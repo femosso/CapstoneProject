@@ -1,1 +1,1 @@
-INSERT INTO `web_server`.`User` (`email`, `password`, `provider`, `type`) VALUES ('felipemosso@gmail.com', '', '0', '0');
+INSERT INTO `web_server`.`User` (`email`, `password`, `provider`, `type`) VALUES ('felipemosso@gmail.com', 'test', '0', '0');
