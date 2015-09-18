@@ -18,6 +18,6 @@ public class AndroidController {
     public @ResponseBody User visualizar() {
         sLogger.info("android/view");
 
-        return new User("felipemosso@gmail.com", "1234");
+        return null;
     }
 }

@@ -1,37 +1,31 @@
 
 package com.capstone.server.model;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.capstone.server.utils.Constants.SignInProvider;
+import com.capstone.server.utils.Constants.UserType;
 
 @Entity
 @Table(name = "User")
-public class User implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class User {
 
     @Id
-    @Column(name = "userId", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
     private String email;
     private String password;
+    private String facebookId;
+    private SignInProvider provider;
+    private UserType type;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Teen teen;
 
     public User() {
-    }
-
-    public User(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getEmail() {
@@ -48,6 +42,38 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
+
+    public SignInProvider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(SignInProvider provider) {
+        this.provider = provider;
+    }
+
+    public UserType getType() {
+        return type;
+    }
+
+    public void setType(UserType type) {
+        this.type = type;
+    }
+
+    public Teen getTeen() {
+        return teen;
+    }
+
+    public void setTeen(Teen teen) {
+        this.teen = teen;
     }
 
 }

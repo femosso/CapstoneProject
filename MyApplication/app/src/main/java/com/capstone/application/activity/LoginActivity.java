@@ -3,6 +3,7 @@ package com.capstone.application.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.capstone.application.R;
@@ -11,9 +12,16 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+
+import org.json.JSONObject;
+
+import java.util.Arrays;
 
 public class LoginActivity extends FragmentActivity {
 
@@ -26,12 +34,35 @@ public class LoginActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        setContentView(R.layout.login_activity);
+
+        // set required permission
+        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setReadPermissions(Arrays.asList("public_profile, email, user_birthday"));
+
         mCallbackManager = CallbackManager.Factory.create();
 
         LoginManager.getInstance().registerCallback(mCallbackManager,
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
+                        // App code
+                        GraphRequest request = GraphRequest.newMeRequest(
+                                loginResult.getAccessToken(),
+                                new GraphRequest.GraphJSONObjectCallback() {
+                                    @Override
+                                    public void onCompleted(JSONObject object,
+                                                            GraphResponse response) {
+                                        // Application code
+                                        Log.v("LoginActivity", response.toString());
+                                    }
+                                });
+
+                        Bundle parameters = new Bundle();
+                        parameters.putString("fields", "id, name, email, gender, birthday");
+                        request.setParameters(parameters);
+                        request.executeAsync();
+
                         startMainActivity();
                     }
 
@@ -45,8 +76,6 @@ public class LoginActivity extends FragmentActivity {
                         Toast.makeText(getApplicationContext(), "onError", Toast.LENGTH_LONG).show();
                     }
                 });
-
-        setContentView(R.layout.login_activity);
 
         if (isLoggedIn()) {
             startMainActivity();

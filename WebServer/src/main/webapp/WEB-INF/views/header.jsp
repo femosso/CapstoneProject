@@ -16,30 +16,17 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li class="active"><a href="${ctx}"><spring:message code="label.header.home"/></a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-            Alunos <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="${ctx}/aluno/cadastrar"><spring:message code="label.header.register"/></a></li>
-            <li><a href="${ctx}/aluno/visualizar"><spring:message code="label.header.view"/></a></li>
-            <li class="divider"></li>
-            <li class="dropdown-header">Nav header</li>
-            <li><a href="#">Separated link</a></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <c:choose>
           <c:when test="${loggedUser == null}">
-            <li><a href="http://www.jquery2dotnet.com"><spring:message code="label.header.signUp"/></a></li>
+            <li><a href="${ctx}/login/register"><spring:message code="label.header.signUp"/></a></li>
           </c:when>
         </c:choose>
         <li class="dropdown">
           <c:choose>
             <c:when test="${loggedUser == null}">
-              <a href="http://www.jquery2dotnet.com" class="dropdown-toggle" data-toggle="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                 <spring:message code="label.header.signIn"/> <b class="caret"></b>
               </a>
               <jsp:include page="login/box.jsp" />
@@ -48,7 +35,11 @@
               <a href="#" id="drop3" role="button" class="dropdown-toggle navbar-link"
                 data-toggle="dropdown">${loggedUser.email}<b class="caret"></b></a>
               <ul class="dropdown-menu" aria-labelledby="drop3">
-                <li><a tabindex="-1" href="${ctx}/login/logout"><spring:message code="label.header.logout"/></a></li>
+                <li>
+                  <a tabindex="-1" href="${ctx}/login/logout" onclick="logout();">
+                    <spring:message code="label.header.logout"/>
+                  </a>
+                </li>
               </ul>
             </c:otherwise>
           </c:choose>
@@ -58,18 +49,18 @@
           <c:choose>
             <c:when test="${locale == 'pt_BR'}">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                <img src="resources/img/br.svg" width="22px" height="14px"><span class="caret"></span>
+                <img src="${resources}/img/br.svg" width="22px" height="14px"><span class="caret"></span>
               </a>
             </c:when>
             <c:otherwise>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                <img src="resources/img/gb.svg" width="22px" height="14px"><span class="caret"></span>
+                <img src="${resources}/img/gb.svg" width="22px" height="14px"><span class="caret"></span>
               </a>
             </c:otherwise>
           </c:choose>
           <ul class="dropdown-menu language" role="menu">
-            <li><a href="?locale=en"><img src="resources/img/gb.svg" width="22px" height="14px"> English</a></li>
-            <li><a href="?locale=pt_BR"><img src="resources/img/br.svg" width="22px" height="14px"> Português</a></li>
+            <li><a href="?locale=en"><img src="${resources}/img/gb.svg" width="22px" height="14px"> English</a></li>
+            <li><a href="?locale=pt_BR"><img src="${resources}/img/br.svg" width="22px" height="14px"> Português</a></li>
           </ul>
         </li>
       </ul>

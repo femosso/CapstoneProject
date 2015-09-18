@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 public class JsonResponse {
 
     private HttpStatus status;
-    private String message = "";
+    private String message;
 
-    public JsonResponse(HttpStatus ok, String message) {
-        this.status = ok;
+    public JsonResponse(HttpStatus status, String message) {
+        this.status = status;
         this.message = message;
     }
 
@@ -20,5 +20,4 @@ public class JsonResponse {
     public String getMessage() {
         return message;
     }
-
 }

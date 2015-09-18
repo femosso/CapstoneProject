@@ -1,4 +1,4 @@
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,15 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap 101 Template</title>
 
-    <!-- Bootstrap -->
     <link href="resources/css/bootstrap/bootstrap.min.css?ts=1" rel="stylesheet">
-
-    <!-- Custom styles for the footer -->
     <link href="resources/css/sticky-footer-navbar.css" rel="stylesheet">
+    <link href="resources/css/toastr/toastr.min.css" rel="stylesheet">
 
   </head>
   <body>
     <div class="container">
+      <c:set var="resources" scope="request">resources</c:set>
       <jsp:include page="header.jsp" />
 
       <!-- Main component for a primary marketing message or call to action -->
@@ -33,6 +32,8 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="resources/js/bootstrap/bootstrap.min.js"></script>
+    <script src="resources/js/cryptojs/md5.js"></script>
+    <script src="resources/js/toastr/toastr.min.js"></script>
     <script src="resources/js/login/box.js"></script>
-</body>
+  </body>
 </html>

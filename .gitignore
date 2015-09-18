@@ -1,1 +1,3 @@
 bin
+/WebServer/target/classes/application.properties
+/WebServer/target/classes/sql/initialize.sql
