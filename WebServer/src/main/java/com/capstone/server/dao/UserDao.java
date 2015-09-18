@@ -6,7 +6,7 @@ import java.util.Collection;
 import com.capstone.server.model.User;
 
 public interface UserDao {
-
+d
     public void persist(User user);
     public User update(User user);
     public User remove(String email);
