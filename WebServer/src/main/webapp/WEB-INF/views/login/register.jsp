@@ -32,15 +32,14 @@
                 <span></span>
               </div>
               <div class="form-group">
-                <div class="col-xs-6 field">
+                <div class="col-xs-6">
                   <label for="firstname" class="control-label">
                     <spring:message code="label.register.firstname"/>
                   </label>
                   <input type="text" class="form-control" id="firstname" name="firstname"
                       placeholder="<spring:message code="label.register.firstname"/>"/>
                 </div>
-  
-                <div class="col-xs-6 field">
+                <div class="col-xs-6">
                   <label for="lastname" class="control-label">
                     <spring:message code="label.register.lastname"/>
                   </label>
@@ -49,14 +48,14 @@
                 </div>
               </div>
               <div class="form-group">
-                <div class="col-xs-8 field">
+                <div class="col-xs-8">
                   <label for="email" class="control-label">
                     <spring:message code="label.register.email"/>
                   </label>
                   <input type="email" class="form-control" id="email" name="email"
                       placeholder="<spring:message code="label.register.email"/>"/>
                 </div>
-                <div class="col-xs-4 field">
+                <div class="col-xs-4">
                   <label for="birthday" class="control-label">
                     <spring:message code="label.register.birthday"/>
                   </label>
@@ -67,14 +66,14 @@
                 </div>
               </div>
               <div class="form-group">
-                <div class="col-xs-6 field">
+                <div class="col-xs-6">
                   <label for="password" class="control-label">
                     <spring:message code="label.register.password"/>
                   </label>
                   <input type="password" class="form-control" name="password" id="password"
                       placeholder="<spring:message code="label.register.password"/>">
                 </div>
-                <div class="col-xs-6 field">
+                <div class="col-xs-6">
                   <label for="confirm" class="control-label">
                     <spring:message code="label.register.confirm"/>
                   </label>
@@ -82,18 +81,30 @@
                       placeholder="<spring:message code="label.register.confirm"/>"/>
                 </div>
               </div>
+              <div class="form-group" style="border-top: 1px solid #999; padding-top: 20px">
+                <div class="col-xs-6">
+                  <div class="checkbox">
+                    <label><input type="checkbox" id="check-monitor" checked>Option 1</label>
+                  </div>
+                </div>
+                <div class="col-xs-6">
+                  <label for="medicalNumber" class="control-label">
+                    <spring:message code="label.register.medicalNumber"/>
+                  </label>
+                  <input type="text" class="form-control" id="medical-number" name="medical-number"
+                      placeholder="<spring:message code="label.register.medicalNumber"/>"/>
+                </div>
+              </div>
               <div class="form-group">
-                <div class="col-md-offset-3 col-md-9">
-                  <button id="sign-up" type="button" class="btn btn-info">
+                <div class="col-xs-6">
+                  <button id="sign-up" type="button" class="btn btn-info btn-block">
                     <i class="icon-hand-right"></i> <spring:message code="label.register.signUp"/>
                   </button>
                 </div>
-              </div>
-              <div style="border-top: 1px solid #999; padding-top: 20px" class="form-group">
-                <div class="col-md-offset-3 col-md-9">
+                <div class="col-xs-6">
                   <input class="btn btn-primary btn-block" type="button" id="sign-up-facebook"
-                    value="<spring:message code="label.register.signUpFacebook"/>"
-                    data-loading-text="<spring:message code="label.register.signingUp"/>">
+                      value="<spring:message code="label.register.signUpFacebook"/>"
+                      data-loading-text="<spring:message code="label.register.signingUp"/>">
                 </div>
               </div>
             </form>

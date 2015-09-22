@@ -1,6 +1,8 @@
 
 package com.capstone.server.controller;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
@@ -23,12 +25,15 @@ import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants;
 import com.capstone.server.utils.Constants.SignInProvider;
+import com.capstone.server.utils.Constants.UserType;
 
 @Controller
 @RequestMapping(RestUriConstants.LOGIN_CONTROLLER)
 public class LoginController implements MessageSourceAware {
 
     private final static Logger sLogger = Logger.getLogger(LoginController.class);
+
+    private final static boolean DEBUG = sLogger.isDebugEnabled();
 
     @Autowired
     private UserDao userDao;
@@ -43,12 +48,12 @@ public class LoginController implements MessageSourceAware {
     }
 
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse sendLogin(@RequestBody final User user, HttpSession session, Locale locale) {
+    public @ResponseBody JsonResponse sendLogin(@RequestBody
+    final User user, HttpSession session, Locale locale) {
 
         User databaseUser = userDao.find(user.getEmail());
 
         if (databaseUser != null) {
-            // TODO - find a more elegant way of doing the password verification
             if (user.getProvider().equals(SignInProvider.APPLICATION)
                     && databaseUser.getPassword().equals(user.getPassword())) {
                 session.setAttribute(Constants.SESSION_USER, user);
@@ -63,13 +68,17 @@ public class LoginController implements MessageSourceAware {
         // if user session has been set, then the login succeeded
         if (session.getAttribute(Constants.SESSION_USER) != null) {
             output = messageSource.getMessage("label.loginController.loginSuccess",
-                    new Object[] { user.getEmail() }, locale);
+                    new Object[] {
+                        user.getEmail()
+                    }, locale);
             sLogger.info(output);
 
             return new JsonResponse(HttpStatus.OK, output);
         } else {
             output = messageSource.getMessage("label.loginController.loginFail",
-                    new Object[] { user.getEmail() }, locale);
+                    new Object[] {
+                        user.getEmail()
+                    }, locale);
             sLogger.info(output);
 
             return new JsonResponse(HttpStatus.BAD_REQUEST, output);
@@ -87,7 +96,13 @@ public class LoginController implements MessageSourceAware {
     }
 
     @RequestMapping(RestUriConstants.REGISTER + "/" + RestUriConstants.SUBMIT)
-    public @ResponseBody JsonResponse registerFormSubmit(@RequestBody final User user, Locale locale) {
+    public @ResponseBody JsonResponse registerFormSubmit(@RequestBody
+    final User user, Locale locale) {
+
+        if (!isValidUser(user)) {
+            sLogger.info("Invalid parameters");
+            return new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters");
+        }
 
         User databaseUser = userDao.find(user.getEmail());
 
@@ -96,8 +111,10 @@ public class LoginController implements MessageSourceAware {
             // sets the User of the Teen since I get "Converting
             // circular structure to JSON" exception in jQuery when
             // I try to set the User for the Teen and vice-versa.
-            Teen teen = user.getTeen();
-            teen.setUser(user);
+            if (user.getType().equals(UserType.TEEN)) {
+                Teen teen = user.getTeen();
+                teen.setUser(user);
+            }
 
             userDao.persist(user);
 
@@ -117,5 +134,59 @@ public class LoginController implements MessageSourceAware {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
+    }
+
+    private static boolean isValidString(String str) {
+        boolean ret = str != null && !str.trim().isEmpty();
+        if (DEBUG) sLogger.debug("isValidString(" + str + ") " + ret);
+        return ret;
+    }
+
+    private static boolean isValidUser(User user) {
+        if (DEBUG) sLogger.debug("Validating User");
+
+        boolean valid = false;
+        if (user != null && user.getType() != null) {
+            valid = isValidString(user.getEmail()) && isValidString(user.getFirstName());
+
+            if (valid && user.getProvider() != null) {
+                // if login from Facebook, it should have facebook id
+                if (user.getProvider().equals(SignInProvider.FACEBOOK)) {
+                    valid = isValidString(user.getFacebookId());
+                    // if login from Application, it should have password
+                } else if (user.getProvider().equals(SignInProvider.APPLICATION)) {
+                    valid = isValidString(user.getPassword());
+                }
+            }
+
+            // if all informations from Follower are valid and user is a Teen
+            if (valid && user.getType().equals(UserType.TEEN)) {
+                valid = isValidTeen(user.getTeen());
+            }
+        }
+
+        return valid;
+    }
+
+    private static boolean isValidTeen(Teen teen) {
+        if (DEBUG) sLogger.debug("Validating Teen");
+
+        return teen != null && isValidDate(teen.getBirthday())
+                && isValidString(teen.getMedicalNumber());
+    }
+
+    private static boolean isValidDate(String date) {
+        boolean ret = false;
+        if (date != null) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            simpleDateFormat.setLenient(false);
+            try {
+                simpleDateFormat.parse(date);
+                ret = true;
+            } catch (ParseException e) {
+            }
+        }
+        if (DEBUG) sLogger.debug("isValidDate(" + date + ") " + ret);
+        return ret;
     }
 }

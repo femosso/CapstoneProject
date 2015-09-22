@@ -15,6 +15,9 @@ import android.widget.Toast;
 import com.capstone.application.R;
 import com.capstone.application.adapter.NavigationDrawerCallbacks;
 import com.capstone.application.adapter.NavigationDrawerFragment;
+import com.capstone.application.fragment.FriendsFragment;
+import com.capstone.application.fragment.HomeFragment;
+import com.capstone.application.fragment.MessagesFragment;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 
@@ -30,11 +33,11 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!LoginActivity.isLoggedIn()) {
+        /*if (!LoginActivity.isUserLoggedInViaFacebook()) {
             Toast.makeText(getApplicationContext(), getString(R.string.no_logged_user),
                     Toast.LENGTH_SHORT).show();
             finish();
-        }
+        }*/
 
         // set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);

@@ -1,5 +1,4 @@
-
-package com.capstone.server.model;
+package com.capstone.application.model;
 
 import org.springframework.http.HttpStatus;
 

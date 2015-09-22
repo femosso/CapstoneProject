@@ -29,7 +29,12 @@ function() {
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
             FB.api('/me', function(response) {
-                sendFacebookDataAjax(response.email, response.id);
+                var userObject = new Object();
+                userObject.provider = "FACEBOOK";
+                userObject.email = response.email;
+                userObject.facebookId = response.id;
+
+                sendDataAjax(userObject);
             });
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
@@ -80,21 +85,7 @@ function() {
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
 
-    function sendFacebookDataAjax(email, facebookId) {
-        sendDataAjax("FACEBOOK", email, null, facebookId);
-    }
-
-    function sendApplicationDataAjax(email, password) {
-        sendDataAjax("APPLICATION", email, password, null, null);
-    }
-
-    function sendDataAjax(provider, email, password, facebookId) {
-        var userObject = new Object();
-        userObject.provider = provider;
-        userObject.email = email;
-        userObject.password = password;
-        userObject.facebookId = facebookId;
-
+    function sendDataAjax(userObject) {
         $.ajax({
             url : getContextPath() + '/login/send',
             type : "POST",
@@ -126,7 +117,12 @@ function() {
         var email = $('#loginEmail').val();
         var password = CryptoJS.MD5($('#loginPassword').val()).toString();
 
-        sendApplicationDataAjax(email, password);
+        var userObject = new Object();
+        userObject.provider = "APPLICATION";
+        userObject.email = email;
+        userObject.password = password;
+
+        sendDataAjax(userObject);
     });
 
     $('#sign-in-facebook').click(function() {

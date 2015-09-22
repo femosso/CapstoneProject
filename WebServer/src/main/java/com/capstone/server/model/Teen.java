@@ -15,36 +15,22 @@ import javax.persistence.Table;
 @Table(name = "Teen")
 public class Teen {
 
+    // TODO - remove this long id - make the primary key @Id be the User
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    private String firstName;
-    private String lastName;
     private String birthday;
     private String medicalNumber;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private User user;
 
+    public Teen() {
+    }
+
     public long getId() {
         return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getBirthday() {

@@ -19,6 +19,8 @@ public class User {
     private String email;
     private String password;
     private String facebookId;
+    private String firstName;
+    private String lastName;
     private SignInProvider provider;
     private UserType type;
 
@@ -50,6 +52,22 @@ public class User {
 
     public void setFacebookId(String facebookId) {
         this.facebookId = facebookId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public SignInProvider getProvider() {

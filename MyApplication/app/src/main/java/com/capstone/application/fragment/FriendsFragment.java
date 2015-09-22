@@ -1,4 +1,4 @@
-package com.capstone.application.activity;
+package com.capstone.application.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;

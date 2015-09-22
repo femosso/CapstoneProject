@@ -29,18 +29,27 @@ function() {
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
             FB.api('/me', function(response) {
-                var teenObject = new Object();
-                teenObject.firstName = response.first_name;
-                teenObject.lastName = response.last_name;
-                teenObject.birthday = response.birthday;
+                var checked = $('#check-monitor').is(':checked');
+                var type = checked ? 'TEEN' : 'FOLLOWER';
+                var medicalNumber = checked ? $('#medical-number').val() : "";
 
                 var userObject = new Object();
                 userObject.provider = "FACEBOOK";
+                userObject.type = type;
                 userObject.email = response.email;
                 userObject.facebookId = response.id;
-                userObject.teen = teenObject;
+                userObject.firstName = response.first_name;
+                userObject.lastName = response.last_name;
 
-                sendDataAjax(userObject, teenObject);
+                // if it is a TEEN user
+                if(checked) {
+                    var teenObject = new Object();
+                    teenObject.birthday = birthday;
+                    teenObject.medicalNumber = medicalNumber;
+                    userObject.teen = teenObject;
+                }
+
+                sendDataAjax(userObject);
             });
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
@@ -91,10 +100,9 @@ function() {
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
 
-    function sendDataAjax(userObject, teenObject) {
+    function sendDataAjax(userObject) {
 
         alert(JSON.stringify(userObject));
-        alert(JSON.stringify(teenObject));
 
         $.ajax({
             url : getContextPath() + '/login/register/submit',
@@ -137,24 +145,32 @@ function() {
         var birthday = $('#birthday').val();
         var password = CryptoJS.MD5($('#password').val()).toString();
         var confirm = CryptoJS.MD5($('#confirm').val()).toString();
+        var checked = $('#check-monitor').is(':checked');
+        var type = checked ? 'TEEN' : 'FOLLOWER';
+        var medicalNumber = checked ? $('#medical-number').val() : "";
 
         /*if(password != confirm) {
         alert("confirm should be equals");
         return false;
         }*/
 
-        var teenObject = new Object();
-        teenObject.firstName = firstName;
-        teenObject.lastName = lastName;
-        teenObject.birthday = birthday;
-
         var userObject = new Object();
         userObject.provider = "APPLICATION";
+        userObject.type = type;
         userObject.email = email;
         userObject.password = password;
-        userObject.teen = teenObject;
+        userObject.firstName = firstName;
+        userObject.lastName = lastName;
 
-        sendDataAjax(userObject, teenObject);
+        // if it is a TEEN user
+        if(checked) {
+            var teenObject = new Object();
+            teenObject.birthday = birthday;
+            teenObject.medicalNumber = medicalNumber;
+            userObject.teen = teenObject;
+        }
+
+        sendDataAjax(userObject);
     });
 
     $("#sign-up-facebook").click(function(e) {
@@ -162,5 +178,9 @@ function() {
         login();
     });
 
+    $('#check-monitor').click(function () {
+        var checked = +$('#check-monitor').is(':checked');
+        $('#medical-number').parent().fadeTo("fast", checked);
+    });
 
 });
