@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,11 +17,11 @@ import com.capstone.application.adapter.NavigationDrawerCallbacks;
 import com.capstone.application.adapter.NavigationDrawerFragment;
 import com.capstone.application.fragment.FriendsFragment;
 import com.capstone.application.fragment.HomeFragment;
-import com.capstone.application.fragment.MessagesFragment;
+import com.capstone.application.fragment.PreferencesFragment;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends AppCompatActivity
         implements NavigationDrawerCallbacks {
 
     private static final String TAG = MainActivity.class.getCanonicalName();
@@ -85,7 +85,7 @@ public class MainActivity extends ActionBarActivity
                 title = getString(R.string.nav_item_friends);
                 break;
             case 2:
-                fragment = new MessagesFragment();
+                fragment = new PreferencesFragment();
                 title = getString(R.string.nav_item_messages);
                 break;
             case 3:

@@ -1,12 +1,22 @@
 package com.capstone.application.activity;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -16,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.capstone.application.R;
+import com.capstone.application.gcm.RegistrationIntentService;
 import com.capstone.application.model.JsonResponse;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
@@ -31,6 +42,8 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +52,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+
+import static com.capstone.application.utils.Constants.SignInProvider.APPLICATION;
+import static com.capstone.application.utils.Constants.SignInProvider.FACEBOOK;
 
 public class LoginActivity extends FragmentActivity {
 
@@ -58,28 +74,63 @@ public class LoginActivity extends FragmentActivity {
 
         FacebookSdk.sdkInitialize(mContext);
 
-        setContentView(R.layout.login_activity);
+        setContentView(R.layout.activity_login);
 
-        // FIXME - temporary code
-        onLoginSuccess();
+        if (checkPlayServices()) {
 
-        // initialize both login via application registering or facebook account
-        initCustomLogin();
-        initFacebookLogin();
+            // FIXME - temporary code - make it on the correct login
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            sharedPreferences.edit().putInt(Constants.SIGN_IN_PROVIDER, APPLICATION.ordinal()).apply();
+            sharedPreferences.edit().putString(Constants.LOGGED_EMAIL, "user1@gmail.com").apply();
 
-        final TextView registerLink = (TextView) findViewById(R.id.link_register);
-        registerLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Start the registering activity
-                Intent intent = new Intent(mContext, RegisterActivity.class);
-                startActivityForResult(intent, REGISTER_REQUEST);
+            if (isUserLoggedIn()) {
+                onLoginSuccess();
             }
-        });
 
-        /*if (isUserLoggedInViaFacebook()) {
-            startMainActivity();
-        }*/
+            setUpGcmConfiguration();
+
+            // FIXME - temporary code
+            //sendNotification(1, "testing 1");
+            //sendNotification(2, "testing 2");
+
+            // initialize both login via application registering or facebook account
+            initCustomLogin();
+            initFacebookLogin();
+
+            final TextView registerLink = (TextView) findViewById(R.id.link_register);
+            registerLink.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Start the registering activity
+                    Intent intent = new Intent(mContext, RegisterActivity.class);
+                    startActivityForResult(intent, REGISTER_REQUEST);
+                }
+            });
+        }
+    }
+
+    // FIXME - Remove this method later
+    private void sendNotification(int type, String message) {
+        Intent intent = new Intent(this, DialogActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("type", type);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_home)
+                .setContentTitle("GCM Message")
+                .setContentText(message)
+                .setAutoCancel(true)
+                //.setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
 
     @Override
@@ -90,6 +141,9 @@ public class LoginActivity extends FragmentActivity {
         // reporting.  Do so in the onResume methods of the primary Activities that an app may be
         // launched into.
         AppEventsLogger.activateApp(this);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(Constants.REGISTRATION_COMPLETE));
     }
 
     @Override
@@ -107,12 +161,13 @@ public class LoginActivity extends FragmentActivity {
 
     @Override
     public void onPause() {
-        super.onPause();
-
         // Call the 'deactivateApp' method to log an app event for use in analytics and advertising
         // reporting.  Do so in the onPause methods of the primary Activities that an app may be
         // launched into.
         AppEventsLogger.deactivateApp(this);
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
     }
 
     private void initCustomLogin() {
@@ -138,7 +193,7 @@ public class LoginActivity extends FragmentActivity {
         boolean valid = true;
 
         User user = new User();
-        user.setProvider(Constants.SignInProvider.APPLICATION);
+        user.setProvider(APPLICATION);
 
         final TextInputLayout emailWrapper = (TextInputLayout) findViewById(R.id.emailWrapper);
         final TextInputLayout passwordWrapper = (TextInputLayout) findViewById(R.id.passwordWrapper);
@@ -233,14 +288,21 @@ public class LoginActivity extends FragmentActivity {
         return user;
     }
 
-    public static boolean isUserLoggedInViaFacebook() {
+    public boolean isUserLoggedInViaFacebook() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         return accessToken != null;
     }
 
-    public static boolean isUserLoggedIn() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        return accessToken != null;
+    public boolean isUserLoggedIn() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        int signInProvider = sharedPreferences.getInt(Constants.SIGN_IN_PROVIDER, -1);
+        String loggedEmail = sharedPreferences.getString(Constants.LOGGED_EMAIL, null);
+        if (loggedEmail != null && (signInProvider == APPLICATION.ordinal() ||
+                (signInProvider == FACEBOOK.ordinal() && isUserLoggedInViaFacebook()))) {
+            return true;
+        }
+        return false;
     }
 
     public void doLogin(User user) {
@@ -336,6 +398,53 @@ public class LoginActivity extends FragmentActivity {
         // initialize main screen of the app
         Intent intent = new Intent(mContext, MainActivity.class);
         startActivity(intent);
+    }
+
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+
+    private void setUpGcmConfiguration() {
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences.getBoolean(Constants.SENT_TOKEN_TO_SERVER, false);
+
+                if (sentToken) {
+                    Toast.makeText(mContext, "Token retrieved and sent to server! You can now use " +
+                            "gcmsender to send downstream messages to this app.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(mContext, "An error occurred while either fetching the InstanceID token,\n" +
+                            "        sending the fetched token to the server or subscribing to the PubSub topic. Please try\n" +
+                            "        running the sample again.", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        // Start IntentService to register this application with GCM.
+        Intent intent = new Intent(this, RegistrationIntentService.class);
+        startService(intent);
+    }
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
     private void handleLoginResult(JsonResponse result) {

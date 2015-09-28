@@ -7,10 +7,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.capstone.server.dao.UserDao;
+import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
 
 @Repository
@@ -40,7 +42,16 @@ public class JpaUserDao implements UserDao {
 
     @Transactional
     public User find(String email) {
-        return em.find(User.class, email);
+        return find(email, false);
+    }
+
+    @Transactional
+    public User find(String email, boolean forceLoad) {
+        User user = em.find(User.class, email);
+        if(forceLoad) {
+            Hibernate.initialize(user.getCheckInList());
+        }
+        return user;
     }
 
     @SuppressWarnings("unchecked")

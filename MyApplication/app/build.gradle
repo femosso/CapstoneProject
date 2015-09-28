@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 22
@@ -10,6 +11,8 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -27,11 +30,12 @@ android {
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    compile 'com.google.android.gms:play-services:7.8.0'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support:cardview-v7:22.2.1'
     compile 'com.android.support:design:22.2.1'
@@ -39,4 +43,10 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:4.0.0'
     compile 'org.springframework.android:spring-android-rest-template:2.0.0.M1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.5.3'
+    //compile 'com.afollestad:material-dialogs:0.6.2.3'
+    //compile 'com.github.PhilJay:MPAndroidChart:v2.1.4'
+    compile 'com.github.shkschneider:android_PreferenceFragmentCompat:1.0.0@aar'
+    compile 'com.mcxiaoke.volley:library-aar:1.0.0'
+
+    testCompile 'junit:junit:4.12'
 }

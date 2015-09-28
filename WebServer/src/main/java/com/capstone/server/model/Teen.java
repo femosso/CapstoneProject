@@ -1,36 +1,51 @@
 
 package com.capstone.server.model;
 
+import java.io.Serializable;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "Teen")
-public class Teen {
+public class Teen implements Serializable {
 
-    // TODO - remove this long id - make the primary key @Id be the User
     @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @Column(name = "teenEmail", nullable = false)
+    private String email;
     private String birthday;
     private String medicalNumber;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private User user;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "TeenFollower",
+            joinColumns = @JoinColumn(name = "teenEmail"),
+            inverseJoinColumns = @JoinColumn(name = "followerEmail"))
+    private List<Follower> followerList;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "PendingTeenFollower",
+            joinColumns = @JoinColumn(name = "teenEmail"),
+            inverseJoinColumns = @JoinColumn(name = "followerEmail"))
+    private List<Follower> pendingFollowerList;
 
     public Teen() {
     }
 
-    public long getId() {
-        return id;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getBirthday() {
@@ -49,11 +64,20 @@ public class Teen {
         this.medicalNumber = medicalNumber;
     }
 
-    public User getUser() {
-        return user;
+    public List<Follower> getFollowerList() {
+        return followerList;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setFollowerList(List<Follower> followerList) {
+        this.followerList = followerList;
     }
+
+    public List<Follower> getPendingFollowerList() {
+        return pendingFollowerList;
+    }
+
+    public void setPendingFollowerList(List<Follower> pendingFollowerList) {
+        this.pendingFollowerList = pendingFollowerList;
+    }
+
 }

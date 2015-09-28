@@ -44,7 +44,7 @@ function() {
                 // if it is a TEEN user
                 if(checked) {
                     var teenObject = new Object();
-                    teenObject.birthday = birthday;
+                    teenObject.birthday = response.birthday;
                     teenObject.medicalNumber = medicalNumber;
                     userObject.teen = teenObject;
                 }
@@ -137,6 +137,8 @@ function() {
     });
 
     $("#sign-up").click(function(e) {
+        e.preventDefault();
+
         $('#sign-up').button('loading');
 
         var firstName = $('#firstname').val();
@@ -174,6 +176,8 @@ function() {
     });
 
     $("#sign-up-facebook").click(function(e) {
+        e.preventDefault();
+
         $('#sign-up-facebook').button('loading');
         login();
     });

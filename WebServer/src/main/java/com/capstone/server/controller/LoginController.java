@@ -1,8 +1,11 @@
 
 package com.capstone.server.controller;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import static com.capstone.server.utils.Validators.isValidEmail;
+import static com.capstone.server.utils.Validators.isValidString;
+import static com.capstone.server.utils.Validators.isValidDate;
+
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
@@ -18,8 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.capstone.server.dao.FollowerDao;
 import com.capstone.server.dao.TeenDao;
 import com.capstone.server.dao.UserDao;
+import com.capstone.server.model.Follower;
 import com.capstone.server.model.JsonResponse;
 import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
@@ -41,6 +46,9 @@ public class LoginController implements MessageSourceAware {
     @Autowired
     private TeenDao teenDao;
 
+    @Autowired
+    private FollowerDao followerDao;
+
     private MessageSource messageSource;
 
     public void setMessageSource(MessageSource messageSource) {
@@ -48,18 +56,19 @@ public class LoginController implements MessageSourceAware {
     }
 
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse sendLogin(@RequestBody
-    final User user, HttpSession session, Locale locale) {
+    public @ResponseBody JsonResponse sendLogin(@RequestBody final User user,
+            HttpSession session, Locale locale) {
+        // FIXME - add field validation
 
         User databaseUser = userDao.find(user.getEmail());
 
         if (databaseUser != null) {
             if (user.getProvider().equals(SignInProvider.APPLICATION)
                     && databaseUser.getPassword().equals(user.getPassword())) {
-                session.setAttribute(Constants.SESSION_USER, user);
+                session.setAttribute(Constants.SESSION_USER, databaseUser);
             } else if (user.getProvider().equals(SignInProvider.FACEBOOK)
                     && databaseUser.getFacebookId().equals(user.getFacebookId())) {
-                session.setAttribute(Constants.SESSION_USER, user);
+                session.setAttribute(Constants.SESSION_USER, databaseUser);
             }
         }
 
@@ -92,13 +101,56 @@ public class LoginController implements MessageSourceAware {
 
     @RequestMapping(RestUriConstants.REGISTER)
     public String showRegisterForm() {
+
+/*        User user1 = new User();
+        user1.setEmail("user1@gmail.com");
+        user1.setFirstName("user1");
+
+        Teen teen1 = new Teen();
+        teen1.setMedicalNumber("12345678");
+        teen1.setEmail(user1.getEmail());
+
+        user1.setTeen(teen1);
+
+        userDao.persist(user1);
+
+        User user2 = new User();
+        user2.setEmail("user2@gmail.com");
+        user2.setFirstName("user2");
+
+        Teen teen2 = new Teen();
+        teen2.setMedicalNumber("12345678");
+        teen2.setEmail(user2.getEmail());
+
+        user2.setTeen(teen2);
+
+        userDao.persist(user2);*/
+
+        
+
+/*        User user3 = new User();
+        user3.setEmail("user3@gmail.com");
+        user3.setFirstName("user3");
+        
+        Follower follower3 = new Follower();
+        follower3.setEmail(user3.getEmail());
+        
+        user3.setFollower(follower3);
+        
+        userDao.persist(user3);*/
+        
+        Follower follower3 = followerDao.find("user3@gmail.com");
+
+        List<Teen> teens = (List<Teen>) teenDao.findAll();
+        follower3.setTeenList(teens);
+
+        followerDao.update(follower3);
+
         return "login/register";
     }
 
     @RequestMapping(RestUriConstants.REGISTER + "/" + RestUriConstants.SUBMIT)
-    public @ResponseBody JsonResponse registerFormSubmit(@RequestBody
-    final User user, Locale locale) {
-
+    public @ResponseBody JsonResponse registerFormSubmit(@RequestBody final User user, Locale locale) {
         if (!isValidUser(user)) {
             sLogger.info("Invalid parameters");
             return new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters");
@@ -113,7 +165,7 @@ public class LoginController implements MessageSourceAware {
             // I try to set the User for the Teen and vice-versa.
             if (user.getType().equals(UserType.TEEN)) {
                 Teen teen = user.getTeen();
-                teen.setUser(user);
+                teen.setEmail(user.getEmail());
             }
 
             userDao.persist(user);
@@ -136,18 +188,12 @@ public class LoginController implements MessageSourceAware {
         return "redirect:/";
     }
 
-    private static boolean isValidString(String str) {
-        boolean ret = str != null && !str.trim().isEmpty();
-        if (DEBUG) sLogger.debug("isValidString(" + str + ") " + ret);
-        return ret;
-    }
-
     private static boolean isValidUser(User user) {
         if (DEBUG) sLogger.debug("Validating User");
 
         boolean valid = false;
         if (user != null && user.getType() != null) {
-            valid = isValidString(user.getEmail()) && isValidString(user.getFirstName());
+            valid = isValidEmail(user.getEmail()) && isValidString(user.getFirstName());
 
             if (valid && user.getProvider() != null) {
                 // if login from Facebook, it should have facebook id
@@ -175,18 +221,4 @@ public class LoginController implements MessageSourceAware {
                 && isValidString(teen.getMedicalNumber());
     }
 
-    private static boolean isValidDate(String date) {
-        boolean ret = false;
-        if (date != null) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            simpleDateFormat.setLenient(false);
-            try {
-                simpleDateFormat.parse(date);
-                ret = true;
-            } catch (ParseException e) {
-            }
-        }
-        if (DEBUG) sLogger.debug("isValidDate(" + date + ") " + ret);
-        return ret;
-    }
 }

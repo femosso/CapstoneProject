@@ -12,4 +12,5 @@ public interface TeenDao {
     public Teen remove(String email);
     public Teen find(String email);
     public Collection<Teen> findAll();
+    public Collection<Teen> findAll(boolean force);
 }

@@ -1,11 +1,16 @@
 
 package com.capstone.server.model;
 
+import java.io.Serializable;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import com.capstone.server.utils.Constants.SignInProvider;
@@ -13,7 +18,7 @@ import com.capstone.server.utils.Constants.UserType;
 
 @Entity
 @Table(name = "User")
-public class User {
+public class User implements Serializable {
 
     @Id
     private String email;
@@ -25,7 +30,19 @@ public class User {
     private UserType type;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private Device device;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
     private Teen teen;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private Follower follower;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<CheckIn> checkInList;
 
     public User() {
     }
@@ -86,12 +103,36 @@ public class User {
         this.type = type;
     }
 
+    public Device getDevice() {
+        return device;
+    }
+
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
     public Teen getTeen() {
         return teen;
     }
 
     public void setTeen(Teen teen) {
         this.teen = teen;
+    }
+
+    public Follower getFollower() {
+        return follower;
+    }
+
+    public void setFollower(Follower follower) {
+        this.follower = follower;
+    }
+
+    public List<CheckIn> getCheckInList() {
+        return checkInList;
+    }
+
+    public void setCheckInList(List<CheckIn> checkInList) {
+        this.checkInList = checkInList;
     }
 
 }

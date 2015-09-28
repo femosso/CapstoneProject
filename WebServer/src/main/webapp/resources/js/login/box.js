@@ -111,7 +111,9 @@ function() {
         });
     }
 
-    $('#sign-in').click(function() {
+    $('#sign-in').click(function(e) {
+        e.preventDefault();
+
         $('#sign-in').button('loading');
 
         var email = $('#loginEmail').val();
@@ -125,7 +127,9 @@ function() {
         sendDataAjax(userObject);
     });
 
-    $('#sign-in-facebook').click(function() {
+    $('#sign-in-facebook').click(function(e) {
+        e.preventDefault();
+
         $('#sign-in-facebook').button('loading');
         login();
     });

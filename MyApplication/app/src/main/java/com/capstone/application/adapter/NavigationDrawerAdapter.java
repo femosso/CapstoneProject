@@ -40,7 +40,7 @@ public class NavigationDrawerAdapter
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.navigation_drawer_row, viewGroup, false);
+                .inflate(R.layout.row_navigation_drawer, viewGroup, false);
         final ViewHolder viewHolder = new ViewHolder(v);
         viewHolder.itemView.setClickable(true);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {

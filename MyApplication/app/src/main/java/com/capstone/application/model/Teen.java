@@ -3,19 +3,26 @@ package com.capstone.application.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Teen implements Parcelable {
 
-    private long id;
+    private String email;
     private String birthday;
     private String medicalNumber;
 
-    private User user;
+    private List<Follower> followerList;
 
     public Teen() {
     }
 
-    public long getId() {
-        return id;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getBirthday() {
@@ -34,19 +41,24 @@ public class Teen implements Parcelable {
         this.medicalNumber = medicalNumber;
     }
 
-    public User getUser() {
-        return user;
+    public List<Follower> getFollowerList() {
+        return followerList;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setFollowerList(List<Follower> followerList) {
+        this.followerList = followerList;
     }
 
     protected Teen(Parcel in) {
-        id = in.readLong();
+        email = in.readString();
         birthday = in.readString();
         medicalNumber = in.readString();
-        user = in.readParcelable(User.class.getClassLoader());
+        if (in.readByte() == 0x01) {
+            followerList = new ArrayList<Follower>();
+            in.readList(followerList, Follower.class.getClassLoader());
+        } else {
+            followerList = null;
+        }
     }
 
     @Override
@@ -56,12 +68,18 @@ public class Teen implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
+        dest.writeString(email);
         dest.writeString(birthday);
         dest.writeString(medicalNumber);
-        dest.writeParcelable(user, flags);
+        if (followerList == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(followerList);
+        }
     }
 
+    @SuppressWarnings("unused")
     public static final Parcelable.Creator<Teen> CREATOR = new Parcelable.Creator<Teen>() {
         @Override
         public Teen createFromParcel(Parcel in) {

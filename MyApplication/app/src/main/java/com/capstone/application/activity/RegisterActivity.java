@@ -70,7 +70,7 @@ public class RegisterActivity extends FragmentActivity {
 
         FacebookSdk.sdkInitialize(mContext);
 
-        setContentView(R.layout.register_activity);
+        setContentView(R.layout.activity_register);
 
         initViews();
     }

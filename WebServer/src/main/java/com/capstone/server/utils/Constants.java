@@ -21,4 +21,60 @@ public class Constants {
         APPLICATION,
         FACEBOOK
     }
+
+    /** Types of question that could be created by the admin */
+    public enum QuestionFormat {
+        FORMAT1("Format 1"),
+        FORMAT2("Format 2"),
+        FORMAT3("Format 3");
+
+        private final String value;
+
+        private QuestionFormat(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static String[] names() {
+            QuestionFormat[] formats = values();
+            String[] names = new String[formats.length];
+
+            for (int i = 0; i < formats.length; i++) {
+                names[i] = formats[i].getValue();
+            }
+
+            return names;
+        }
+    }
+
+    /** Types of question that could be created by the admin */
+    public enum QuestionType {
+        TYPE1("Type 1"),
+        TYPE2("Type 2"),
+        TYPE3("Type 3");
+
+        private final String value;
+
+        private QuestionType(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static String[] names() {
+            QuestionType[] types = values();
+            String[] names = new String[types.length];
+
+            for (int i = 0; i < types.length; i++) {
+                names[i] = types[i].getValue();
+            }
+
+            return names;
+        }
+    }
 }

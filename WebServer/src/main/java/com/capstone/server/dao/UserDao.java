@@ -11,5 +11,6 @@ public interface UserDao {
     public User update(User user);
     public User remove(String email);
     public User find(String email);
+    public User find(String email, boolean force);
     public Collection<User> findAll();
 }

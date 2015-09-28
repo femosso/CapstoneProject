@@ -18,6 +18,14 @@ public class User implements Parcelable {
 
     private Teen teen;
 
+    private Follower follower;
+
+    public User(String email, String firstName, String lastName) {
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public User() {
     }
 
@@ -85,13 +93,24 @@ public class User implements Parcelable {
         this.teen = teen;
     }
 
+    public Follower getFollower() {
+        return follower;
+    }
+
+    public void setFollower(Follower follower) {
+        this.follower = follower;
+    }
+
     protected User(Parcel in) {
         email = in.readString();
         password = in.readString();
         facebookId = in.readString();
-        provider = (SignInProvider) in.readSerializable();
-        type = (UserType) in.readSerializable();
+        firstName = in.readString();
+        lastName = in.readString();
+        provider = (SignInProvider) in.readValue(SignInProvider.class.getClassLoader());
+        type = (UserType) in.readValue(UserType.class.getClassLoader());
         teen = (Teen) in.readValue(Teen.class.getClassLoader());
+        follower = (Follower) in.readValue(Follower.class.getClassLoader());
     }
 
     @Override
@@ -104,11 +123,15 @@ public class User implements Parcelable {
         dest.writeString(email);
         dest.writeString(password);
         dest.writeString(facebookId);
-        dest.writeSerializable(provider);
-        dest.writeSerializable(type);
+        dest.writeString(firstName);
+        dest.writeString(lastName);
+        dest.writeValue(provider);
+        dest.writeValue(type);
         dest.writeValue(teen);
+        dest.writeValue(follower);
     }
 
+    @SuppressWarnings("unused")
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {

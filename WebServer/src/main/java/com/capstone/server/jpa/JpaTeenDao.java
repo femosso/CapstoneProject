@@ -39,14 +39,20 @@ public class JpaTeenDao implements TeenDao {
     }
 
     @Transactional
+    public Collection<Teen> findAll() {
+        return findAll(false);
+    }
+
+    @Transactional
     public Teen find(String email) {
         return em.find(Teen.class, email);
     }
 
     @SuppressWarnings("unchecked")
     @Transactional
-    public Collection<Teen> findAll() {
-        Query query = em.createQuery("SELECT e FROM Teen e");
+    public Collection<Teen> findAll(boolean forceLoad) {
+        Query query = em.createQuery("SELECT e FROM Teen e"
+                + (forceLoad ? " JOIN FETCH e.followerList" : ""));
         return (Collection<Teen>) query.getResultList();
     }
 }

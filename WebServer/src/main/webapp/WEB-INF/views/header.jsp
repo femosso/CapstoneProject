@@ -16,6 +16,27 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li class="active"><a href="${ctx}"><spring:message code="label.header.home"/></a></li>
+        <c:choose>
+          <c:when test="${loggedUser.type == 'ADMIN'}">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <spring:message code="label.header.question"/><span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="${ctx}/question/register"><spring:message code="label.header.addQuestion"/></a></li>
+                <li><a href="${ctx}/question/view"><spring:message code="label.header.viewRemoveQuestions"/></a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <spring:message code="label.header.device"/><span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="${ctx}/device/view"><spring:message code="label.header.viewDevices"/></a></li>
+              </ul>
+            </li>
+          </c:when>
+        </c:choose>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <c:choose>
