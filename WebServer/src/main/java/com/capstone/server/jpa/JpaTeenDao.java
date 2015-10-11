@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,20 +40,38 @@ public class JpaTeenDao implements TeenDao {
     }
 
     @Transactional
-    public Collection<Teen> findAll() {
-        return findAll(false);
+    public Teen find(String email) {
+        return find(email, false);
     }
 
     @Transactional
-    public Teen find(String email) {
-        return em.find(Teen.class, email);
+    public Teen find(String email, boolean forceLoad) {
+        Teen teen = em.find(Teen.class, email);
+        if(teen != null && forceLoad) {
+            Hibernate.initialize(teen.getUser());
+            Hibernate.initialize(teen.getFollowerList());
+            Hibernate.initialize(teen.getPendingFollowerList());
+            Hibernate.initialize(teen.getCheckInList());
+        }
+        return teen;
+    }
+
+    @Transactional
+    public Collection<Teen> findAll() {
+        return findAll(false);
     }
 
     @SuppressWarnings("unchecked")
     @Transactional
     public Collection<Teen> findAll(boolean forceLoad) {
-        Query query = em.createQuery("SELECT e FROM Teen e"
-                + (forceLoad ? " JOIN FETCH e.followerList" : ""));
-        return (Collection<Teen>) query.getResultList();
+        Query query = em.createQuery("SELECT e FROM Teen e");
+
+        Collection<Teen> teens = (Collection<Teen>) query.getResultList();
+        if(teens != null && forceLoad) {
+            for(Teen teen : teens) {
+                Hibernate.initialize(teen.getFollowerList());
+            }
+        }
+        return teens;
     }
 }

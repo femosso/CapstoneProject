@@ -24,9 +24,9 @@ public class Constants {
 
     /** Types of question that could be created by the admin */
     public enum QuestionFormat {
-        FORMAT1("Format 1"),
-        FORMAT2("Format 2"),
-        FORMAT3("Format 3");
+        FORMAT1("Multiple Choice"),
+        FORMAT2("Number"),
+        FORMAT3("Text");
 
         private final String value;
 

@@ -13,10 +13,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Entity
 @Table(name = "Teen")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Teen implements Serializable {
 
     @Id
@@ -25,17 +30,20 @@ public class Teen implements Serializable {
     private String birthday;
     private String medicalNumber;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "teen")
+    @JsonBackReference
+    private User user;
+
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "TeenFollower",
-            joinColumns = @JoinColumn(name = "teenEmail"),
-            inverseJoinColumns = @JoinColumn(name = "followerEmail"))
+    @JoinTable(name = "TeenFollower", joinColumns = @JoinColumn(name = "teenEmail") , inverseJoinColumns = @JoinColumn(name = "followerEmail") )
     private List<Follower> followerList;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "PendingTeenFollower",
-            joinColumns = @JoinColumn(name = "teenEmail"),
-            inverseJoinColumns = @JoinColumn(name = "followerEmail"))
+    @JoinTable(name = "PendingTeenFollower", joinColumns = @JoinColumn(name = "teenEmail") , inverseJoinColumns = @JoinColumn(name = "followerEmail") )
     private List<Follower> pendingFollowerList;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "teen")
+    private List<CheckIn> checkInList;
 
     public Teen() {
     }
@@ -54,6 +62,14 @@ public class Teen implements Serializable {
 
     public void setBirthday(String birthday) {
         this.birthday = birthday;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getMedicalNumber() {
@@ -78,6 +94,14 @@ public class Teen implements Serializable {
 
     public void setPendingFollowerList(List<Follower> pendingFollowerList) {
         this.pendingFollowerList = pendingFollowerList;
+    }
+
+    public List<CheckIn> getCheckInList() {
+        return checkInList;
+    }
+
+    public void setCheckInList(List<CheckIn> checkInList) {
+        this.checkInList = checkInList;
     }
 
 }

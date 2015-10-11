@@ -19,13 +19,15 @@ public class Validators {
     }
 
     public static boolean isValidEmail(String email) {
+        
+        // FIXME - java.lang.ClassNotFoundException: com.sun.mail.util.PropUtil
         boolean result = true;
-        try {
+        /*try {
             InternetAddress emailAddr = new InternetAddress(email);
             emailAddr.validate();
         } catch (AddressException ex) {
             result = false;
-        }
+        }*/
         return result;
     }
 

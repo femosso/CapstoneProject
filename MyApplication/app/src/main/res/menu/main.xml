@@ -15,4 +15,10 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_hotlist"
+        android:icon="@drawable/ic_notifications"
+        app:showAsAction="always"
+        android:title="hotlist" />
 </menu>

@@ -1,6 +1,8 @@
 
 package com.capstone.server.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -8,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "Device")
-public class Device {
+public class Device implements Serializable {
 
     @Id
     @Column(name = "email", nullable = false)

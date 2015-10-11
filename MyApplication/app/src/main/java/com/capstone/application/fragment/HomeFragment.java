@@ -19,6 +19,7 @@ import com.capstone.application.activity.PieChartActivity;
 import com.capstone.application.adapter.CheckInListAdapter;
 import com.capstone.application.model.CheckIn;
 import com.capstone.application.model.Question;
+import com.capstone.application.model.Teen;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
 
@@ -94,17 +95,14 @@ public class HomeFragment extends Fragment {
             User user = new User();
             user.setFirstName("Name " + index);
 
+            Teen teen = new Teen();
+            teen.setUser(user);
+
             Question question = new Question();
             question.setText("Question " + index);
 
-            CheckIn obj = new CheckIn(user, question, new Date());
+            CheckIn obj = new CheckIn(teen, question, new Date());
             results.add(index, obj);
-
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
         return results;
     }

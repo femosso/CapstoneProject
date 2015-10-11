@@ -12,7 +12,12 @@ public class Teen implements Parcelable {
     private String birthday;
     private String medicalNumber;
 
+    private User user;
+
     private List<Follower> followerList;
+    private List<Follower> pendingFollowerList;
+
+    private List<CheckIn> checkInList;
 
     public Teen() {
     }
@@ -33,6 +38,14 @@ public class Teen implements Parcelable {
         this.birthday = birthday;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public String getMedicalNumber() {
         return medicalNumber;
     }
@@ -49,15 +62,47 @@ public class Teen implements Parcelable {
         this.followerList = followerList;
     }
 
+    public List<Follower> getPendingFollowerList() {
+        return pendingFollowerList;
+    }
+
+    public void setPendingFollowerList(List<Follower> pendingFollowerList) {
+        this.pendingFollowerList = pendingFollowerList;
+    }
+
+    public List<CheckIn> getCheckInList() {
+        return checkInList;
+    }
+
+    public void setCheckInList(List<CheckIn> checkInList) {
+        this.checkInList = checkInList;
+    }
+
     protected Teen(Parcel in) {
         email = in.readString();
         birthday = in.readString();
         medicalNumber = in.readString();
+        user = (User) in.readValue(User.class.getClassLoader());
+
         if (in.readByte() == 0x01) {
             followerList = new ArrayList<Follower>();
             in.readList(followerList, Follower.class.getClassLoader());
         } else {
             followerList = null;
+        }
+
+        if (in.readByte() == 0x01) {
+            pendingFollowerList = new ArrayList<Follower>();
+            in.readList(pendingFollowerList, Follower.class.getClassLoader());
+        } else {
+            pendingFollowerList = null;
+        }
+
+        if (in.readByte() == 0x01) {
+            checkInList = new ArrayList<CheckIn>();
+            in.readList(checkInList, CheckIn.class.getClassLoader());
+        } else {
+            checkInList = null;
         }
     }
 
@@ -71,11 +116,27 @@ public class Teen implements Parcelable {
         dest.writeString(email);
         dest.writeString(birthday);
         dest.writeString(medicalNumber);
+        dest.writeValue(user);
+
         if (followerList == null) {
             dest.writeByte((byte) (0x00));
         } else {
             dest.writeByte((byte) (0x01));
             dest.writeList(followerList);
+        }
+
+        if (pendingFollowerList == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(pendingFollowerList);
+        }
+
+        if (checkInList == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(checkInList);
         }
     }
 

@@ -1,3 +1,4 @@
 /target/
 /src/main/resources/application.properties
 /src/main/resources/sql/initialize.sql
+/src/main/webapp/WEB-INF/classes/api.key

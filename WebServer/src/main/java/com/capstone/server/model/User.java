@@ -2,22 +2,21 @@
 package com.capstone.server.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import com.capstone.server.utils.Constants.SignInProvider;
-import com.capstone.server.utils.Constants.UserType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "User")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements Serializable {
 
     @Id
@@ -26,8 +25,8 @@ public class User implements Serializable {
     private String facebookId;
     private String firstName;
     private String lastName;
-    private SignInProvider provider;
-    private UserType type;
+    private int provider;
+    private int type;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @PrimaryKeyJoinColumn
@@ -35,14 +34,12 @@ public class User implements Serializable {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @PrimaryKeyJoinColumn
+    @JsonManagedReference
     private Teen teen;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private Follower follower;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<CheckIn> checkInList;
 
     public User() {
     }
@@ -87,19 +84,19 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
-    public SignInProvider getProvider() {
+    public int getProvider() {
         return provider;
     }
 
-    public void setProvider(SignInProvider provider) {
+    public void setProvider(int provider) {
         this.provider = provider;
     }
 
-    public UserType getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(UserType type) {
+    public void setType(int type) {
         this.type = type;
     }
 
@@ -126,13 +123,4 @@ public class User implements Serializable {
     public void setFollower(Follower follower) {
         this.follower = follower;
     }
-
-    public List<CheckIn> getCheckInList() {
-        return checkInList;
-    }
-
-    public void setCheckInList(List<CheckIn> checkInList) {
-        this.checkInList = checkInList;
-    }
-
 }

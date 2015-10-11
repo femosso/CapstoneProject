@@ -17,7 +17,7 @@
       <ul class="nav navbar-nav">
         <li class="active"><a href="${ctx}"><spring:message code="label.header.home"/></a></li>
         <c:choose>
-          <c:when test="${loggedUser.type == 'ADMIN'}">
+          <c:when test="${loggedUser.type == 0}">
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                 <spring:message code="label.header.question"/><span class="caret"></span>

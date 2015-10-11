@@ -4,7 +4,6 @@ public class RestUriConstants {
 
     // Controller Constants
     public static final String LOGIN_CONTROLLER = "/login";
-    public static final String ANDROID_CONTROLLER = "/android";
     public static final String QUESTION_CONTROLLER = "/question";
     public static final String DEVICE_CONTROLLER = "/device";
     public static final String TEEN_CONTROLLER = "/teen";
@@ -20,4 +19,6 @@ public class RestUriConstants {
     public static final String DELETE = "delete/{id}";
     public static final String LOGOUT = "logout";
     public static final String FOLLOW = "follow";
+    public static final String PENDING = "pending";
+    public static final String GET = "get";
 }

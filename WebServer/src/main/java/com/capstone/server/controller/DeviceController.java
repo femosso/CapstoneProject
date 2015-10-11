@@ -40,7 +40,7 @@ public class DeviceController {
 
     private final static boolean DEBUG = sLogger.isDebugEnabled();
 
-    private static final Executor sThreadPool = Executors.newFixedThreadPool(5);
+    private final Executor sThreadPool = Executors.newFixedThreadPool(5);
 
     @Autowired
     private DeviceDao deviceDao;
@@ -65,15 +65,16 @@ public class DeviceController {
     }
 
     @RequestMapping(value = RestUriConstants.REGISTER, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse register(@RequestBody
-    final Device device) {
-        String token = device.getToken();
+    public @ResponseBody JsonResponse register(@RequestBody final Device device) {
+        if (DEBUG) {
+            sLogger.debug("Registering GCM device: " + device.getToken() + " E-mail: "
+                    + device.getEmail());
+        }
 
-        if (DEBUG)
-            sLogger.debug("Registering GCM device: " + token);
-
-        if (deviceDao.find(device.getToken()) == null) {
+        if (deviceDao.find(device.getEmail()) == null) {
             deviceDao.persist(device);
+        } else {
+            deviceDao.update(device);
         }
 
         return new JsonResponse(HttpStatus.OK, "success");
@@ -81,9 +82,12 @@ public class DeviceController {
 
     @RequestMapping(value = RestUriConstants.DELETE, method = RequestMethod.DELETE)
     public @ResponseBody JsonResponse unregister(@PathVariable("id") String token) {
-        System.out.println("Desregistrando regId " + token);
-        deviceDao.remove(token);
-        return null;
+        if (DEBUG) {
+            sLogger.debug("Unregistering GCM device: " + token);
+        }
+
+        deviceDao.removeByToken(token);
+        return new JsonResponse(HttpStatus.OK, "success");
     }
 
     @RequestMapping(RestUriConstants.VIEW)
@@ -99,7 +103,7 @@ public class DeviceController {
         return new JsonResponse(HttpStatus.OK, "success");
     }
 
-    public static void asyncSend(final DeviceMessage deviceMessage) {
+    public void asyncSend(final DeviceMessage deviceMessage) {
         final List<Device> devices = new ArrayList<Device>(deviceMessage.getDeviceList());
 
         final List<String> devicesRegIds = new ArrayList<String>();
@@ -127,23 +131,23 @@ public class DeviceController {
                     String messageId = result.getMessageId();
 
                     if (messageId != null) {
-                        sLogger.debug("Succesfully sent message to device: " + regId
-                                + "; messageId = " + messageId);
+                        sLogger.debug("Succesfully sent message to device: " + regId + "; messageId = " + messageId);
                         String canonicalRegId = result.getCanonicalRegistrationId();
                         if (canonicalRegId != null) {
-                            // same device has more than on registration id -
-                            // update it
+                            // same device has more than on registration id - update it
                             sLogger.info("canonicalRegId " + canonicalRegId);
-                            // FIXME Datastore.updateRegistration(regId,
-                            // canonicalRegId);
+
+                            Device device = deviceDao.findByToken(regId);
+                            device.setToken(canonicalRegId);
+                            deviceDao.update(device);
                         }
                     } else {
                         String error = result.getErrorCodeName();
                         if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
-                            // application has been removed from device -
-                            // unregister it
+                            // application has been removed from device - unregister it
                             sLogger.info("Unregistered device: " + regId);
-                            // FIXME Datastore.unregister(regId);
+
+                            deviceDao.removeByToken(regId);
                         } else {
                             sLogger.error("Error sending message to " + regId + ": " + error);
                         }
@@ -151,6 +155,13 @@ public class DeviceController {
                 }
             }
         });
+    }
+
+    @RequestMapping(value = "test", method = RequestMethod.GET)
+    public String home() {
+        Device device = deviceDao.findByToken(
+                "c74cAeQh1K4:APA91bHr1c59beaUA8v_MTRxNAcX3tdcWTpypAQIqWvY-WXAnWtSWKvcBZpEdO-XPqIbMzizHcafiBKS5MsSiZ2heQNVTSipoNi3LQ_Ga6jjv10q4xsVby9npaf_bX2JEq4py93UDIaM");
+        return null;
     }
 
     private static boolean isValidString(String str) {

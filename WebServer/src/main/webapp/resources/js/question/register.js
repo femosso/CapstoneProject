@@ -53,11 +53,59 @@ function() {
         var type = $('#question-type').val();
         var format = $('#question-format').val();
 
+        var formatIndex = $("#question-format option:selected").index();
+
         var questionObject = new Object();
         questionObject.text = question;
         questionObject.type = type;
         questionObject.format = format;
 
+        // if multiple-choice format, get its alternatives
+        if(formatIndex == 0) {
+            var alternativeObject;
+            var alternativeArray = new Array();
+
+            $(".alternative-text").each(function(e) {
+                alternativeObject = new Object();
+                alternativeObject.text = $(this).val();
+
+                alternativeArray.push(alternativeObject);
+            });
+
+            questionObject.alternativeList = alternativeArray;
+        }
+
         sendDataAjax(questionObject);
+    });
+
+    $('#question-format').on('change', function() {
+        var formatIndex = $("#question-format option:selected").index();
+
+        // if multiple-choice, show the alternatives UI
+        if(formatIndex == 0) {
+            $("#question-alternatives").show();
+        } else {
+            $("#question-alternatives").hide();
+        }
+    });
+
+    $('.alternative.add').click(function(e) {
+        e.preventDefault();
+
+        var alternative = $("<div><p class='space'>&nbsp;</p>" +
+                            "<div class='input-group'>" +
+                              "<input type='text' class='form-control alternative-text'>" +
+                              "<span class='input-group-btn'>" +
+                                "<button class='btn btn-default alternative remove' type='button'>-</button>" +
+                              "</span>" +
+                            "</div></div>");
+
+        $(this).parent().parent().parent().append(alternative);
+    });
+
+    $(document).on('click', '.alternative.remove', function(e) {
+        e.preventDefault();
+
+        $(this).parent().parent().parent().remove();
     });
 });

@@ -31,19 +31,14 @@ public class CheckInController {
 
     @RequestMapping(value = RestUriConstants.LIST, method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody List<CheckIn> visualizar() {
-        System.out.println("visualizar");
-
-        User user = new User();
-        user.setEmail("bababba@gmail.com");
-
-        userDao.persist(user);
+        System.out.println("check in visualizar");
         return null;
     }
 
     @RequestMapping(value = RestUriConstants.LIST + "1", method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody List<CheckIn> visualizar1() {
 
-        System.out.println("visualizar1");
+/*        System.out.println("visualizar1");
 
         User user = userDao.find("bababba@gmail.com");
 
@@ -56,21 +51,21 @@ public class CheckInController {
         checkIn2.setDate(new Date());
         checkIn2.setUser(user);
         checkInDao.persist(checkIn2);
-
+*/
         return null;
     }
 
     @RequestMapping(value = RestUriConstants.LIST + "2", method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody List<CheckIn> visualizar2() {
 
-        System.out.println("visualizar2");
+        /*System.out.println("visualizar2");
 
         User user = userDao.find("bababba@gmail.com", true);
 
         List<CheckIn> list = user.getCheckInList();
         for (CheckIn item : list) {
             System.out.println("check in -> " + item.getDate().toString());
-        }
+        }*/
         return null;
     }
 

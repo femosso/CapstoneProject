@@ -3,9 +3,6 @@ package com.capstone.application.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.capstone.application.utils.Constants.SignInProvider;
-import com.capstone.application.utils.Constants.UserType;
-
 public class User implements Parcelable {
 
     private String email;
@@ -13,20 +10,23 @@ public class User implements Parcelable {
     private String facebookId;
     private String firstName;
     private String lastName;
-    private SignInProvider provider;
-    private UserType type;
+
+    private int provider;
+    private int type;
+
+    private Device device;
 
     private Teen teen;
 
     private Follower follower;
 
+    public User() {
+    }
+
     public User(String email, String firstName, String lastName) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public User() {
     }
 
     public String getEmail() {
@@ -69,20 +69,28 @@ public class User implements Parcelable {
         this.lastName = lastName;
     }
 
-    public SignInProvider getProvider() {
+    public int getProvider() {
         return provider;
     }
 
-    public void setProvider(SignInProvider provider) {
+    public void setProvider(int provider) {
         this.provider = provider;
     }
 
-    public UserType getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(UserType type) {
+    public void setType(int type) {
         this.type = type;
+    }
+
+    public Device getDevice() {
+        return device;
+    }
+
+    public void setDevice(Device device) {
+        this.device = device;
     }
 
     public Teen getTeen() {
@@ -107,8 +115,9 @@ public class User implements Parcelable {
         facebookId = in.readString();
         firstName = in.readString();
         lastName = in.readString();
-        provider = (SignInProvider) in.readValue(SignInProvider.class.getClassLoader());
-        type = (UserType) in.readValue(UserType.class.getClassLoader());
+        provider = in.readInt();
+        type = in.readInt();
+        device = (Device) in.readValue(Device.class.getClassLoader());
         teen = (Teen) in.readValue(Teen.class.getClassLoader());
         follower = (Follower) in.readValue(Follower.class.getClassLoader());
     }
@@ -125,8 +134,9 @@ public class User implements Parcelable {
         dest.writeString(facebookId);
         dest.writeString(firstName);
         dest.writeString(lastName);
-        dest.writeValue(provider);
-        dest.writeValue(type);
+        dest.writeInt(provider);
+        dest.writeInt(type);
+        dest.writeValue(device);
         dest.writeValue(teen);
         dest.writeValue(follower);
     }

@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.capstone.application.R;
@@ -15,6 +14,7 @@ import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,8 +44,7 @@ public class RegistrationIntentService extends IntentService {
             // [END get_token]
             Log.i(TAG, "GCM Registration Token: " + token);
 
-            // TODO: Implement this method to send any registration to your app's servers.
-            sendRegistrationToServer(token);
+            sendRegistrationToServer(token, sharedPreferences);
 
             // Subscribe to topic channels
             subscribeTopics(token);
@@ -62,24 +61,24 @@ public class RegistrationIntentService extends IntentService {
             sharedPreferences.edit().putBoolean(Constants.SENT_TOKEN_TO_SERVER, false).apply();
         }
         // Notify UI that registration has completed, so the progress indicator can be hidden.
-        Intent registrationComplete = new Intent(Constants.REGISTRATION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
+        // FIXME - uncomment this when I get how to make broadcast receiver synchronous
+        //Intent registrationComplete = new Intent(Constants.REGISTRATION_COMPLETE_ACTION);
+        //LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
     /**
-     * Persist registration to third-party servers.
-     * <p/>
-     * Modify this method to associate the user's GCM registration token with any server-side account
-     * maintained by your application.
+     * Persist registration to application server.
      *
      * @param token The new token.
      */
-    private void sendRegistrationToServer(String token) {
-        Device device = new Device();
-        device.setToken(token);
+    private void sendRegistrationToServer(String token, SharedPreferences sharedPreferences) throws Exception {
+        String loggedEmail = sharedPreferences.getString(Constants.LOGGED_EMAIL, null);
 
-        JsonResponse result;
-        try {
+        // only send registration to the server if user is already logged in
+        if (loggedEmail != null) {
+            Device device = new Device(loggedEmail, token);
+
+            JsonResponse result;
             // The URL for making the GET request
             final String url = Constants.SERVER_URL + "device/register";
 
@@ -92,9 +91,9 @@ public class RegistrationIntentService extends IntentService {
             // Make the HTTP GET request, marshaling the response to User object
             result = restTemplate.postForObject(url, device, JsonResponse.class);
 
-            Log.d("Felipe", "sendRegistrationToServer -> " + result.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (result == null || result.getStatus() != HttpStatus.OK) {
+                throw new Exception("Fail to register token in application's server");
+            }
         }
     }
 

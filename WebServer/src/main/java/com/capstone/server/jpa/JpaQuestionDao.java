@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +31,8 @@ public class JpaQuestionDao implements QuestionDao {
     }
 
     @Transactional
-    public Question remove(String email) {
-        Question obj = find(email);
+    public Question remove(long id) {
+        Question obj = find(id);
         if (obj != null) {
             em.remove(obj);
         }
@@ -39,14 +40,35 @@ public class JpaQuestionDao implements QuestionDao {
     }
 
     @Transactional
-    public Question find(String email) {
-        return em.find(Question.class, email);
+    public Question find(long id) {
+        return find(id, false);
+    }
+
+    @Transactional
+    public Question find(long id, boolean forceLoad) {
+        Question question = em.find(Question.class, id);
+        if(question != null && forceLoad) {
+            Hibernate.initialize(question.getAlternativeList());
+        }
+        return question;
+    }
+
+    @Transactional
+    public Collection<Question> findAll() {
+        return findAll(false);
     }
 
     @SuppressWarnings("unchecked")
     @Transactional
-    public Collection<Question> findAll() {
+    public Collection<Question> findAll(boolean forceLoad) {
         Query query = em.createQuery("SELECT e FROM Question e");
-        return (Collection<Question>) query.getResultList();
+
+        Collection<Question> questions = (Collection<Question>) query.getResultList();
+        if(questions != null && forceLoad) {
+            for(Question question : questions) {
+                Hibernate.initialize(question.getAlternativeList());
+            }
+        }
+        return questions;
     }
 }

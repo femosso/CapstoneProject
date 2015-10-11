@@ -30,11 +30,11 @@ function() {
             // Logged into your app and Facebook.
             FB.api('/me', function(response) {
                 var checked = $('#check-monitor').is(':checked');
-                var type = checked ? 'TEEN' : 'FOLLOWER';
+                var type = checked ? 1 : 2;
                 var medicalNumber = checked ? $('#medical-number').val() : "";
 
                 var userObject = new Object();
-                userObject.provider = "FACEBOOK";
+                userObject.provider = 1;
                 userObject.type = type;
                 userObject.email = response.email;
                 userObject.facebookId = response.id;
@@ -157,7 +157,7 @@ function() {
         }*/
 
         var userObject = new Object();
-        userObject.provider = "APPLICATION";
+        userObject.provider = 0;
         userObject.type = type;
         userObject.email = email;
         userObject.password = password;

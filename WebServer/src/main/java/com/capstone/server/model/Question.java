@@ -1,11 +1,18 @@
 
 package com.capstone.server.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "Question")
@@ -18,6 +25,10 @@ public class Question {
     private String locale;
     private String format;
     private String type;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval=true)
+    @JsonManagedReference
+    private List<Alternative> alternativeList;
 
     public Question() {
     }
@@ -57,4 +68,13 @@ public class Question {
     public void setType(String type) {
         this.type = type;
     }
+
+    public List<Alternative> getAlternativeList() {
+        return alternativeList;
+    }
+
+    public void setAlternativeList(List<Alternative> alternativeList) {
+        this.alternativeList = alternativeList;
+    }
+
 }

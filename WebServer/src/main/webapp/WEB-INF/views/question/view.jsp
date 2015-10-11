@@ -16,6 +16,15 @@
     <link href="${resources}/css/toastr/toastr.min.css" rel="stylesheet">
     <link href="${resources}/css/select/bootstrap-select.min.css" rel="stylesheet">
 
+    <style type="text/css">
+        button.alternative {
+            width: 2.5em;
+        }
+
+        .space {
+            line-height: 0em;
+        }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -40,7 +49,11 @@
                   <tr id="${question.id}">
                     <td>${question.text}</td>
                     <td>${question.type}</td>
-                    <td>${question.format}</td>
+                    <td>${question.format}
+                      <c:forEach items="${question.alternativeList}" var="alternative">
+                        <input type="hidden" value="${alternative.text}" />
+                      </c:forEach>
+                    </td>
                     <td>${question.locale}</td>
                     <td>
                       <p data-placement="top" data-toggle="tooltip" title="Edit">
@@ -101,6 +114,16 @@
                      <option>${format}</option>
                     </c:forEach>
                   </select>
+                </div>
+              </div>
+              <div class="form-group" id="question-alternatives">
+                <div class="col-xs-6">
+                  <div class="input-group">
+                    <label class="control-label">Alternatives EN</label>
+                    <span class="input-group-btn">
+                      <button class="btn btn-default alternative add" type="button">+</button>
+                    </span>
+                  </div>
                 </div>
               </div>
             </form>

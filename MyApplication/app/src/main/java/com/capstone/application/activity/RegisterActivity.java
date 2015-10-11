@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.capstone.application.R;
 import com.capstone.application.fragment.DatePickerFragment;
+import com.capstone.application.model.Follower;
 import com.capstone.application.model.JsonResponse;
 import com.capstone.application.model.Teen;
 import com.capstone.application.model.User;
@@ -184,8 +185,7 @@ public class RegisterActivity extends FragmentActivity {
             user.setEmail(email);
             user.setFirstName(name[0]);
             user.setLastName(name[1]);
-            user.setProvider(SignInProvider.FACEBOOK);
-            user.setType(UserType.FOLLOWER);
+            user.setProvider(SignInProvider.FACEBOOK.ordinal());
 
             // if it is a teen, we get its medical number and birthday
             if (mCheckBoxTeen.isChecked()) {
@@ -203,8 +203,11 @@ public class RegisterActivity extends FragmentActivity {
 
                 teen.setBirthday(birthday);
 
-                user.setType(UserType.TEEN);
+                user.setType(UserType.TEEN.ordinal());
                 user.setTeen(teen);
+            } else {
+                user.setType(UserType.FOLLOWER.ordinal());
+                user.setFollower(new Follower());
             }
         } catch (JSONException e) {
             user = null;
@@ -243,8 +246,7 @@ public class RegisterActivity extends FragmentActivity {
         boolean valid = true;
 
         User user = new User();
-        user.setProvider(SignInProvider.APPLICATION);
-        user.setType(UserType.FOLLOWER);
+        user.setProvider(SignInProvider.APPLICATION.ordinal());
 
         String username = mUsernameWrapper.getEditText().getText().toString();
         String email = mEmailWrapper.getEditText().getText().toString();
@@ -299,8 +301,11 @@ public class RegisterActivity extends FragmentActivity {
                 teen.setMedicalNumber(medicalNumber);
             }
 
-            user.setType(UserType.TEEN);
+            user.setType(UserType.TEEN.ordinal());
             user.setTeen(teen);
+        } else {
+            user.setType(UserType.FOLLOWER.ordinal());
+            user.setFollower(new Follower());
         }
 
         // if some validation failed, return null
@@ -363,7 +368,7 @@ public class RegisterActivity extends FragmentActivity {
             }
 
             // log out from Facebook if user couldn't be authenticated in server
-            if (user.getProvider().equals(SignInProvider.FACEBOOK) &&
+            if (user.getProvider() == SignInProvider.FACEBOOK.ordinal() &&
                     (result == null || !result.getStatus().equals(HttpStatus.OK))) {
                 Log.d(TAG, "Logging out from Facebook - user couldn't be authenticated in server");
                 LoginManager.getInstance().logOut();
@@ -389,6 +394,7 @@ public class RegisterActivity extends FragmentActivity {
         }
     }
 
+    // FIXME - This should trigger GCM registration as well
     public void onRegisterSuccess(User user) {
         Intent result = new Intent();
         result.putExtra("result", user);

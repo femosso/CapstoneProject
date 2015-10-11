@@ -23,7 +23,7 @@ public class CheckIn implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "email", nullable = false)
-    private User user;
+    private Teen teen;
 
     private Date date;
 
@@ -34,12 +34,12 @@ public class CheckIn implements Serializable {
         return id;
     }
 
-    public User getUser() {
-        return user;
+    public Teen getTeen() {
+        return teen;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setTeen(Teen teen) {
+        this.teen = teen;
     }
 
     public Date getDate() {

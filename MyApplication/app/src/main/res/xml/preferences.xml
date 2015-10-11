@@ -4,16 +4,18 @@
         android:key="username"
         android:summary="Please provide your username"
         android:title="Your Name"></EditTextPreference>
+
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="applicationUpdates"
         android:summary="This option if selected will allow the application to check for latest versions."
         android:title="Application Updates" />
+
     <ListPreference
         android:defaultValue="1"
-        android:entries="@array/nav_drawer_labels"
-        android:entryValues="@array/nav_drawer_labels"
-        android:key="downloadType"
-        android:summary="Select the kind of data that you would like to download"
-        android:title="Download Details" />
+        android:entries="@array/reminder_frequency"
+        android:entryValues="@array/reminder_frequency"
+        android:key="reminderFrequency"
+        android:summary="How often many times per day you would like to be asked about your health conditions"
+        android:title="Reminder Frequency" />
 </PreferenceScreen>

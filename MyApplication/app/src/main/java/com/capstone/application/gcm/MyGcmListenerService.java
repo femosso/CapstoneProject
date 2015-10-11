@@ -4,14 +4,18 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.capstone.application.R;
 import com.capstone.application.activity.DialogActivity;
+import com.capstone.application.utils.Constants;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class MyGcmListenerService extends GcmListenerService {
@@ -37,6 +41,15 @@ public class MyGcmListenerService extends GcmListenerService {
         } else {
             // normal downstream message.
         }
+
+        // TODO - only make it visible to the user if the message arrived i
+        // update notification counter as new follow request message has arrived
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int counter = sharedPreferences.getInt(Constants.NOTIFICATION_COUNTER, -1);
+        sharedPreferences.edit().putInt(Constants.NOTIFICATION_COUNTER, ++counter).apply();
+
+        Intent intent = new Intent(Constants.NEW_FOLLOW_REQUEST_ACTION);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         // [START_EXCLUDE]
         /**

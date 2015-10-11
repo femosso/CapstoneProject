@@ -30,7 +30,7 @@ function() {
             // Logged into your app and Facebook.
             FB.api('/me', function(response) {
                 var userObject = new Object();
-                userObject.provider = "FACEBOOK";
+                userObject.provider = 1;
                 userObject.email = response.email;
                 userObject.facebookId = response.id;
 
@@ -120,7 +120,7 @@ function() {
         var password = CryptoJS.MD5($('#loginPassword').val()).toString();
 
         var userObject = new Object();
-        userObject.provider = "APPLICATION";
+        userObject.provider = 0;
         userObject.email = email;
         userObject.password = password;
 

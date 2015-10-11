@@ -5,47 +5,49 @@ import java.util.Date;
 
 public class CheckIn {
 
-    private User mUser;
+    private Long id;
 
-    private Date mDate;
+    private Teen teen;
 
-    private Question mQuestion;
+    private Date date;
 
-    public CheckIn(User user, Question question, Date date) {
-        mUser = user;
-        mQuestion = question;
-        mDate = date;
+    private Question question;
+
+    public CheckIn(Teen teen, Question question, Date date) {
+        this.teen = teen;
+        this.question = question;
+        this.date = date;
     }
 
-    public User getUser() {
-        return mUser;
+    public Teen getTeen() {
+        return teen;
     }
 
-    public void setUser(User user) {
-        this.mUser = user;
+    public void setTeen(Teen teen) {
+        this.teen = teen;
     }
 
     public Date getDate() {
-        return mDate;
+        return date;
     }
 
     public String getStringDate() {
-        return new SimpleDateFormat("yyyy-MM-dd").format(mDate);
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
     public String getStringTime() {
-        return new SimpleDateFormat("HH:mm:ss").format(mDate);
+        return new SimpleDateFormat("HH:mm:ss").format(date);
     }
 
     public void setDate(Date date) {
-        this.mDate = date;
+        this.date = date;
     }
 
     public Question getQuestion() {
-        return mQuestion;
+        return question;
     }
 
     public void setQuestion(Question question) {
-        this.mQuestion = question;
+        this.question = question;
     }
 }

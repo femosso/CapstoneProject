@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/row_teen_selector"
+    android:padding="8dp">
+
+    <!-- Thumbnail Image -->
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="8dp" />
+
+    <!-- Movie Title -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/thumbnail"
+        android:layout_toRightOf="@+id/thumbnail"
+        android:text="title"
+        android:textSize="@dimen/title"
+        android:textStyle="bold" />
+
+    <!-- Rating -->
+    <TextView
+        android:id="@+id/rating"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@+id/thumbnail"
+        android:text="rating"
+        android:textSize="@dimen/rating" />
+
+    <!-- Genre -->
+    <TextView
+        android:id="@+id/genre"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rating"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/thumbnail"
+        android:text="genre"
+        android:textColor="@color/genre"
+        android:textSize="@dimen/genre" />
+
+    <Button
+        android:id="@+id/deny"
+
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Deny"
+        android:textColor="@color/year" />
+
+    <Button
+        android:id="@+id/confirm"
+
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/deny"
+        android:layout_toLeftOf="@+id/deny"
+        android:layout_toStartOf="@+id/deny"
+        android:text="Confirm"
+        android:textColor="@color/year" />
+
+</RelativeLayout>

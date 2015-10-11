@@ -56,7 +56,7 @@ public class CheckInListAdapter extends RecyclerView.Adapter<CheckInListAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolderItem holder, int position) {
-        holder.label.setText(mCheckInList.get(position).getUser().getFirstName());
+        holder.label.setText(mCheckInList.get(position).getTeen().getUser().getFirstName());
         holder.dateTime.setText(mCheckInList.get(position).getQuestion().getText());
         holder.date.setText(mCheckInList.get(position).getStringDate() + " " + mCheckInList.get(position).getStringTime());
     }

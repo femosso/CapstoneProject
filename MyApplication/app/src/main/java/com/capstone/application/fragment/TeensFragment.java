@@ -3,8 +3,10 @@ package com.capstone.application.fragment;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,7 +17,7 @@ import android.widget.ListView;
 import com.capstone.application.R;
 import com.capstone.application.adapter.TeenListAdapter;
 import com.capstone.application.model.Movie;
-import com.capstone.application.model.Teen;
+import com.capstone.application.model.TeenListRequest;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
 
@@ -23,18 +25,19 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class FriendsFragment extends Fragment {
+public class TeensFragment extends Fragment {
 
-    private static String TAG = "FriendsFragment";
+    private static String TAG = "TeensFragment";
 
     private Context mContext;
 
+    private ListView mListView;
+
     private TeenListAdapter mAdapter;
 
-    public FriendsFragment() {
+    public TeensFragment() {
         // Required empty public constructor
     }
 
@@ -44,16 +47,13 @@ public class FriendsFragment extends Fragment {
         mContext = getActivity().getApplicationContext();
     }
 
-    private ListView listView;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_teens, container, false);
 
+        mListView = (ListView) rootView.findViewById(R.id.list);
 
-        listView = (ListView) rootView.findViewById(R.id.list);
-
-        new RetrieveTeensTask(FriendsFragment.this).execute();
+        new RetrieveTeensTask(TeensFragment.this).execute();
 
         // Code to Add an item with default animation
         //((TeenListAdapter) mAdapter).addItem(obj, index);
@@ -125,7 +125,7 @@ public class FriendsFragment extends Fragment {
                         }
 
                         mAdapter = new TeenListAdapter(getActivity(), movieList);
-                        listView.setAdapter(mAdapter);
+                        mListView.setAdapter(mAdapter);
 
                     }
                 }, new Response.ErrorListener() {
@@ -139,11 +139,11 @@ public class FriendsFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(movieReq);
     }*/
 
-    private class RetrieveTeensTask extends AsyncTask<Void, Void, List<User>> {
+    private class RetrieveTeensTask extends AsyncTask<Void, Void, TeenListRequest> {
 
         private ProgressDialog dialog;
 
-        public RetrieveTeensTask(FriendsFragment fragment) {
+        public RetrieveTeensTask(TeensFragment fragment) {
             dialog = new ProgressDialog(fragment.getActivity());
         }
 
@@ -154,13 +154,16 @@ public class FriendsFragment extends Fragment {
         }
 
         @Override
-        protected List<User> doInBackground(Void... params) {
-            Log.d(TAG, "Contacting server to retrieve list of teens");
+        protected TeenListRequest doInBackground(Void... params) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            String loggedEmail = sharedPreferences.getString(Constants.LOGGED_EMAIL, null);
 
-            List<User> result = null;
+            Log.d(TAG, loggedEmail + " is contacting server to retrieve list of teens");
+
+            TeenListRequest result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "teen/list";
+                final String url = Constants.SERVER_URL + "teen/list?email=" + loggedEmail;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -169,11 +172,7 @@ public class FriendsFragment extends Fragment {
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
                 // Make the HTTP GET request, marshaling the response to Teen object
-                User[] users = restTemplate.getForObject(url, User[].class);
-
-                if(users != null) {
-                    result = Arrays.asList(users);
-                }
+                result = restTemplate.getForObject(url, TeenListRequest.class);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -182,26 +181,21 @@ public class FriendsFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<User> result) {
+        protected void onPostExecute(TeenListRequest result) {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
 
-            User user = new User();
-            user.setFirstName("blablabla");
-            user.setEmail("blablabla@gmail.com");
+            List<User> teenList = new ArrayList<>();
+            User requester = new User();
 
-            Teen teen = new Teen();
-            teen.setMedicalNumber("1234567");
-            teen.setBirthday("22/05/1990");
-            user.setTeen(teen);
+            if (result != null) {
+                teenList = result.getTeenList();
+                requester = result.getRequester();
+            }
 
-            List<User> list = new ArrayList<>();
-            list.add(user);
-            result = list;
-
-            mAdapter = new TeenListAdapter(getActivity(), result);
-            listView.setAdapter(mAdapter);
+            mAdapter = new TeenListAdapter(getActivity(), teenList, requester);
+            mListView.setAdapter(mAdapter);
         }
     }
 }

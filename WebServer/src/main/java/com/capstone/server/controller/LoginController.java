@@ -63,10 +63,10 @@ public class LoginController implements MessageSourceAware {
         User databaseUser = userDao.find(user.getEmail());
 
         if (databaseUser != null) {
-            if (user.getProvider().equals(SignInProvider.APPLICATION)
+            if (user.getProvider() == SignInProvider.APPLICATION.ordinal()
                     && databaseUser.getPassword().equals(user.getPassword())) {
                 session.setAttribute(Constants.SESSION_USER, databaseUser);
-            } else if (user.getProvider().equals(SignInProvider.FACEBOOK)
+            } else if (user.getProvider() == SignInProvider.FACEBOOK.ordinal()
                     && databaseUser.getFacebookId().equals(user.getFacebookId())) {
                 session.setAttribute(Constants.SESSION_USER, databaseUser);
             }
@@ -101,51 +101,6 @@ public class LoginController implements MessageSourceAware {
 
     @RequestMapping(RestUriConstants.REGISTER)
     public String showRegisterForm() {
-
-/*        User user1 = new User();
-        user1.setEmail("user1@gmail.com");
-        user1.setFirstName("user1");
-
-        Teen teen1 = new Teen();
-        teen1.setMedicalNumber("12345678");
-        teen1.setEmail(user1.getEmail());
-
-        user1.setTeen(teen1);
-
-        userDao.persist(user1);
-
-        User user2 = new User();
-        user2.setEmail("user2@gmail.com");
-        user2.setFirstName("user2");
-
-        Teen teen2 = new Teen();
-        teen2.setMedicalNumber("12345678");
-        teen2.setEmail(user2.getEmail());
-
-        user2.setTeen(teen2);
-
-        userDao.persist(user2);*/
-
-        
-
-/*        User user3 = new User();
-        user3.setEmail("user3@gmail.com");
-        user3.setFirstName("user3");
-        
-        Follower follower3 = new Follower();
-        follower3.setEmail(user3.getEmail());
-        
-        user3.setFollower(follower3);
-        
-        userDao.persist(user3);*/
-        
-        Follower follower3 = followerDao.find("user3@gmail.com");
-
-        List<Teen> teens = (List<Teen>) teenDao.findAll();
-        follower3.setTeenList(teens);
-
-        followerDao.update(follower3);
-
         return "login/register";
     }
 
@@ -163,9 +118,14 @@ public class LoginController implements MessageSourceAware {
             // sets the User of the Teen since I get "Converting
             // circular structure to JSON" exception in jQuery when
             // I try to set the User for the Teen and vice-versa.
-            if (user.getType().equals(UserType.TEEN)) {
+            if (user.getType() == UserType.TEEN.ordinal()) {
                 Teen teen = user.getTeen();
+                teen.setUser(user);
                 teen.setEmail(user.getEmail());
+            } else if (user.getType() == UserType.FOLLOWER.ordinal()) {
+                Follower follower = user.getFollower();
+                follower.setUser(user);
+                follower.setEmail(user.getEmail());
             }
 
             userDao.persist(user);
@@ -192,23 +152,26 @@ public class LoginController implements MessageSourceAware {
         if (DEBUG) sLogger.debug("Validating User");
 
         boolean valid = false;
-        if (user != null && user.getType() != null) {
+        if (user != null) {
             valid = isValidEmail(user.getEmail()) && isValidString(user.getFirstName());
 
-            if (valid && user.getProvider() != null) {
+            if (valid) {
                 // if login from Facebook, it should have facebook id
-                if (user.getProvider().equals(SignInProvider.FACEBOOK)) {
+                if (user.getProvider() == SignInProvider.FACEBOOK.ordinal()) {
                     valid = isValidString(user.getFacebookId());
                     // if login from Application, it should have password
-                } else if (user.getProvider().equals(SignInProvider.APPLICATION)) {
+                } else if (user.getProvider() == SignInProvider.APPLICATION.ordinal()) {
                     valid = isValidString(user.getPassword());
+                } else {
+                    valid = false;
                 }
             }
 
-            // if all informations from Follower are valid and user is a Teen
-            if (valid && user.getType().equals(UserType.TEEN)) {
+            // if all informations from User are valid and user is a Teen
+            if (valid && user.getType() == UserType.TEEN.ordinal()) {
                 valid = isValidTeen(user.getTeen());
             }
+            // FIXME - maybe do Follower validation?
         }
 
         return valid;

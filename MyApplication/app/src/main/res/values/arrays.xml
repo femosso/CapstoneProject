@@ -3,8 +3,8 @@
     <!-- navigation drawer item labels  -->
     <array name="nav_drawer_labels">
         <item>@string/nav_item_home</item>
-        <item>@string/nav_item_friends</item>
-        <item>@string/nav_item_messages</item>
+        <item>@string/nav_item_teens</item>
+        <item>@string/nav_item_settings</item>
         <item>@string/nav_item_logout</item>
     </array>
 
@@ -14,5 +14,13 @@
         <item>@drawable/ic_whats_hot</item>
         <item>@drawable/ic_photos</item>
         <item>@drawable/ic_communities</item>
+    </array>
+
+    <!-- possible reminder frequency values in settings preference -->
+    <array name="reminder_frequency">
+        <item>3 Times</item>
+        <item>4 Times</item>
+        <item>5 Times</item>
+        <item>6 Times</item>
     </array>
 </resources>
