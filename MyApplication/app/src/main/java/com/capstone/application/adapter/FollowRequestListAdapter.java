@@ -18,7 +18,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.capstone.application.AppController;
 import com.capstone.application.R;
-import com.capstone.application.activity.PendingFollowRequestActivity;
+import com.capstone.application.activity.FollowRequestActivity;
 import com.capstone.application.model.FollowDataRequest;
 import com.capstone.application.model.JsonResponse;
 import com.capstone.application.model.Teen;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PendingFollowRequestListAdapter extends BaseAdapter {
+public class FollowRequestListAdapter extends BaseAdapter {
     private static String TAG = "TeenListAdapter";
 
     private Activity mActivity;
@@ -40,7 +40,7 @@ public class PendingFollowRequestListAdapter extends BaseAdapter {
     private List<User> mUserItems;
     private ImageLoader mImageLoader = AppController.getInstance().getImageLoader();
 
-    public PendingFollowRequestListAdapter(Activity activity, List<User> userItems) {
+    public FollowRequestListAdapter(Activity activity, List<User> userItems) {
         mActivity = activity;
         mUserItems = (userItems == null ? new ArrayList<User>() : userItems);
     }
@@ -72,7 +72,7 @@ public class PendingFollowRequestListAdapter extends BaseAdapter {
             if (inflater == null) {
                 inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             }
-            convertView = inflater.inflate(R.layout.row_pending_follow_request, parent, false);
+            convertView = inflater.inflate(R.layout.row_follow_request, parent, false);
 
             viewHolder = new ViewHolderItem();
             viewHolder.thumbNail = (NetworkImageView) convertView.findViewById(R.id.thumbnail);
@@ -151,7 +151,7 @@ public class PendingFollowRequestListAdapter extends BaseAdapter {
         }
     }
 
-    public void updatePendingFollowRequestList(PendingFollowRequestActivity activity) {
+    public void updatePendingFollowRequestList(FollowRequestActivity activity) {
         new RetrievePendingFollowRequestTask(activity).execute();
     }
 
@@ -209,7 +209,7 @@ public class PendingFollowRequestListAdapter extends BaseAdapter {
         private ProgressDialog dialog;
         private Activity mActivity;
 
-        public RetrievePendingFollowRequestTask(PendingFollowRequestActivity activity) {
+        public RetrievePendingFollowRequestTask(FollowRequestActivity activity) {
             mActivity = activity;
             dialog = new ProgressDialog(mActivity);
         }

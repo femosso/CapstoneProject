@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,25 +17,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.capstone.application.R;
-import com.capstone.application.activity.PieChartActivity;
+import com.capstone.application.activity.CheckInDetailsActivity;
 import com.capstone.application.adapter.CheckInListAdapter;
 import com.capstone.application.model.CheckIn;
-import com.capstone.application.model.Question;
-import com.capstone.application.model.Teen;
-import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
-
-    private static String TAG = "HomeFragment";
+    private static final String TAG = HomeFragment.class.getName();
 
     private Context mContext;
 
@@ -89,24 +85,6 @@ public class HomeFragment extends Fragment {
         super.onResume();
     }
 
-    private ArrayList<CheckIn> getDataSet() {
-        ArrayList results = new ArrayList<CheckIn>();
-        for (int index = 0; index < 10; index++) {
-            User user = new User();
-            user.setFirstName("Name " + index);
-
-            Teen teen = new Teen();
-            teen.setUser(user);
-
-            Question question = new Question();
-            question.setText("Question " + index);
-
-            CheckIn obj = new CheckIn(teen, question, new Date());
-            results.add(index, obj);
-        }
-        return results;
-    }
-
     private class RetrieveCheckInsTask extends AsyncTask<Void, Void, List<CheckIn>> {
 
         private ProgressDialog dialog;
@@ -123,12 +101,15 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected List<CheckIn> doInBackground(Void... params) {
-            Log.d(TAG, "Contacting server to retrieve list of latest check-ins");
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            String loggedEmail = sharedPreferences.getString(Constants.LOGGED_EMAIL, null);
+
+            Log.d(TAG, loggedEmail + " is contacting server to retrieve list of latest check-ins");
 
             List<CheckIn> result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "checkIn/list";
+                final String url = Constants.SERVER_URL + "checkIn/list?email=" + loggedEmail;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -155,16 +136,70 @@ public class HomeFragment extends Fragment {
                 dialog.dismiss();
             }
 
-            mAdapter = new CheckInListAdapter(getDataSet());
+            mAdapter = new CheckInListAdapter(result);
             mRecyclerView.setAdapter(mAdapter);
 
             ((CheckInListAdapter) mAdapter).setOnItemClickListener(new CheckInListAdapter.MyClickListener() {
                 @Override
                 public void onItemClick(int position, View v) {
                     Log.i(TAG, " Clicked on Item " + position);
-                    startActivity(new Intent(mContext, PieChartActivity.class));
+
+                    CheckIn checkIn = ((CheckInListAdapter) mAdapter).getItem(position);
+                    new RetrieveCheckInDetailTask(HomeFragment.this).execute(checkIn.getId());
                 }
             });
+        }
+    }
+
+    private class RetrieveCheckInDetailTask extends AsyncTask<Long, Void, CheckIn> {
+        private ProgressDialog dialog;
+
+        public RetrieveCheckInDetailTask(HomeFragment fragment) {
+            dialog = new ProgressDialog(fragment.getActivity());
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Doing something, please wait.");
+            dialog.show();
+        }
+
+        @Override
+        protected CheckIn doInBackground(Long... params) {
+            Log.d(TAG, "Contacting server to retrieve details of a check in");
+
+            long checkInId = params[0];
+
+            CheckIn result = null;
+            try {
+                // The URL for making the GET request
+                final String url = Constants.SERVER_URL + "checkIn/view?id=" + checkInId;
+
+                // Create a new RestTemplate instance
+                RestTemplate restTemplate = new RestTemplate();
+
+                // Add the String message converter
+                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+                // Make the HTTP GET request, marshaling the response to CheckIn object
+                result = restTemplate.getForObject(url, CheckIn.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(CheckIn result) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            Intent intent = new Intent(mContext, CheckInDetailsActivity.class);
+            intent.putExtra("checkIn", result);
+
+            startActivity(intent);
         }
     }
 }

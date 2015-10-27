@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:gravity="center"
-                android:text="Welcome"
+                android:text="Got It\nDiabetes Management"
                 android:textColor="#333333"
                 android:textSize="30sp" />
         </RelativeLayout>
@@ -62,7 +62,7 @@
                     android:inputType="textPassword" />
             </android.support.design.widget.TextInputLayout>
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_login"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

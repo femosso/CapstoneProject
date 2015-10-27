@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TeenListAdapter extends BaseAdapter {
-    private static String TAG = "TeenListAdapter";
+    private static final String TAG = TeenListAdapter.class.getName();
 
     private Activity mActivity;
     private LayoutInflater inflater;

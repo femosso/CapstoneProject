@@ -9,7 +9,9 @@ public interface CheckInDao {
 
     public void persist(CheckIn checkIn);
     public CheckIn update(CheckIn checkIn);
-    public CheckIn remove(String email);
-    public CheckIn find(String email);
+    public CheckIn remove(long id);
+    public CheckIn find(long id);
+    public CheckIn find(long id, boolean force);
     public Collection<CheckIn> findAll();
+    public Collection<CheckIn> findAll(boolean force);
 }

@@ -4,6 +4,7 @@
     <array name="nav_drawer_labels">
         <item>@string/nav_item_home</item>
         <item>@string/nav_item_teens</item>
+        <item>@string/nav_item_check_ins</item>
         <item>@string/nav_item_settings</item>
         <item>@string/nav_item_logout</item>
     </array>
@@ -12,15 +13,34 @@
     <array name="nav_drawer_icons">
         <item>@drawable/ic_home</item>
         <item>@drawable/ic_whats_hot</item>
+        <item>@drawable/ic_people</item>
         <item>@drawable/ic_photos</item>
         <item>@drawable/ic_communities</item>
     </array>
 
     <!-- possible reminder frequency values in settings preference -->
-    <array name="reminder_frequency">
+    <string-array name="reminder_frequency">
         <item>3 Times</item>
         <item>4 Times</item>
-        <item>5 Times</item>
         <item>6 Times</item>
-    </array>
+    </string-array>
+
+    <string-array name="reminder_frequency_values">
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+    </string-array>
+
+    <!-- types of data the teen desires to share with its followers -->
+    <string-array name="shared_data">
+        <item>Type 1</item>
+        <item>Type 2</item>
+        <item>Type 3</item>
+    </string-array>
+
+    <string-array name="shared_data_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 </resources>

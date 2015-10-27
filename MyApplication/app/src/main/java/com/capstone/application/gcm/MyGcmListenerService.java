@@ -14,7 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.capstone.application.R;
-import com.capstone.application.activity.DialogActivity;
+import com.capstone.application.activity.MainActivity;
 import com.capstone.application.utils.Constants;
 import com.google.android.gms.gcm.GcmListenerService;
 
@@ -45,8 +45,8 @@ public class MyGcmListenerService extends GcmListenerService {
         // TODO - only make it visible to the user if the message arrived i
         // update notification counter as new follow request message has arrived
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int counter = sharedPreferences.getInt(Constants.NOTIFICATION_COUNTER, -1);
-        sharedPreferences.edit().putInt(Constants.NOTIFICATION_COUNTER, ++counter).apply();
+        int counter = sharedPreferences.getInt(Constants.PENDING_FOLLOW_REQUEST_COUNTER, -1);
+        sharedPreferences.edit().putInt(Constants.PENDING_FOLLOW_REQUEST_COUNTER, ++counter).apply();
 
         Intent intent = new Intent(Constants.NEW_FOLLOW_REQUEST_ACTION);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -74,7 +74,7 @@ public class MyGcmListenerService extends GcmListenerService {
      * @param message GCM message received.
      */
     private void sendNotification(String message) {
-        Intent intent = new Intent(this, DialogActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,

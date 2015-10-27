@@ -29,7 +29,7 @@ import java.util.List;
 
 public class TeensFragment extends Fragment {
 
-    private static String TAG = "TeensFragment";
+    private static final String TAG = TeensFragment.class.getName();
 
     private Context mContext;
 
@@ -49,7 +49,7 @@ public class TeensFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.activity_teens, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_teens, container, false);
 
         mListView = (ListView) rootView.findViewById(R.id.list);
 

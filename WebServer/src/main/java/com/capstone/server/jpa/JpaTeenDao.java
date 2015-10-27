@@ -51,7 +51,7 @@ public class JpaTeenDao implements TeenDao {
             Hibernate.initialize(teen.getUser());
             Hibernate.initialize(teen.getFollowerList());
             Hibernate.initialize(teen.getPendingFollowerList());
-            Hibernate.initialize(teen.getCheckInList());
+            //Hibernate.initialize(teen.getCheckInList());
         }
         return teen;
     }

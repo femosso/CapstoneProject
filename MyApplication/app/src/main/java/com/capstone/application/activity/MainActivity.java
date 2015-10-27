@@ -19,12 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.capstone.application.R;
 import com.capstone.application.adapter.NavigationDrawerCallbacks;
 import com.capstone.application.adapter.NavigationDrawerFragment;
 import com.capstone.application.alarm.TeenAlarmReceiver;
+import com.capstone.application.fragment.CheckInsFragment;
 import com.capstone.application.fragment.HomeFragment;
 import com.capstone.application.fragment.PreferencesFragment;
 import com.capstone.application.fragment.TeensFragment;
@@ -41,7 +41,9 @@ public class MainActivity extends AppCompatActivity
 
     private Context mContext;
 
-    private BroadcastReceiver mBroadcastReceiver;
+    private BroadcastReceiver mUpdateFollowRequestReceiver;
+
+    private TeenAlarmReceiver mAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,23 +74,18 @@ public class MainActivity extends AppCompatActivity
         // set up the fragment with the current position
         displayView(mNavigationDrawerFragment.getCurrentPosition());
 
-        mBroadcastReceiver = new BroadcastReceiver() {
+        mUpdateFollowRequestReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Constants.NEW_FOLLOW_REQUEST_ACTION)) {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                    int counter = sharedPreferences.getInt(Constants.NOTIFICATION_COUNTER, -1);
-
-                    if (counter != -1) {
-                        updateHotCount();
-                    }
+                    updateFollowRequestCounter();
                 }
             }
         };
 
         // set up alarm
-        TeenAlarmReceiver alarm = new TeenAlarmReceiver(mContext);
-        alarm.setAlarm(getApplicationContext());
+        mAlarm = new TeenAlarmReceiver();
+        mAlarm.setAlarm(getApplicationContext());
     }
 
     @Override
@@ -100,10 +97,8 @@ public class MainActivity extends AppCompatActivity
         // launched into.
         AppEventsLogger.activateApp(this);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(mUpdateFollowRequestReceiver,
                 new IntentFilter(Constants.NEW_FOLLOW_REQUEST_ACTION));
-
-        updateHotCount();
     }
 
     @Override
@@ -115,6 +110,7 @@ public class MainActivity extends AppCompatActivity
     private void displayView(int position) {
         Fragment fragment = null;
         String title = getString(R.string.app_name);
+
         switch (position) {
             case 0:
                 fragment = new HomeFragment();
@@ -125,10 +121,14 @@ public class MainActivity extends AppCompatActivity
                 title = getString(R.string.nav_item_teens);
                 break;
             case 2:
+                fragment = new CheckInsFragment();
+                title = getString(R.string.nav_item_check_ins);
+                break;
+            case 3:
                 fragment = new PreferencesFragment();
                 title = getString(R.string.nav_item_settings);
                 break;
-            case 3:
+            case 4:
                 onClickLogout();
                 break;
             default:
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity
         // launched into.
         AppEventsLogger.deactivateApp(this);
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mUpdateFollowRequestReceiver);
         super.onPause();
     }
 
@@ -176,18 +176,20 @@ public class MainActivity extends AppCompatActivity
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
 
-            MenuItem menuItem = menu.findItem(R.id.menu_hotlist);
-            MenuItemCompat.setActionView(menuItem, R.layout.action_bar_notifitcation_icon);
+            MenuItem pendingRequest = menu.findItem(R.id.menu_pending_request);
+            MenuItemCompat.setActionView(pendingRequest, R.layout.action_bar_notification_icon);
 
-            final View menu_hotlist = MenuItemCompat.getActionView(menuItem);
-            ui_hot = (TextView) menu_hotlist.findViewById(R.id.hotlist_hot);
+            View pendingRequestView = MenuItemCompat.getActionView(pendingRequest);
+            mTextPendingRequest = (TextView) pendingRequestView.findViewById(R.id.counter);
 
-            menu_hotlist.setOnClickListener(new View.OnClickListener() {
+            pendingRequestView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivity(new Intent(mContext, PendingFollowRequestActivity.class));
+                    startActivity(new Intent(mContext, FollowRequestActivity.class));
                 }
             });
+
+            updateFollowRequestCounter();
 
             return true;
         }
@@ -196,22 +198,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        if (id == R.id.action_search) {
-            Toast.makeText(mContext, "Search action is selected!",
-                    Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -220,9 +206,13 @@ public class MainActivity extends AppCompatActivity
 
         sharedPreferences.edit().putBoolean(Constants.SENT_TOKEN_TO_SERVER, false).apply();
         sharedPreferences.edit().putInt(Constants.SIGN_IN_PROVIDER, -1).apply();
+        sharedPreferences.edit().putInt(Constants.USER_TYPE, -1).apply();
         sharedPreferences.edit().putString(Constants.LOGGED_EMAIL, null).apply();
 
         LoginManager.getInstance().logOut();
+
+        mAlarm.cancelAlarm(mContext);
+
         startLoginActivity();
     }
 
@@ -235,24 +225,24 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    private TextView ui_hot = null;
+    private TextView mTextPendingRequest;
 
     // call the updating code on the main thread,
     // so we can call this asynchronously
-    public void updateHotCount() {
-
+    public void updateFollowRequestCounter() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        final int counter = sharedPreferences.getInt(Constants.NOTIFICATION_COUNTER, 0);
+        final int followRequestCounter = sharedPreferences.getInt(Constants.PENDING_FOLLOW_REQUEST_COUNTER, 0);
 
-        if (ui_hot == null) return;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (counter == 0)
-                    ui_hot.setVisibility(View.INVISIBLE);
-                else {
-                    ui_hot.setVisibility(View.VISIBLE);
-                    ui_hot.setText(Integer.toString(counter));
+                if (mTextPendingRequest != null) {
+                    if (followRequestCounter == 0)
+                        mTextPendingRequest.setVisibility(View.INVISIBLE);
+                    else {
+                        mTextPendingRequest.setVisibility(View.VISIBLE);
+                        mTextPendingRequest.setText(Integer.toString(followRequestCounter));
+                    }
                 }
             }
         });

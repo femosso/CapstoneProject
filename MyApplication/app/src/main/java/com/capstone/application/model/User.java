@@ -3,6 +3,9 @@ package com.capstone.application.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User implements Parcelable {
 
     private String email;
@@ -19,6 +22,8 @@ public class User implements Parcelable {
     private Teen teen;
 
     private Follower follower;
+
+    private List<CheckIn> checkInList;
 
     public User() {
     }
@@ -109,6 +114,14 @@ public class User implements Parcelable {
         this.follower = follower;
     }
 
+    public List<CheckIn> getCheckInList() {
+        return checkInList;
+    }
+
+    public void setCheckInList(List<CheckIn> checkInList) {
+        this.checkInList = checkInList;
+    }
+
     protected User(Parcel in) {
         email = in.readString();
         password = in.readString();
@@ -120,6 +133,13 @@ public class User implements Parcelable {
         device = (Device) in.readValue(Device.class.getClassLoader());
         teen = (Teen) in.readValue(Teen.class.getClassLoader());
         follower = (Follower) in.readValue(Follower.class.getClassLoader());
+
+        if (in.readByte() == 0x01) {
+            checkInList = new ArrayList<>();
+            in.readList(checkInList, CheckIn.class.getClassLoader());
+        } else {
+            checkInList = null;
+        }
     }
 
     @Override
@@ -139,6 +159,13 @@ public class User implements Parcelable {
         dest.writeValue(device);
         dest.writeValue(teen);
         dest.writeValue(follower);
+
+        if (checkInList == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(checkInList);
+        }
     }
 
     @SuppressWarnings("unused")

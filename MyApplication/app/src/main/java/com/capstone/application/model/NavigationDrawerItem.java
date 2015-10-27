@@ -2,29 +2,31 @@ package com.capstone.application.model;
 
 public class NavigationDrawerItem {
 
-    private String mText;
+    private String mTitle;
 
     private int mIcon;
 
     // if logged via Facebook, this field should be set
     private String mProfileId;
 
+    private int mCount = 0;
+
     public NavigationDrawerItem(String text, int icon) {
-        mText = text;
+        mTitle = text;
         mIcon = icon;
     }
 
     public NavigationDrawerItem(String text, String profileId) {
-        mText = text;
+        mTitle = text;
         mProfileId = profileId;
     }
 
     public String getText() {
-        return mText;
+        return mTitle;
     }
 
     public void setText(String text) {
-        mText = text;
+        mTitle = text;
     }
 
     public int getIcon() {
@@ -41,5 +43,13 @@ public class NavigationDrawerItem {
 
     public void setProfileId(String profileId) {
         this.mProfileId = profileId;
+    }
+
+    public int getCount() {
+        return mCount;
+    }
+
+    public void setCount(int count) {
+        mCount = count;
     }
 }

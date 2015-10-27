@@ -2,15 +2,18 @@
 package com.capstone.server.jpa;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.capstone.server.dao.CheckInDao;
+import com.capstone.server.model.Answer;
 import com.capstone.server.model.CheckIn;
 
 @Repository
@@ -30,8 +33,8 @@ public class JpaCheckInDao implements CheckInDao {
     }
 
     @Transactional
-    public CheckIn remove(String email) {
-        CheckIn obj = find(email);
+    public CheckIn remove(long id) {
+        CheckIn obj = find(id);
         if (obj != null) {
             em.remove(obj);
         }
@@ -39,14 +42,47 @@ public class JpaCheckInDao implements CheckInDao {
     }
 
     @Transactional
-    public CheckIn find(String email) {
-        return em.find(CheckIn.class, email);
+    public CheckIn find(long id) {
+        return find(id, false);
+    }
+
+    @Transactional
+    public CheckIn find(long id, boolean forceLoad) {
+        CheckIn checkIn = em.find(CheckIn.class, id);
+        if (checkIn != null && forceLoad) {
+            Hibernate.initialize(checkIn.getUser());
+
+            // initialize list of answers
+            List<Answer> answerList = checkIn.getAnswerList();
+            Hibernate.initialize(answerList);
+
+            // initialize list of such answers' questions
+            for(Answer answer : answerList) {
+                Hibernate.initialize(answer.getQuestion());
+            }
+        }
+
+        return checkIn;
+    }
+
+    @Transactional
+    public Collection<CheckIn> findAll() {
+        return findAll(false);
     }
 
     @SuppressWarnings("unchecked")
     @Transactional
-    public Collection<CheckIn> findAll() {
+    public Collection<CheckIn> findAll(boolean forceLoad) {
         Query query = em.createQuery("SELECT e FROM CheckIn e");
-        return (Collection<CheckIn>) query.getResultList();
+
+        Collection<CheckIn> checkIns = (Collection<CheckIn>) query.getResultList();
+        if (checkIns != null && forceLoad) {
+            for (CheckIn checkIn : checkIns) {
+                Hibernate.initialize(checkIn.getUser());
+                Hibernate.initialize(checkIn.getAnswerList());
+            }
+        }
+
+        return checkIns;
     }
 }

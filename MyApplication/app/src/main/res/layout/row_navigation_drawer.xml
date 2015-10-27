@@ -48,6 +48,5 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="8dp"
         android:background="@drawable/item_counter_bg"
-        android:text="algo"
         android:textColor="@color/counter_text_color" />
 </RelativeLayout>

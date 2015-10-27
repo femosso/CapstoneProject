@@ -54,7 +54,7 @@ public class TeenController {
             sLogger.info("Invalid parameters");
             return null;
         }
-       
+
         // get user that has requested the list of teens
         User requestorDb = userDao.find(email, true);
         if (requestorDb == null) {

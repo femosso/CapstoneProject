@@ -1,26 +1,31 @@
 
 package com.capstone.server.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.capstone.server.dao.CheckInDao;
 import com.capstone.server.dao.QuestionDao;
+import com.capstone.server.dao.TeenDao;
 import com.capstone.server.model.Alternative;
+import com.capstone.server.model.Answer;
+import com.capstone.server.model.CheckIn;
 import com.capstone.server.model.JsonResponse;
 import com.capstone.server.model.Question;
+import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants.QuestionFormat;
 import com.capstone.server.utils.Constants.QuestionType;
 
@@ -35,16 +40,17 @@ public class QuestionController {
     @Autowired
     private QuestionDao questionDao;
 
-    private MessageSource messageSource;
+    @Autowired
+    private CheckInDao checkInDao;
 
-    public void setMessageSource(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
+    @Autowired
+    private TeenDao teenDao;
 
     @RequestMapping(RestUriConstants.REGISTER)
     public String showRegisterForm(Model model) {
         model.addAttribute("formats", QuestionFormat.names());
         model.addAttribute("types", QuestionType.names());
+
         return "question/register";
     }
 
@@ -53,10 +59,7 @@ public class QuestionController {
         model.addAttribute("formats", QuestionFormat.names());
         model.addAttribute("types", QuestionType.names());
         model.addAttribute("questions", questionDao.findAll(true));
-        
-        for(Question item : questionDao.findAll()) {
-            System.out.println("item " + item.getText());
-        }
+
         return "question/view";
     }
 
@@ -70,7 +73,6 @@ public class QuestionController {
         // set locale to the one configured in the server
         question.setLocale(locale.toLanguageTag());
 
-        System.out.println("!!!!!!eee " + QuestionFormat.FORMAT1.getValue());
         if(question.getFormat().equals(QuestionFormat.FORMAT1.getValue())) {
             for(Alternative item : question.getAlternativeList()) {
                 item.setQuestion(question);
@@ -80,17 +82,45 @@ public class QuestionController {
         if(question.getId() == null) {
             questionDao.persist(question);
         } else {
+            // re-set the answer and alternative list otherwise Hibernate will
+            // think we want to empty those lists
+            Question questionDb = questionDao.find(question.getId(), true);
+            question.setAnswerList(questionDb.getAnswerList());
+
+            // only re-set alternative list if not of multiple-choice format,
+            // otherwise this would be done in the loop before
+            if(!question.getFormat().equals(QuestionFormat.FORMAT1.getValue())) {
+                question.setAlternativeList(questionDb.getAlternativeList());
+            }
+
             questionDao.update(question);
         }
 
         return new JsonResponse(HttpStatus.OK, "ok");
     }
 
-    @RequestMapping(value = RestUriConstants.GET, method = RequestMethod.GET)
-    public @ResponseBody Question requestQuestion(@RequestParam("email") String email) {
-        List<Question> questionsList = (List<Question>) questionDao.findAll();
+    @RequestMapping(value = RestUriConstants.LIST, method = RequestMethod.GET)
+    public @ResponseBody List<Question> requestQuestion() {
+        List<Question> questionListDb = (List<Question>) questionDao.findAll(true);
+        List<Question> questionList = new ArrayList<>();
 
-        Question question = null;
+        if(questionListDb != null) {
+            Question question;
+
+            // get only relevant fields from question
+            for(Question item : questionListDb) {
+                question = new Question();
+                question.setId(item.getId());
+                question.setText(item.getText());
+                question.setType(item.getType());
+                question.setFormat(item.getFormat());
+                question.setAlternativeList(item.getAlternativeList());
+
+                questionList.add(question);
+            }
+        }
+
+        /*Question question = null;
         if(questionsList != null) {
             // random some question to be sent to teen
             Random r = new Random();
@@ -98,12 +128,65 @@ public class QuestionController {
 
             System.out.println("sortedQuestion = " + sortedQuestion);
             question = questionDao.find(sortedQuestion, true);
+        }*/
+
+        return questionList;
+    }
+
+   /* @RequestMapping(RestUriConstants.CHECKIN + "/" + RestUriConstants.SEND)
+    public @ResponseBody JsonResponse sendCheckIn(@RequestBody final CheckIn checkIn) {
+        if (!isValidCheckIn(checkIn)) {
+            sLogger.info("Invalid parameters");
+            return new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters");
         }
 
-        return question;
+        for(Answer item : checkIn.getAnswerList()) {
+            item.setCheckIn(checkIn);
+        }
+
+        checkInDao.persist(checkIn);
+
+        return new JsonResponse(HttpStatus.OK, "ok");
+    }*/
+
+    @RequestMapping(value = "test", method = RequestMethod.GET)
+    public String home() {
+        Question question = new Question();
+        question.setId(1);
+
+        Answer answer = new Answer();
+        answer.setText("blablabla");
+        answer.setQuestion(question);
+
+        User user = new User();
+        user.setEmail("felipemosso61@hotmail.com");
+
+        CheckIn checkIn = new CheckIn();
+        checkIn.setDate(System.currentTimeMillis());
+        checkIn.setUser(user);
+
+        checkIn.setAnswerList(Arrays.asList(answer));
+
+        for(Answer item : checkIn.getAnswerList()) {
+            item.setCheckIn(checkIn);
+        }
+
+        checkInDao.persist(checkIn);
+
+        return null;
+    }
+
+    @RequestMapping(value = RestUriConstants.DELETE, method = RequestMethod.DELETE)
+    public @ResponseBody JsonResponse delete(@PathVariable("id") long id) {
+        questionDao.remove(id);
+        return new JsonResponse(HttpStatus.OK, "ok");
     }
 
     private boolean isValidQuestion(Question question) {
         return true;
     }
+
+/*    private boolean isValidCheckIn(CheckIn checkIn) {
+        return true;
+    }*/
 }

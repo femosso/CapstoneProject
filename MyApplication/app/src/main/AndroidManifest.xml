@@ -5,6 +5,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
 
     <permission
         android:name="com.capstone.application.permission.C2D_MESSAGE"
@@ -29,18 +33,24 @@
 
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.RegisterActivity" />
-        <activity android:name=".activity.PieChartActivity" />
-        <activity android:name=".activity.PendingFollowRequestActivity" />
+        <activity android:name=".activity.FollowRequestActivity" />
+        <activity android:name=".activity.CheckInDetailsActivity" />
+        <activity android:name=".activity.LineChartActivity" />
 
         <activity
-            android:name=".activity.DialogActivity"
-            android:theme="@style/Transparent" />
+            android:name=".activity.CheckInWizardActivity"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <provider
+            android:name=".database.PendingCheckInProvider"
+            android:authorities="com.capstone.application.diabetes" >
+        </provider>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -58,7 +68,12 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".alarm.TeenAlarmReceiver"></receiver>
+        <receiver android:name=".alarm.TeenAlarmReceiver">
+            <intent-filter>
+                <action android:name="capstone.intent.action.ADD_PENDING_QUESTION"></action>
+                <action android:name="capstone.intent.action.REQUEST_NEW_QUESTION"></action>
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name=".alarm.BootReceiver"

@@ -94,17 +94,17 @@ function() {
             data : JSON.stringify(userObject),
 
             success : function(data) {
-                if(data.status == 'OK') {
+                if(data.jsonResponse.status == 'OK') {
                     //toastr.success(data.message, "Success!");
                     $('#login-nav').submit();
                 } else {
-                    toastr.error(data.message, "Opsss..");
+                    toastr.error(data.jsonResponse.message, "Opsss..");
                 }
                 $('#sign-in').button('reset');
                 $('#sign-in-facebook').button('reset');
             },
             error : function(data, status, er) {
-                toastr.error(data.status + "\n" + data.message, "Opsss..");
+                toastr.error(data.jsonResponse.status + "\n" + data.jsonResponse.message, "Opsss..");
                 $('#sign-in').button('reset');
                 $('#sign-in-facebook').button('reset');
             }

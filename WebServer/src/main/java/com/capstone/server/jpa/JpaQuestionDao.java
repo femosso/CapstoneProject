@@ -49,6 +49,7 @@ public class JpaQuestionDao implements QuestionDao {
         Question question = em.find(Question.class, id);
         if(question != null && forceLoad) {
             Hibernate.initialize(question.getAlternativeList());
+            Hibernate.initialize(question.getAnswerList());
         }
         return question;
     }
@@ -67,6 +68,7 @@ public class JpaQuestionDao implements QuestionDao {
         if(questions != null && forceLoad) {
             for(Question question : questions) {
                 Hibernate.initialize(question.getAlternativeList());
+                Hibernate.initialize(question.getAnswerList());
             }
         }
         return questions;

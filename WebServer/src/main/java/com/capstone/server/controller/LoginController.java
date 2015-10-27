@@ -26,6 +26,7 @@ import com.capstone.server.dao.TeenDao;
 import com.capstone.server.dao.UserDao;
 import com.capstone.server.model.Follower;
 import com.capstone.server.model.JsonResponse;
+import com.capstone.server.model.LoginResponse;
 import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants;
@@ -56,42 +57,45 @@ public class LoginController implements MessageSourceAware {
     }
 
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse sendLogin(@RequestBody final User user,
+    public @ResponseBody LoginResponse sendLogin(@RequestBody final User user,
             HttpSession session, Locale locale) {
         // FIXME - add field validation
 
-        User databaseUser = userDao.find(user.getEmail());
+        User userDb = userDao.find(user.getEmail());
 
-        if (databaseUser != null) {
+        if (userDb != null) {
             if (user.getProvider() == SignInProvider.APPLICATION.ordinal()
-                    && databaseUser.getPassword().equals(user.getPassword())) {
-                session.setAttribute(Constants.SESSION_USER, databaseUser);
+                    && userDb.getPassword().equals(user.getPassword())) {
+                session.setAttribute(Constants.SESSION_USER, userDb);
             } else if (user.getProvider() == SignInProvider.FACEBOOK.ordinal()
-                    && databaseUser.getFacebookId().equals(user.getFacebookId())) {
-                session.setAttribute(Constants.SESSION_USER, databaseUser);
+                    && userDb.getFacebookId().equals(user.getFacebookId())) {
+                session.setAttribute(Constants.SESSION_USER, userDb);
             }
         }
 
         String output;
+        LoginResponse loginResponse = new LoginResponse();
 
         // if user session has been set, then the login succeeded
         if (session.getAttribute(Constants.SESSION_USER) != null) {
             output = messageSource.getMessage("label.loginController.loginSuccess",
-                    new Object[] {
-                        user.getEmail()
-                    }, locale);
+                    new Object[] { user.getEmail() }, locale);
             sLogger.info(output);
 
-            return new JsonResponse(HttpStatus.OK, output);
+            // set relevant information
+            user.setType(userDb.getType());
+
+            loginResponse.setJsonResponse(new JsonResponse(HttpStatus.OK, output));
+            loginResponse.setUser(user);
         } else {
             output = messageSource.getMessage("label.loginController.loginFail",
-                    new Object[] {
-                        user.getEmail()
-                    }, locale);
+                    new Object[] { user.getEmail() }, locale);
             sLogger.info(output);
 
-            return new JsonResponse(HttpStatus.BAD_REQUEST, output);
+            loginResponse.setJsonResponse(new JsonResponse(HttpStatus.BAD_REQUEST, output));
         }
+
+        return loginResponse;
     }
 
     @RequestMapping(RestUriConstants.SUBMIT)

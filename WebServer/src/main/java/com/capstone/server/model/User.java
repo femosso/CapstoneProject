@@ -2,11 +2,13 @@
 package com.capstone.server.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -25,6 +27,7 @@ public class User implements Serializable {
     private String facebookId;
     private String firstName;
     private String lastName;
+
     private int provider;
     private int type;
 
@@ -40,6 +43,9 @@ public class User implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private Follower follower;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CheckIn> checkInList;
 
     public User() {
     }
@@ -123,4 +129,13 @@ public class User implements Serializable {
     public void setFollower(Follower follower) {
         this.follower = follower;
     }
+
+    public List<CheckIn> getCheckInList() {
+        return checkInList;
+    }
+
+    public void setCheckInList(List<CheckIn> checkInList) {
+        this.checkInList = checkInList;
+    }
+
 }

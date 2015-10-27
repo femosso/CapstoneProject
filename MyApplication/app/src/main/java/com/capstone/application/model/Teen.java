@@ -17,8 +17,6 @@ public class Teen implements Parcelable {
     private List<Follower> followerList;
     private List<Follower> pendingFollowerList;
 
-    private List<CheckIn> checkInList;
-
     public Teen() {
     }
 
@@ -70,14 +68,6 @@ public class Teen implements Parcelable {
         this.pendingFollowerList = pendingFollowerList;
     }
 
-    public List<CheckIn> getCheckInList() {
-        return checkInList;
-    }
-
-    public void setCheckInList(List<CheckIn> checkInList) {
-        this.checkInList = checkInList;
-    }
-
     protected Teen(Parcel in) {
         email = in.readString();
         birthday = in.readString();
@@ -85,25 +75,19 @@ public class Teen implements Parcelable {
         user = (User) in.readValue(User.class.getClassLoader());
 
         if (in.readByte() == 0x01) {
-            followerList = new ArrayList<Follower>();
+            followerList = new ArrayList<>();
             in.readList(followerList, Follower.class.getClassLoader());
         } else {
             followerList = null;
         }
 
         if (in.readByte() == 0x01) {
-            pendingFollowerList = new ArrayList<Follower>();
+            pendingFollowerList = new ArrayList<>();
             in.readList(pendingFollowerList, Follower.class.getClassLoader());
         } else {
             pendingFollowerList = null;
         }
 
-        if (in.readByte() == 0x01) {
-            checkInList = new ArrayList<CheckIn>();
-            in.readList(checkInList, CheckIn.class.getClassLoader());
-        } else {
-            checkInList = null;
-        }
     }
 
     @Override
@@ -130,13 +114,6 @@ public class Teen implements Parcelable {
         } else {
             dest.writeByte((byte) (0x01));
             dest.writeList(pendingFollowerList);
-        }
-
-        if (checkInList == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeList(checkInList);
         }
     }
 

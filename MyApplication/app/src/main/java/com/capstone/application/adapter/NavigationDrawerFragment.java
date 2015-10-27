@@ -2,11 +2,17 @@ package com.capstone.application.adapter;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.capstone.application.R;
+import com.capstone.application.database.PendingCheckInProvider;
 import com.capstone.application.model.NavigationDrawerItem;
+import com.capstone.application.utils.Constants;
 import com.facebook.AccessToken;
 import com.facebook.Profile;
 
@@ -68,9 +76,20 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
 
     private static TypedArray mNavItemIcons = null;
 
+    private BroadcastReceiver mUpdatePendingQuestionReceiver;
+
+    private Context mContext;
+
+    private int mUserType;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mContext = getActivity().getApplicationContext();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mUserType = sharedPreferences.getInt(Constants.USER_TYPE, -1);
 
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
@@ -87,11 +106,21 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
 
         // load slide menu item icons
         mNavItemIcons = getActivity().getResources().obtainTypedArray(R.array.nav_drawer_icons);
+
+        mUpdatePendingQuestionReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Constants.NOTIFY_PENDING_CHECK_IN_ACTION)) {
+                    updateQuestionCounter();
+                }
+            }
+        };
     }
 
+    NavigationDrawerAdapter mAdapter;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         mDrawerList = (RecyclerView) view.findViewById(R.id.drawerList);
 
@@ -100,9 +129,9 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
         mDrawerList.setLayoutManager(layoutManager);
         mDrawerList.setHasFixedSize(true);
 
-        NavigationDrawerAdapter adapter = new NavigationDrawerAdapter(getMenu());
-        adapter.setNavigationDrawerCallbacks(this);
-        mDrawerList.setAdapter(adapter);
+        mAdapter = new NavigationDrawerAdapter(getMenu());
+        mAdapter.setNavigationDrawerCallbacks(this);
+        mDrawerList.setAdapter(mAdapter);
 
         selectItem(mCurrentSelectedPosition, false);
         return view;
@@ -126,11 +155,21 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
     }
 
     private List<NavigationDrawerItem> getMenu() {
-        List<NavigationDrawerItem> items = new ArrayList<NavigationDrawerItem>();
+        List<NavigationDrawerItem> items = new ArrayList<>();
 
         // preparing navigation drawer items
         for (int i = 0; i < mNavItemLabels.length; i++) {
             items.add(new NavigationDrawerItem(mNavItemLabels[i], mNavItemIcons.getResourceId(i, -1)));
+        }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        // if logged user is not a teen, hide Check In tab from sliding menu
+        int userType = sharedPreferences.getInt(Constants.USER_TYPE, -1);
+        if(userType != Constants.UserType.TEEN.ordinal()) {
+            items.remove(2);
+        } else {
+            items.get(2).setCount(getPendingCheckInCount());
         }
 
         // if user is logged via Facebook, let's grab its profile pic
@@ -160,8 +199,7 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
-        mDrawerLayout
-                .setStatusBarBackgroundColor(getResources().getColor(R.color.myPrimaryDarkColor));
+        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.myPrimaryDarkColor));
 
         mActionBarDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, toolbar,
                 R.string.drawer_open, R.string.drawer_close) {
@@ -183,8 +221,7 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
                 }
                 if (!mUserLearnedDrawer) {
                     mUserLearnedDrawer = true;
-                    SharedPreferences sp = PreferenceManager
-                            .getDefaultSharedPreferences(getActivity());
+                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
                 }
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
@@ -213,6 +250,11 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
     }
 
     private void selectItem(int position, boolean triggerCallbacks) {
+        // if logged user is not a teen, there will not be check in item on sliding menu
+        if (mUserType != Constants.UserType.TEEN.ordinal() && position > 1) {
+            position++;
+        }
+
         mCurrentSelectedPosition = position;
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
@@ -262,5 +304,32 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
 
     public int getCurrentPosition() {
         return mCurrentSelectedPosition;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mUpdatePendingQuestionReceiver,
+                new IntentFilter(Constants.NOTIFY_PENDING_CHECK_IN_ACTION));
+
+        updateQuestionCounter();
+    }
+
+    @Override
+    public void onPause() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mUpdatePendingQuestionReceiver);
+        super.onPause();
+    }
+
+    public void updateQuestionCounter() {
+        // update question item counter
+        mAdapter.updateCounter(2, getPendingCheckInCount());
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private int getPendingCheckInCount() {
+        Cursor cursor = mContext.getContentResolver().query(PendingCheckInProvider.CONTENT_URI,
+                null, null, null, null);
+        return cursor != null ? cursor.getCount() : 0;
     }
 }

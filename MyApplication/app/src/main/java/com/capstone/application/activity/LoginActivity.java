@@ -1,21 +1,16 @@
 package com.capstone.application.activity;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Patterns;
@@ -26,8 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.capstone.application.R;
+import com.capstone.application.database.PendingCheckInProvider;
 import com.capstone.application.gcm.RegistrationIntentService;
 import com.capstone.application.model.JsonResponse;
+import com.capstone.application.model.LoginResponse;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
 import com.capstone.application.utils.Crypto;
@@ -77,15 +74,12 @@ public class LoginActivity extends FragmentActivity {
         setContentView(R.layout.activity_login);
 
         if (checkPlayServices()) {
+
             // FIXME - maybe consider save password hash and login in sharedPreferences and
             // automatically authenticate using those saved credentials
             if (isUserLoggedIn()) {
                 onLoginSuccess(null);
             }
-
-            // FIXME - temporary code
-            //sendNotification(1, "testing 1");
-            //sendNotification(2, "testing 2");
 
             // initialize both login via application registering or facebook account
             initCustomLogin();
@@ -101,30 +95,9 @@ public class LoginActivity extends FragmentActivity {
                 }
             });
         }
-    }
 
-    // FIXME - Remove this method later
-    private void sendNotification(int type, String message) {
-        Intent intent = new Intent(this, DialogActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("type", type);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
-
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_home)
-                .setContentTitle("GCM Message")
-                .setContentText(message)
-                .setAutoCancel(true)
-                        //.setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        // FIXME - remove this later
+        mContext.getContentResolver().delete(PendingCheckInProvider.CONTENT_URI, null, null);
     }
 
     @Override
@@ -344,7 +317,7 @@ public class LoginActivity extends FragmentActivity {
 
             User user = params[0];
 
-            JsonResponse result = null;
+            LoginResponse result = null;
             try {
                 // The URL for making the GET request
                 final String url = Constants.SERVER_URL + "login/send";
@@ -356,19 +329,20 @@ public class LoginActivity extends FragmentActivity {
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
                 // Make the HTTP GET request, marshaling the response to User object
-                result = restTemplate.postForObject(url, user, JsonResponse.class);
+                result = restTemplate.postForObject(url, user, LoginResponse.class);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             // log out from Facebook if user couldn't be authenticated in server
             if (user.getProvider() == Constants.SignInProvider.FACEBOOK.ordinal() &&
-                    (result == null || !result.getStatus().equals(HttpStatus.OK))) {
-                Log.d(TAG, "Logging out from Facebook - user couldn't be authenticated in server");
+                    (result == null || result.getJsonResponse() == null
+                            || !result.getJsonResponse().getStatus().equals(HttpStatus.OK))) {
+                Log.d(TAG, "Logging out from Facebook - user could not be authenticated in server");
                 LoginManager.getInstance().logOut();
             }
 
-            return new LoginResponse(result, user);
+            return result;
         }
 
         @Override
@@ -377,13 +351,17 @@ public class LoginActivity extends FragmentActivity {
                 dialog.dismiss();
             }
 
-            JsonResponse jsonResponse = result.jsonResponse;
-            User user = result.user;
+            if(result != null) {
+                JsonResponse jsonResponse = result.getJsonResponse();
+                User user = result.getUser();
 
-            handleLoginResult(jsonResponse);
+                handleLoginResult(jsonResponse);
 
-            if (result != null && jsonResponse.getStatus().equals(HttpStatus.OK)) {
-                onLoginSuccess(user);
+                if (jsonResponse != null && jsonResponse.getStatus().equals(HttpStatus.OK)) {
+                    onLoginSuccess(user);
+                }
+            } else {
+                Toast.makeText(mContext, "Fail to login", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -393,7 +371,8 @@ public class LoginActivity extends FragmentActivity {
 
         // if user is not logged in yet, write info to shared preferences
         if(user != null) {
-            sharedPreferences.edit().putInt(Constants.SIGN_IN_PROVIDER, user.getType()).apply();
+            sharedPreferences.edit().putInt(Constants.SIGN_IN_PROVIDER, user.getProvider()).apply();
+            sharedPreferences.edit().putInt(Constants.USER_TYPE, user.getType()).apply();
             sharedPreferences.edit().putString(Constants.LOGGED_EMAIL, user.getEmail()).apply();
         }
 
@@ -473,17 +452,4 @@ public class LoginActivity extends FragmentActivity {
         Toast.makeText(mContext, outputMessage, Toast.LENGTH_LONG).show();
     }
 
-    /**
-     * Auxiliary class to pass necessary objects from PerformLoginTask::doInBackground() method
-     * of AsyncTask to PerformLoginTask::onPostExecute()
-     */
-    private static class LoginResponse {
-        JsonResponse jsonResponse;
-        User user;
-
-        LoginResponse(JsonResponse jsonResponse, User user) {
-            this.jsonResponse = jsonResponse;
-            this.user = user;
-        }
-    }
 }

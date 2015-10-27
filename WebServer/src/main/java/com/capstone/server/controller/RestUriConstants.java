@@ -8,6 +8,7 @@ public class RestUriConstants {
     public static final String DEVICE_CONTROLLER = "/device";
     public static final String TEEN_CONTROLLER = "/teen";
     public static final String CHECK_IN_CONTROLLER = "/checkIn";
+    public static final String ANSWER_CONTROLLER = "/answer";
 
     // Action Constants
     public static final String REGISTER = "register";
@@ -20,5 +21,6 @@ public class RestUriConstants {
     public static final String LOGOUT = "logout";
     public static final String FOLLOW = "follow";
     public static final String PENDING = "pending";
-    public static final String GET = "get";
+    public static final String CHECKIN = "checkIn";
+    public static final String HISTORIC = "historic";
 }

@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference
-        android:key="username"
-        android:summary="Please provide your username"
-        android:title="Your Name"></EditTextPreference>
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="applicationUpdates"
-        android:summary="This option if selected will allow the application to check for latest versions."
-        android:title="Application Updates" />
-
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="3"
         android:entries="@array/reminder_frequency"
-        android:entryValues="@array/reminder_frequency"
+        android:entryValues="@array/reminder_frequency_values"
         android:key="reminderFrequency"
-        android:summary="How often many times per day you would like to be asked about your health conditions"
+        android:summary="How many times per day you would like to be asked about your health conditions"
         android:title="Reminder Frequency" />
+
+    <MultiSelectListPreference
+        android:defaultValue="@array/shared_data_values"
+        android:entries="@array/shared_data"
+        android:entryValues="@array/shared_data_values"
+        android:key="sharedData"
+        android:summary="Which kind of data you would like to shared with your followers"
+        android:title="Shared Data" />
+
 </PreferenceScreen>

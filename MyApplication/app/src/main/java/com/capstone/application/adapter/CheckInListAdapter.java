@@ -10,10 +10,12 @@ import android.widget.TextView;
 import com.capstone.application.R;
 import com.capstone.application.model.CheckIn;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CheckInListAdapter extends RecyclerView.Adapter<CheckInListAdapter.ViewHolderItem> {
-    private static String TAG = "CheckInListAdapter";
+    private static final String TAG = CheckInListAdapter.class.getName();
 
     private List<CheckIn> mCheckInList;
     private static MyClickListener myClickListener;
@@ -44,7 +46,7 @@ public class CheckInListAdapter extends RecyclerView.Adapter<CheckInListAdapter.
     }
 
     public CheckInListAdapter(List<CheckIn> checkInLIst) {
-        mCheckInList = checkInLIst;
+        mCheckInList = (checkInLIst == null ? new ArrayList<CheckIn>() : checkInLIst);
     }
 
     @Override
@@ -56,9 +58,10 @@ public class CheckInListAdapter extends RecyclerView.Adapter<CheckInListAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolderItem holder, int position) {
-        holder.label.setText(mCheckInList.get(position).getTeen().getUser().getFirstName());
-        holder.dateTime.setText(mCheckInList.get(position).getQuestion().getText());
-        holder.date.setText(mCheckInList.get(position).getStringDate() + " " + mCheckInList.get(position).getStringTime());
+        holder.label.setText(mCheckInList.get(position).getUser().getFirstName());
+        //holder.dateTime.setText(mCheckInList.get(position).getQuestion().getText());
+        long date = mCheckInList.get(position).getDate();
+        holder.date.setText(new SimpleDateFormat("yyyy/MM/dd").format(date) + " " + new SimpleDateFormat("HH:mm:ss").format(date));
     }
 
     public void addItem(CheckIn dataObj, int index) {
@@ -69,6 +72,10 @@ public class CheckInListAdapter extends RecyclerView.Adapter<CheckInListAdapter.
     public void deleteItem(int index) {
         mCheckInList.remove(index);
         notifyItemRemoved(index);
+    }
+
+    public CheckIn getItem(int position) {
+        return mCheckInList.get(position);
     }
 
     @Override

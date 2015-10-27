@@ -3,15 +3,27 @@ package com.capstone.application.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Question implements Parcelable {
 
     private Long id;
+
     private String text;
     private String locale;
     private String format;
     private String type;
 
+    private List<Alternative> alternativeList;
+
+    private List<Answer> answerList;
+
     public Question() {
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
@@ -50,12 +62,42 @@ public class Question implements Parcelable {
         this.type = type;
     }
 
+    public List<Alternative> getAlternativeList() {
+        return alternativeList;
+    }
+
+    public void setAlternativeList(List<Alternative> alternativeList) {
+        this.alternativeList = alternativeList;
+    }
+
+    public List<Answer> getAnswerList() {
+        return answerList;
+    }
+
+    public void setAnswerList(List<Answer> answerList) {
+        this.answerList = answerList;
+    }
+
     protected Question(Parcel in) {
         id = in.readByte() == 0x00 ? null : in.readLong();
         text = in.readString();
         locale = in.readString();
         format = in.readString();
         type = in.readString();
+
+        if (in.readByte() == 0x01) {
+            alternativeList = new ArrayList<>();
+            in.readList(alternativeList, Alternative.class.getClassLoader());
+        } else {
+            alternativeList = null;
+        }
+
+        if (in.readByte() == 0x01) {
+            answerList = new ArrayList<>();
+            in.readList(answerList, Answer.class.getClassLoader());
+        } else {
+            answerList = null;
+        }
     }
 
     @Override
@@ -75,6 +117,20 @@ public class Question implements Parcelable {
         dest.writeString(locale);
         dest.writeString(format);
         dest.writeString(type);
+
+        if (alternativeList == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(alternativeList);
+        }
+
+        if (answerList == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(answerList);
+        }
     }
 
     @SuppressWarnings("unused")

@@ -16,6 +16,9 @@ toastr.options = {
     "hideMethod": "fadeOut"
 };
 
+// button that latest triggered the modal
+var button = null;
+
 $(document).ready(
 function() {
     function getContextPath() {
@@ -156,5 +159,38 @@ function() {
         e.preventDefault();
 
         $(this).parent().parent().parent().remove();
+    });
+
+    $('#delete').on('show.bs.modal', function(e) {
+        // button that triggered the modal
+        button = $(e.relatedTarget);
+    });
+
+    $('#delete-question').click(function(e) {
+        e.preventDefault();
+
+        // get the closest "tr" parent
+        var tr = button.closest('tr');
+
+        // set question-id to a hidden input inside modal-body
+        var id = tr.attr("id");
+
+        alert("id " + id);
+        $.ajax({
+            url : getContextPath() + '/question/delete/' + id,
+            type : "DELETE",
+            success : function(data) {
+                if(data.status == 'OK') {
+                    toastr.success(data.message, "Success!");
+                    //$('#login-nav').submit();
+                } else {
+                    toastr.error(data.message, "Opsss..");
+                }
+                $('#delete').modal('hide');
+            },
+            error : function(data) {
+                $('#delete').modal('hide');
+            }
+        });
     });
 });

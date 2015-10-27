@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -41,9 +40,6 @@ public class Teen implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "PendingTeenFollower", joinColumns = @JoinColumn(name = "teenEmail") , inverseJoinColumns = @JoinColumn(name = "followerEmail") )
     private List<Follower> pendingFollowerList;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "teen")
-    private List<CheckIn> checkInList;
 
     public Teen() {
     }
@@ -94,14 +90,6 @@ public class Teen implements Serializable {
 
     public void setPendingFollowerList(List<Follower> pendingFollowerList) {
         this.pendingFollowerList = pendingFollowerList;
-    }
-
-    public List<CheckIn> getCheckInList() {
-        return checkInList;
-    }
-
-    public void setCheckInList(List<CheckIn> checkInList) {
-        this.checkInList = checkInList;
     }
 
 }

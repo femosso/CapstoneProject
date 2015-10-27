@@ -14,8 +14,7 @@ import com.facebook.login.widget.ProfilePictureView;
 
 import java.util.List;
 
-public class NavigationDrawerAdapter
-        extends RecyclerView.Adapter<NavigationDrawerAdapter.ViewHolder> {
+public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDrawerAdapter.ViewHolder> {
 
     private List<NavigationDrawerItem> mData;
 
@@ -35,6 +34,10 @@ public class NavigationDrawerAdapter
 
     public void setNavigationDrawerCallbacks(NavigationDrawerCallbacks navigationDrawerCallbacks) {
         mNavigationDrawerCallbacks = navigationDrawerCallbacks;
+    }
+
+    public void updateCounter(int position, int count) {
+        mData.get(position).setCount(count);
     }
 
     @Override
@@ -77,6 +80,14 @@ public class NavigationDrawerAdapter
         } else {
             viewHolder.imgView.setImageResource(mData.get(i).getIcon());
             showProfilePic(false, viewHolder);
+        }
+
+        // if it has some counter set
+        if (mData.get(i).getCount() != 0) {
+            viewHolder.counterView.setText(" " + mData.get(i).getCount() + " ");
+        } else {
+            // hide the counter view
+            viewHolder.counterView.setVisibility(View.GONE);
         }
 
         if (mSelectedPosition == i) {

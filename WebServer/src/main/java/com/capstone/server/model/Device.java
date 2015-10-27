@@ -8,8 +8,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 @Entity
 @Table(name = "Device")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Device implements Serializable {
 
     @Id
