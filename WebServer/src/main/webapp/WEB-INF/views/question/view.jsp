@@ -36,12 +36,12 @@
             <table id="questions-table" class="table table-striped">
               <thead>
                 <tr>
-                  <th>Question EN</th>
-                  <th>Type EN</th>
-                  <th>Format EN</th>
-                  <th>Locale EN</th>
-                  <th>Edit EN</th>
-                  <th>Remove EN</th>
+                  <th><spring:message code="label.question.view.questionColumn"/></th>
+                  <th><spring:message code="label.question.view.typeColumn"/></th>
+                  <th><spring:message code="label.question.view.formatColumn"/></th>
+                  <th><spring:message code="label.question.view.localeColumn"/></th>
+                  <th><spring:message code="label.question.view.editColumn"/></th>
+                  <th><spring:message code="label.question.view.removeColumn"/></th>
                 </tr>
               </thead>
               <tbody>
@@ -86,20 +86,26 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
               <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
             </button>
-            <h4 class="modal-title custom_align" id="Heading">Edit Question EN</h4>
+            <h4 class="modal-title custom_align" id="Heading">
+              <spring:message code="label.question.view.editQuestion"/>
+            </h4>
           </div>
           <div class="modal-body">
             <form id="question-form" class="form-horizontal" role="form">
               <input type="hidden" id="question-id">
               <div class="form-group">
                 <div class="col-xs-12">
-                  <label class="control-label" for="question-text">Question EN</label>
+                  <label class="control-label" for="question-text">
+                    <spring:message code="label.question.view.questionColumn"/>
+                  </label>
                   <input type="text" class="form-control" id="question-text" name="question-text">
                 </div>
               </div>
               <div class="form-group">
                 <div class="col-xs-6 selectContainer">
-                  <label class="control-label">Type EN</label>
+                  <label class="control-label">
+                    <spring:message code="label.question.view.typeColumn"/>
+                  </label>
                   <select class="form-control selectpicker" id="question-type" data-size="${fn:length(types)}">
                     <c:forEach items="${types}" var="type">
                      <option>${type}</option>
@@ -107,7 +113,9 @@
                   </select>
                 </div>
                 <div class="col-xs-6 selectContainer">
-                  <label class="control-label">Format EN</label>
+                  <label class="control-label">
+                    <spring:message code="label.question.view.formatColumn"/>
+                  </label>
                   <select class="form-control selectpicker" id="question-format" data-size="${fn:length(formats)}">
                     <c:forEach items="${formats}" var="format">
                      <option>${format}</option>
@@ -118,7 +126,9 @@
               <div class="form-group" id="question-alternatives">
                 <div class="col-xs-6">
                   <div class="input-group">
-                    <label class="control-label">Alternatives EN</label>
+                    <label class="control-label">
+                      <spring:message code="label.question.view.alternatives"/>
+                    </label>
                     <span class="input-group-btn">
                       <button class="btn btn-default alternative add" type="button">+</button>
                     </span>
@@ -129,8 +139,9 @@
           </div>
           <div class="modal-footer ">
             <button class="btn btn-warning btn-lg" id="submit-question" style="width: 100%;"
-                data-loading-text="Updating.. EN" >
-              <span class="glyphicon glyphicon-ok-sign"></span> Update EN
+                data-loading-text="<spring:message code="label.question.view.updating"/>" >
+              <span class="glyphicon glyphicon-ok-sign"></span>
+              <spring:message code="label.question.view.update"/>
             </button>
           </div>
         </div>
@@ -144,19 +155,24 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
               <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
             </button>
-            <h4 class="modal-title custom_align" id="Heading">Remove Question EN</h4>
+            <h4 class="modal-title custom_align" id="Heading">
+              <spring:message code="label.question.view.removeQuestion"/>
+            </h4>
           </div>
           <div class="modal-body">
             <div class="alert alert-danger">
-              <span class="glyphicon glyphicon-warning-sign"></span> Are you sure you want to remove this question? EN
+              <span class="glyphicon glyphicon-warning-sign"></span>
+              <spring:message code="label.question.view.removeConfirmation"/>
             </div>
           </div>
           <div class="modal-footer ">
             <button value="Submit" class="btn btn-success" id="delete-question">
-              <span class="glyphicon glyphicon-ok-sign"></span> Yes EN
+              <span class="glyphicon glyphicon-ok-sign"></span>
+              <spring:message code="label.question.view.yes"/>
             </button>
             <button type="button" class="btn btn-default" data-dismiss="modal">
-              <span class="glyphicon glyphicon-remove"></span> No EN
+              <span class="glyphicon glyphicon-remove"></span>
+              <spring:message code="label.question.view.no"/>
             </button>
           </div>
         </div>

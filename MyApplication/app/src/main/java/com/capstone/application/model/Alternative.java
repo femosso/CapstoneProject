@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Alternative implements Parcelable {
-
     private Long id;
 
     private Question question;

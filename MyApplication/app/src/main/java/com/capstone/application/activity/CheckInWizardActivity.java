@@ -35,14 +35,15 @@ import com.capstone.application.model.Question;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
 import com.capstone.application.utils.Constants.QuestionFormat;
+import com.capstone.application.utils.RestUriConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.tech.freak.wizardpager.model.AbstractWizardModel;
 import com.tech.freak.wizardpager.model.ModelCallbacks;
+import com.tech.freak.wizardpager.model.MultipleFixedChoicePage;
 import com.tech.freak.wizardpager.model.NumberPage;
 import com.tech.freak.wizardpager.model.Page;
 import com.tech.freak.wizardpager.model.PageList;
-import com.tech.freak.wizardpager.model.SingleFixedChoicePage;
 import com.tech.freak.wizardpager.model.TextPage;
 import com.tech.freak.wizardpager.ui.PageFragmentCallbacks;
 import com.tech.freak.wizardpager.ui.ReviewFragment;
@@ -59,9 +60,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class CheckInWizardActivity extends FragmentActivity implements
@@ -115,7 +114,7 @@ public class CheckInWizardActivity extends FragmentActivity implements
         if (mQuestions != null && !mQuestions.isEmpty()) {
             initViews(savedInstanceState);
         } else {
-            Toast.makeText(mContext, "Not able to initialize wizard - no questions", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, getString(R.string.check_in_wizard_not_initialized), Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -124,7 +123,10 @@ public class CheckInWizardActivity extends FragmentActivity implements
         mWizardModel = new QuestionsWizardModel(mContext);
 
         if (savedInstanceState != null) {
-            mWizardModel.load(savedInstanceState.getBundle("model"));
+            Bundle bundle = savedInstanceState.getBundle("model");
+            if (bundle != null) {
+                mWizardModel.load(bundle);
+            }
         }
 
         mWizardModel.registerListener(this);
@@ -143,8 +145,8 @@ public class CheckInWizardActivity extends FragmentActivity implements
             }
         });
 
-        mNextButton = (Button) findViewById(R.id.next_button);
-        mPrevButton = (Button) findViewById(R.id.prev_button);
+        mNextButton = (Button) findViewById(R.id.btnNext);
+        mPrevButton = (Button) findViewById(R.id.btnPrev);
 
         mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -169,10 +171,10 @@ public class CheckInWizardActivity extends FragmentActivity implements
                         @Override
                         public Dialog onCreateDialog(Bundle savedInstanceState) {
                             return new AlertDialog.Builder(getActivity())
-                                    .setMessage("Would you like to send this check in to server?")
-                                    .setNegativeButton("Add photo", onNeutralButton)
-                                    .setPositiveButton("Send", onPositiveButton)
-                                    .setNeutralButton(android.R.string.cancel, null).create();
+                                    .setMessage(getString(R.string.check_in_confirm_alert_title))
+                                    .setNegativeButton(getString(R.string.check_in_confirm_alert_negative), onNegativeButton)
+                                    .setPositiveButton(getString(R.string.check_in_confirm_alert_positive), onPositiveButton)
+                                    .setNeutralButton(getString(R.string.check_in_confirm_alert_neutral), null).create();
                         }
                     };
                     dg.show(getSupportFragmentManager(), "place_order_dialog");
@@ -201,18 +203,18 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
     private String mImageName;
 
-    private DialogInterface.OnClickListener onNeutralButton = new DialogInterface.OnClickListener() {
+    private DialogInterface.OnClickListener onNegativeButton = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
-                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                String timeStamp = String.valueOf(System.currentTimeMillis());
 
                 File imagesFolder = new File(Constants.SAVE_IMAGES_PATH);
                 imagesFolder.mkdirs();
 
-                mImageName = "QR_" + timeStamp + ".jpg";
+                mImageName = "Image_" + timeStamp + ".jpg";
 
                 File image = new File(imagesFolder, mImageName);
                 Uri saveImage = Uri.fromFile(image);
@@ -247,9 +249,28 @@ public class CheckInWizardActivity extends FragmentActivity implements
         String text;
         List<Answer> answers = new ArrayList<>();
 
+        Page page;
+
         // fulfill list of questions with respective answers to be sent to the server
         for (String key : mKeyList) {
-            text = mWizardModel.findByKey(key).getData().getString(Page.SIMPLE_DATA_KEY);
+            page = mWizardModel.findByKey(key);
+
+            if (page instanceof MultipleFixedChoicePage) {
+                ArrayList<String> values = page.getData().getStringArrayList(Page.SIMPLE_DATA_KEY);
+
+                // convert array list to comma-separated string
+                StringBuilder sb = new StringBuilder();
+                if (values != null) {
+                    for (String s : values) {
+                        sb.append(s);
+                        sb.append(",");
+                    }
+                }
+                text = sb.toString();
+            } else {
+                text = page.getData().getString(Page.SIMPLE_DATA_KEY);
+            }
+
             if (text == null || text.isEmpty()) {
                 hasUnanswered = true;
                 break;
@@ -281,14 +302,13 @@ public class CheckInWizardActivity extends FragmentActivity implements
             checkIn.setDate(System.currentTimeMillis());
 
             if (mImageName != null) {
-                checkIn.setPhotoPath(Constants.SAVE_IMAGES_PATH + mImageName.toString());
+                checkIn.setPhotoPath(Constants.SAVE_IMAGES_PATH + mImageName);
                 mImageName = null;
             }
 
-
             new SendCheckInTask(CheckInWizardActivity.this).execute(checkIn);
         } else {
-            Toast.makeText(mContext, "You must answer all questions before proceed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.check_in_wizard_not_answered), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -306,11 +326,12 @@ public class CheckInWizardActivity extends FragmentActivity implements
     private void updateBottomBar() {
         int position = mPager.getCurrentItem();
         if (position == mCurrentPageSequence.size()) {
-            mNextButton.setText("finish");
+            mNextButton.setText(getString(R.string.check_in_wizard_finish));
             //mNextButton.setBackgroundResource(R.drawable.finish_background);
             //mNextButton.setTextAppearance(this, R.style.TextAppearanceFinish);
         } else {
-            mNextButton.setText(mEditingAfterReview ? "review" : "next");
+            mNextButton.setText(mEditingAfterReview ? getString(R.string.check_in_wizard_review)
+                    : getString(R.string.check_in_wizard_next));
             //mNextButton.setBackgroundResource(R.drawable.selectable_item_background);
             TypedValue v = new TypedValue();
             getTheme().resolveAttribute(android.R.attr.textAppearanceMedium, v, true);
@@ -454,8 +475,6 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
             int k, i = 0;
             for (Question question : mQuestions) {
-                Log.d("Felipe", question.getText());
-
                 if (question.getFormat().equals(QuestionFormat.FORMAT1.getValue())) {
                     String[] alternatives = new String[question.getAlternativeList().size()];
                     k = 0;
@@ -464,7 +483,8 @@ public class CheckInWizardActivity extends FragmentActivity implements
                         k++;
                     }
 
-                    SingleFixedChoicePage choicePage = new SingleFixedChoicePage(this, question.getText());
+                    MultipleFixedChoicePage choicePage = new MultipleFixedChoicePage(this, question.getText());
+                    //SingleFixedChoicePage choicePage = new SingleFixedChoicePage(this, question.getText());
                     //choicePage.setRequired(true);
                     choicePage.setChoices((alternatives));
 
@@ -476,7 +496,6 @@ public class CheckInWizardActivity extends FragmentActivity implements
                 }
 
                 mKeyList.add(wizardPages[i].getKey());
-
                 i++;
             }
 
@@ -494,7 +513,7 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(getString(R.string.progress_dialog_sending));
             dialog.show();
         }
 
@@ -507,7 +526,8 @@ public class CheckInWizardActivity extends FragmentActivity implements
             JsonResponse result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "checkIn/send";
+                final String url = Constants.getServerUrl(mContext) +
+                        RestUriConstants.CHECK_IN_CONTROLLER + File.separator + RestUriConstants.SEND;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -520,7 +540,7 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
                 MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
-                if(checkInData.getPhotoPath() != null) {
+                if (checkInData.getPhotoPath() != null) {
                     map.add("file", new FileSystemResource(checkInData.getPhotoPath()));
                 }
 
@@ -535,7 +555,7 @@ public class CheckInWizardActivity extends FragmentActivity implements
                 e.printStackTrace();
             }
 
-            if(checkInData.getPhotoPath() != null) {
+            if (checkInData.getPhotoPath() != null) {
                 File file = new File(checkInData.getPhotoPath());
                 file.delete();
             }
@@ -558,72 +578,6 @@ public class CheckInWizardActivity extends FragmentActivity implements
                 }
 
                 finish();
-            }
-        }
-    }
-
-
-    private class SendImageTask extends AsyncTask<User, Void, JsonResponse> {
-
-        private ProgressDialog dialog;
-
-        public SendImageTask(LoginActivity activity) {
-            dialog = new ProgressDialog(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
-            //dialog.show();
-        }
-
-        @Override
-        protected JsonResponse doInBackground(User... params) {
-            Log.d(TAG, "Contacting server to send check in image");
-
-            JsonResponse result = null;
-            try {
-                // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "checkIn/image/send";
-
-                // Create a new RestTemplate instance
-                RestTemplate restTemplate = new RestTemplate();
-
-                // Add the String message converter
-                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-
-                String path = "/mnt/sdcard/Download/download.jpg";
-
-                User user = new User();
-                user.setEmail("blablabla");
-
-                CheckIn checkIn = new CheckIn();
-                checkIn.setUser(user);
-
-                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                String json = ow.writeValueAsString(checkIn);
-
-                MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-                map.add("file", new FileSystemResource(path));
-
-                HttpHeaders xHeader = new HttpHeaders();
-                xHeader.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> xPart = new HttpEntity<>(json, xHeader);
-                map.add("checkIn", xPart);
-
-                // Make the HTTP GET request, marshaling the response to User object
-                result = restTemplate.postForObject(url, map, JsonResponse.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(JsonResponse result) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
             }
         }
     }

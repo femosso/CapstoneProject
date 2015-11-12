@@ -13,37 +13,39 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.capstone.application.R;
 import com.capstone.application.adapter.NavigationDrawerCallbacks;
 import com.capstone.application.adapter.NavigationDrawerFragment;
 import com.capstone.application.alarm.TeenAlarmReceiver;
-import com.capstone.application.fragment.CheckInsFragment;
 import com.capstone.application.fragment.HomeFragment;
+import com.capstone.application.fragment.PendingCheckInsFragment;
 import com.capstone.application.fragment.PreferencesFragment;
 import com.capstone.application.fragment.TeensFragment;
 import com.capstone.application.utils.Constants;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationDrawerCallbacks {
-
-    private static final String TAG = MainActivity.class.getCanonicalName();
+public class MainActivity extends AppCompatActivity implements NavigationDrawerCallbacks {
+    private Context mContext;
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    private Context mContext;
 
     private BroadcastReceiver mUpdateFollowRequestReceiver;
 
     private TeenAlarmReceiver mAlarm;
+
+    private TextView mTextPendingRequest;
+
+    private int mUserType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,40 +54,52 @@ public class MainActivity extends AppCompatActivity
 
         mContext = getApplicationContext();
 
-        /*if (!LoginActivity.isUserLoggedInViaFacebook()) {
-            Toast.makeText(getApplicationContext(), getString(R.string.no_logged_user),
-                    Toast.LENGTH_SHORT).show();
-            finish();
-        }*/
-
         // set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        // Set up the  navigation drawer
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(true);
+
+        }
+
+        // saves the type of user logged in
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mUserType = sharedPreferences.getInt(Constants.USER_TYPE, -1);
+
+        if (mUserType == -1) {
+            Toast.makeText(mContext, getString(R.string.no_user_logged_in), Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        // Set up the navigation drawer
         mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.fragment_drawer);
+                getFragmentManager().findFragmentById(R.id.fragmentDrawer);
 
         mNavigationDrawerFragment
-                .setup(R.id.fragment_drawer, (DrawerLayout) findViewById(R.id.drawer), toolbar);
+                .setup(R.id.fragmentDrawer, (DrawerLayout) findViewById(R.id.drawer), toolbar);
 
         // set up the fragment with the current position
         displayView(mNavigationDrawerFragment.getCurrentPosition());
 
-        mUpdateFollowRequestReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(Constants.NEW_FOLLOW_REQUEST_ACTION)) {
-                    updateFollowRequestCounter();
-                }
-            }
-        };
+        // only set up alarm and make follow request activity available if logged user is a teen
+        if (mUserType == Constants.UserType.TEEN.ordinal()) {
+            // set up alarm for the logged teen
+            mAlarm = new TeenAlarmReceiver();
+            mAlarm.setAlarm(getApplicationContext());
 
-        // set up alarm
-        mAlarm = new TeenAlarmReceiver();
-        mAlarm.setAlarm(getApplicationContext());
+            // set up receiver to update follow request counter in action bar
+            mUpdateFollowRequestReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().equals(Constants.NEW_FOLLOW_REQUEST_ACTION)) {
+                        updateFollowRequestCounter();
+                    }
+                }
+            };
+        }
     }
 
     @Override
@@ -97,8 +111,13 @@ public class MainActivity extends AppCompatActivity
         // launched into.
         AppEventsLogger.activateApp(this);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mUpdateFollowRequestReceiver,
-                new IntentFilter(Constants.NEW_FOLLOW_REQUEST_ACTION));
+        // only register the receiver to update follow request counter if logged user is a teen
+        if (mUserType == Constants.UserType.TEEN.ordinal()) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mUpdateFollowRequestReceiver,
+                    new IntentFilter(Constants.NEW_FOLLOW_REQUEST_ACTION));
+
+            updateFollowRequestCounter();
+        }
     }
 
     @Override
@@ -111,6 +130,10 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
         String title = getString(R.string.app_name);
 
+        if (mUserType != Constants.UserType.TEEN.ordinal() && position > 1) {
+            position++;
+        }
+
         switch (position) {
             case 0:
                 fragment = new HomeFragment();
@@ -121,7 +144,7 @@ public class MainActivity extends AppCompatActivity
                 title = getString(R.string.nav_item_teens);
                 break;
             case 2:
-                fragment = new CheckInsFragment();
+                fragment = new PendingCheckInsFragment();
                 title = getString(R.string.nav_item_check_ins);
                 break;
             case 3:
@@ -138,7 +161,7 @@ public class MainActivity extends AppCompatActivity
         if (fragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.container_body, fragment);
+            fragmentTransaction.replace(R.id.containerBody, fragment);
             fragmentTransaction.commit();
 
             // set the toolbar title if it has already been initialized
@@ -164,7 +187,9 @@ public class MainActivity extends AppCompatActivity
         // launched into.
         AppEventsLogger.deactivateApp(this);
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mUpdateFollowRequestReceiver);
+        if (mUserType == Constants.UserType.TEEN.ordinal()) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mUpdateFollowRequestReceiver);
+        }
         super.onPause();
     }
 
@@ -177,27 +202,39 @@ public class MainActivity extends AppCompatActivity
             getMenuInflater().inflate(R.menu.main, menu);
 
             MenuItem pendingRequest = menu.findItem(R.id.menu_pending_request);
-            MenuItemCompat.setActionView(pendingRequest, R.layout.action_bar_notification_icon);
 
-            View pendingRequestView = MenuItemCompat.getActionView(pendingRequest);
-            mTextPendingRequest = (TextView) pendingRequestView.findViewById(R.id.counter);
+            // it will only have pending request option menu if user is a teen
+            if (mUserType == Constants.UserType.TEEN.ordinal()) {
+                MenuItemCompat.setActionView(pendingRequest, R.layout.action_bar_notification_icon);
 
-            pendingRequestView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(mContext, FollowRequestActivity.class));
-                }
-            });
+                View pendingRequestView = MenuItemCompat.getActionView(pendingRequest);
+                mTextPendingRequest = (TextView) pendingRequestView.findViewById(R.id.txtCounter);
 
-            updateFollowRequestCounter();
+                pendingRequestView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(mContext, FollowRequestActivity.class));
+                    }
+                });
+
+                updateFollowRequestCounter();
+            } else {
+                pendingRequest.setVisible(false);
+            }
 
             return true;
         }
+
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_action_about) {
+            startActivity(new Intent(mContext, AboutActivity.class));
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -211,8 +248,11 @@ public class MainActivity extends AppCompatActivity
 
         LoginManager.getInstance().logOut();
 
-        mAlarm.cancelAlarm(mContext);
+        if (mAlarm != null) {
+            mAlarm.cancelAlarm(mContext);
+        }
 
+        // return to login activity
         startLoginActivity();
     }
 
@@ -221,18 +261,14 @@ public class MainActivity extends AppCompatActivity
         finish();
 
         // initialize login screen of the app
-        Intent intent = new Intent(mContext, LoginActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(mContext, LoginActivity.class));
     }
 
-    private TextView mTextPendingRequest;
-
-    // call the updating code on the main thread,
-    // so we can call this asynchronously
     public void updateFollowRequestCounter() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         final int followRequestCounter = sharedPreferences.getInt(Constants.PENDING_FOLLOW_REQUEST_COUNTER, 0);
 
+        // call the updating code on the main thread, so we can call this asynchronously
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

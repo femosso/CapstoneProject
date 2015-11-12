@@ -23,11 +23,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.capstone.server.config.ApiKeyInitializer;
 import com.capstone.server.dao.DeviceDao;
+import com.capstone.server.dao.UserDao;
 import com.capstone.server.model.Device;
 import com.capstone.server.model.DeviceMessage;
 import com.capstone.server.model.JsonResponse;
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Message.Builder;
 import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
@@ -44,6 +46,9 @@ public class DeviceController {
 
     @Autowired
     private DeviceDao deviceDao;
+
+    @Autowired
+    private UserDao userDao;
 
     @Autowired
     private ServletConfig servletConfig;
@@ -81,7 +86,7 @@ public class DeviceController {
     }
 
     @RequestMapping(value = RestUriConstants.DELETE, method = RequestMethod.DELETE)
-    public @ResponseBody JsonResponse unregister(@PathVariable("id") String token) {
+    public @ResponseBody JsonResponse unregister(@PathVariable(RestUriConstants.PARAM_ID) String token) {
         if (DEBUG) {
             sLogger.debug("Unregistering GCM device: " + token);
         }
@@ -92,18 +97,17 @@ public class DeviceController {
 
     @RequestMapping(RestUriConstants.VIEW)
     public String viewDevices(Model model) {
-        model.addAttribute("devices", deviceDao.findAll());
+        model.addAttribute("users", userDao.findAll());
         return "device/view";
     }
 
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse sendMessage(@RequestBody
-    final DeviceMessage deviceMessage) {
-        asyncSend(deviceMessage);
+    public @ResponseBody JsonResponse sendMessage(@RequestBody final DeviceMessage deviceMessage) {
+        asyncSend(deviceMessage, com.capstone.server.utils.Constants.GCM_ADMIN_TYPE);
         return new JsonResponse(HttpStatus.OK, "success");
     }
 
-    public void asyncSend(final DeviceMessage deviceMessage) {
+    public void asyncSend(final DeviceMessage deviceMessage, final String... type) {
         final List<Device> devices = new ArrayList<Device>(deviceMessage.getDeviceList());
 
         final List<String> devicesRegIds = new ArrayList<String>();
@@ -113,10 +117,18 @@ public class DeviceController {
 
         sThreadPool.execute(new Runnable() {
             public void run() {
-                Message message = new Message.Builder().addData("message",
-                        deviceMessage.getMessage()).build();
-                MulticastResult multicastResult;
+                Builder messageBuilder = new Message.Builder().addData("message",
+                        deviceMessage.getMessage()).addData("type", type[0]);
 
+                // if check in id has been provided
+                if (type[0].equals(com.capstone.server.utils.Constants.GCM_NEW_CHECK_IN_TYPE) && 
+                        type[1] != null) {
+                    messageBuilder.addData("checkInId", type[1]);
+                }
+
+                Message message = messageBuilder.build();
+
+                MulticastResult multicastResult;
                 try {
                     multicastResult = sender.send(message, devicesRegIds, 5);
                 } catch (IOException e) {
@@ -155,13 +167,6 @@ public class DeviceController {
                 }
             }
         });
-    }
-
-    @RequestMapping(value = "test", method = RequestMethod.GET)
-    public String home() {
-        Device device = deviceDao.findByToken(
-                "c74cAeQh1K4:APA91bHr1c59beaUA8v_MTRxNAcX3tdcWTpypAQIqWvY-WXAnWtSWKvcBZpEdO-XPqIbMzizHcafiBKS5MsSiZ2heQNVTSipoNi3LQ_Ga6jjv10q4xsVby9npaf_bX2JEq4py93UDIaM");
-        return null;
     }
 
     private static boolean isValidString(String str) {

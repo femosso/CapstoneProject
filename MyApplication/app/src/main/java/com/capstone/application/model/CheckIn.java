@@ -8,9 +8,13 @@ import java.util.List;
 
 public class CheckIn implements Parcelable {
     private Long id;
+
     private User user;
+
     private List<Answer> answerList;
+
     private long date;
+
     private String photoPath;
 
     public CheckIn() {

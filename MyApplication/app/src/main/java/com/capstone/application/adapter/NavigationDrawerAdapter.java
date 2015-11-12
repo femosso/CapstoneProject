@@ -42,29 +42,25 @@ public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDraw
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.row_navigation_drawer, viewGroup, false);
-        final ViewHolder viewHolder = new ViewHolder(v);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_navigation_drawer, viewGroup, false);
+
+        final ViewHolder viewHolder = new ViewHolder(view);
         viewHolder.itemView.setClickable(true);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                                                   @Override
-                                                   public void onClick(View v) {
-                                                       if (mSelectedView != null) {
-                                                           mSelectedView.setSelected(false);
-                                                       }
-                                                       mSelectedPosition = viewHolder
-                                                               .getAdapterPosition();
-                                                       v.setSelected(true);
-                                                       mSelectedView = v;
-                                                       if (mNavigationDrawerCallbacks != null) {
-                                                           mNavigationDrawerCallbacks
-                                                                   .onNavigationDrawerItemSelected(
-                                                                           viewHolder
-                                                                                   .getAdapterPosition());
-                                                       }
-                                                   }
-                                               }
-        );
+            @Override
+            public void onClick(View v) {
+                if (mSelectedView != null) {
+                    mSelectedView.setSelected(false);
+                }
+
+                mSelectedPosition = viewHolder.getAdapterPosition();
+                v.setSelected(true);
+                mSelectedView = v;
+                if (mNavigationDrawerCallbacks != null) {
+                    mNavigationDrawerCallbacks.onNavigationDrawerItemSelected(viewHolder.getAdapterPosition());
+                }
+            }
+        });
 
         return viewHolder;
     }
@@ -85,6 +81,7 @@ public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDraw
         // if it has some counter set
         if (mData.get(i).getCount() != 0) {
             viewHolder.counterView.setText(" " + mData.get(i).getCount() + " ");
+            viewHolder.counterView.setVisibility(View.VISIBLE);
         } else {
             // hide the counter view
             viewHolder.counterView.setVisibility(View.GONE);
@@ -104,7 +101,7 @@ public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDraw
     private void showProfilePic(boolean show, ViewHolder viewHolder) {
         // handle the value of the @layout_toRightOf text view element
         RelativeLayout.LayoutParams textViewParams = (RelativeLayout.LayoutParams) viewHolder.textView.getLayoutParams();
-        textViewParams.addRule(RelativeLayout.RIGHT_OF, show ? R.id.item_profile_pic : R.id.item_icon);
+        textViewParams.addRule(RelativeLayout.RIGHT_OF, show ? R.id.imgProfilePic : R.id.imgHome);
         viewHolder.textView.setLayoutParams(textViewParams);
 
         // show or hide profile pic and icon view
@@ -131,10 +128,10 @@ public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDraw
 
         public ViewHolder(View itemView) {
             super(itemView);
-            profilePicView = (ProfilePictureView) itemView.findViewById(R.id.item_profile_pic);
-            imgView = (ImageView) itemView.findViewById(R.id.item_icon);
-            textView = (TextView) itemView.findViewById(R.id.item_name);
-            counterView = (TextView) itemView.findViewById(R.id.item_counter);
+            profilePicView = (ProfilePictureView) itemView.findViewById(R.id.imgProfilePic);
+            imgView = (ImageView) itemView.findViewById(R.id.imgHome);
+            textView = (TextView) itemView.findViewById(R.id.txtItemName);
+            counterView = (TextView) itemView.findViewById(R.id.txtItemCounter);
         }
     }
 }

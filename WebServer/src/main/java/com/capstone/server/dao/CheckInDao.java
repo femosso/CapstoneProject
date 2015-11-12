@@ -14,4 +14,5 @@ public interface CheckInDao {
     public CheckIn find(long id, boolean force);
     public Collection<CheckIn> findAll();
     public Collection<CheckIn> findAll(boolean force);
+    public Collection<CheckIn> findByTeen(String email);
 }

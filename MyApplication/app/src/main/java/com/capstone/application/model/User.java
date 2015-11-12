@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class User implements Parcelable {
-
     private String email;
     private String password;
     private String facebookId;

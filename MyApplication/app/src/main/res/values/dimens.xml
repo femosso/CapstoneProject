@@ -9,8 +9,22 @@
     <dimen name="toolbar_elevation">4dp</dimen>
 
     <!-- Teen row dimens -->
-    <dimen name="title">17dp</dimen>
-    <dimen name="rating">15dip</dimen>
-    <dimen name="genre">13dip</dimen>
-    <dimen name="year">12dip</dimen>
+    <dimen name="title">17sp</dimen>
+    <dimen name="rating">15sp</dimen>
+    <dimen name="genre">13sp</dimen>
+    <dimen name="year">12sp</dimen>
+
+    <!-- Follow Request button dimens -->
+    <dimen name="follow_request_radius">14dp</dimen>
+    <dimen name="follow_request_width">40sp</dimen>
+    <dimen name="follow_request_height">5sp</dimen>
+
+    <!-- Navigation Drawer counters -->
+    <dimen name="nav_drawer_counter_radius">2dp</dimen>
+    <dimen name="nav_drawer_counter_padding_left">3dp</dimen>
+    <dimen name="nav_drawer_counter_padding_right">3dp</dimen>
+
+    <!-- Action Bar counters -->
+    <dimen name="action_bar_counter_radius">2dp</dimen>
+    <dimen name="action_bar_counter_stroke_width">2dp</dimen>
 </resources>

@@ -1,131 +1,47 @@
 package com.capstone.application.adapter;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.capstone.application.AppController;
 import com.capstone.application.R;
 import com.capstone.application.activity.FollowRequestActivity;
 import com.capstone.application.model.FollowDataRequest;
+import com.capstone.application.model.FollowDataResponse;
 import com.capstone.application.model.JsonResponse;
 import com.capstone.application.model.Teen;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
+import com.capstone.application.utils.RestUriConstants;
+import com.capstone.application.volley.AppController;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.File;
 import java.util.List;
 
-public class FollowRequestListAdapter extends BaseAdapter {
-    private static String TAG = "TeenListAdapter";
+public class FollowRequestListAdapter extends RecyclerView.Adapter<FollowRequestListAdapter.ViewHolderItem> {
+    private static final String TAG = FollowRequestListAdapter.class.getName();
 
-    private Activity mActivity;
-    private LayoutInflater inflater;
+    private FollowRequestActivity mActivity;
+
     private List<User> mUserItems;
+
     private ImageLoader mImageLoader = AppController.getInstance().getImageLoader();
 
-    public FollowRequestListAdapter(Activity activity, List<User> userItems) {
-        mActivity = activity;
-        mUserItems = (userItems == null ? new ArrayList<User>() : userItems);
-    }
-
-    @Override
-    public int getCount() {
-        return mUserItems.size();
-    }
-
-    @Override
-    public Object getItem(int location) {
-        return mUserItems.get(location);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    public void setData(List<User> userItems) {
-        mUserItems = userItems;
-    }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolderItem viewHolder;
-
-        if (convertView == null) {
-            if (inflater == null) {
-                inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            }
-            convertView = inflater.inflate(R.layout.row_follow_request, parent, false);
-
-            viewHolder = new ViewHolderItem();
-            viewHolder.thumbNail = (NetworkImageView) convertView.findViewById(R.id.thumbnail);
-
-            viewHolder.title = (TextView) convertView.findViewById(R.id.title);
-            viewHolder.rating = (TextView) convertView.findViewById(R.id.rating);
-            viewHolder.genre = (TextView) convertView.findViewById(R.id.genre);
-
-            viewHolder.confirm = (Button) convertView.findViewById(R.id.confirm);
-            viewHolder.confirm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    confirmFollowRequest(mUserItems.get(position), true);
-                }
-            });
-
-            viewHolder.deny = (Button) convertView.findViewById(R.id.deny);
-            viewHolder.deny.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    confirmFollowRequest(mUserItems.get(position), false);
-                }
-            });
-
-            // store the holder with the view.
-            convertView.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolderItem) convertView.getTag();
-        }
-
-        if (mImageLoader == null) {
-            mImageLoader = AppController.getInstance().getImageLoader();
-        }
-
-        // getting user data for the row
-        User user = mUserItems.get(position);
-
-        if (user != null) {
-            // thumbnail image
-            //thumbNail.setImageUrl(m.getThumbnailUrl(), mImageLoader);
-
-            if (user.getFirstName() != null) {
-                // title
-                viewHolder.title.setText(user.getFirstName());
-            }
-
-            viewHolder.rating.setText("User type " + user.getType());
-        }
-
-        return convertView;
-    }
-
-    public static class ViewHolderItem {
+    public class ViewHolderItem extends RecyclerView.ViewHolder {
         NetworkImageView thumbNail;
 
         TextView title;
@@ -134,6 +50,85 @@ public class FollowRequestListAdapter extends BaseAdapter {
 
         Button confirm;
         Button deny;
+
+        public ViewHolderItem(View itemView) {
+            super(itemView);
+            thumbNail = (NetworkImageView) itemView.findViewById(R.id.imgThumbnail);
+
+            title = (TextView) itemView.findViewById(R.id.txtFullName);
+            rating = (TextView) itemView.findViewById(R.id.txtMedicalNumber);
+            genre = (TextView) itemView.findViewById(R.id.txtBirthday);
+
+            confirm = (Button) itemView.findViewById(R.id.btnConfirm);
+            deny = (Button) itemView.findViewById(R.id.btnDeny);
+        }
+    }
+
+    public FollowRequestListAdapter(FollowRequestActivity activity, List<User> userItems) {
+        mActivity = activity;
+        mUserItems = userItems;
+    }
+
+    @Override
+    public ViewHolderItem onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_follow_request, parent, false);
+        return new ViewHolderItem(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolderItem holder, final int position) {
+        if (mImageLoader == null) {
+            mImageLoader = AppController.getInstance().getImageLoader();
+        }
+
+        holder.confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmFollowRequest(mUserItems.get(position), true);
+            }
+        });
+
+        holder.deny.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmFollowRequest(mUserItems.get(position), false);
+            }
+        });
+
+        // getting user data for the row
+        User user = mUserItems.get(position);
+
+        if (user != null) {
+            String url = Constants.getServerUrl(mActivity) + RestUriConstants.TEEN_CONTROLLER
+                    + File.separator + RestUriConstants.PHOTO + "?" + RestUriConstants.PARAM_EMAIL
+                    + "=" + user.getEmail();
+
+            // thumbnail image of the follower
+            holder.thumbNail.setImageUrl(url, mImageLoader);
+
+            if (user.getFirstName() != null) {
+                holder.title.setText(user.getFirstName() + " " + user.getLastName());
+            }
+
+            holder.rating.setText(mActivity.getString(R.string.user_type) +
+                    (user.getType() == Constants.UserType.TEEN.ordinal() ?
+                            mActivity.getString(R.string.user_type_teen) :
+                            mActivity.getString(R.string.user_type_follower)));
+        }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemCount() {
+        return mUserItems.size();
+    }
+
+    public void setData(List<User> userItems) {
+        mUserItems = userItems;
     }
 
     private void confirmFollowRequest(User user, boolean follow) {
@@ -145,18 +140,14 @@ public class FollowRequestListAdapter extends BaseAdapter {
                 Teen loggedTeen = new Teen();
                 loggedTeen.setEmail(loggedEmail);
 
+                // associate the logged teen with the follower (which can be a teen or not)
                 FollowDataRequest followData = new FollowDataRequest(user, loggedTeen, follow);
                 new ConfirmFollowTask().execute(followData);
             }
         }
     }
 
-    public void updatePendingFollowRequestList(FollowRequestActivity activity) {
-        new RetrievePendingFollowRequestTask(activity).execute();
-    }
-
-    private class ConfirmFollowTask extends AsyncTask<FollowDataRequest, Void, JsonResponse> {
-
+    private class ConfirmFollowTask extends AsyncTask<FollowDataRequest, Void, FollowDataResponse> {
         private ProgressDialog dialog;
 
         public ConfirmFollowTask() {
@@ -165,20 +156,22 @@ public class FollowRequestListAdapter extends BaseAdapter {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(mActivity.getString(R.string.progress_dialog_sending));
             dialog.show();
         }
 
         @Override
-        protected JsonResponse doInBackground(FollowDataRequest... params) {
+        protected FollowDataResponse doInBackground(FollowDataRequest... params) {
             Log.d(TAG, "Contacting server to send follow request confirmation");
 
             FollowDataRequest followData = params[0];
 
-            JsonResponse result = null;
+            FollowDataResponse result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "teen/follow/submit";
+                final String url = Constants.getServerUrl(mActivity) +
+                        RestUriConstants.TEEN_CONTROLLER + File.separator +
+                        RestUriConstants.FOLLOW + File.separator + RestUriConstants.SUBMIT;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -186,8 +179,8 @@ public class FollowRequestListAdapter extends BaseAdapter {
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                // Make the HTTP GET request, marshaling the response to User object
-                result = restTemplate.postForObject(url, followData, JsonResponse.class);
+                // Make the HTTP POST request, marshaling the response to FollowDataResponse object
+                result = restTemplate.postForObject(url, followData, FollowDataResponse.class);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -196,70 +189,22 @@ public class FollowRequestListAdapter extends BaseAdapter {
         }
 
         @Override
-        protected void onPostExecute(JsonResponse result) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-        }
-    }
-
-    private class RetrievePendingFollowRequestTask extends AsyncTask<Void, Void, List<User>> {
-
-        private ProgressDialog dialog;
-        private Activity mActivity;
-
-        public RetrievePendingFollowRequestTask(FollowRequestActivity activity) {
-            mActivity = activity;
-            dialog = new ProgressDialog(mActivity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
-            dialog.show();
-        }
-
-        @Override
-        protected List<User> doInBackground(Void... params) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-            String loggedEmail = sharedPreferences.getString(Constants.LOGGED_EMAIL, null);
-
-            Log.d(TAG, loggedEmail + " is contacting server to retrieve list of pending follow requests");
-
-            List<User> userList = null;
-            try {
-                // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "teen/pending/list?email=" + loggedEmail;
-
-                // Create a new RestTemplate instance
-                RestTemplate restTemplate = new RestTemplate();
-
-                // Add the String message converter
-                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-
-                // Make the HTTP GET request, marshaling the response to Teen object
-                User[] result = restTemplate.getForObject(url, User[].class);
-
-                if(result != null)  {
-                    userList = Arrays.asList(result);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return userList;
-        }
-
-        @Override
-        protected void onPostExecute(List<User> result) {
+        protected void onPostExecute(FollowDataResponse result) {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
 
             if (result != null) {
-                setData(result);
-                notifyDataSetChanged();
+                JsonResponse jsonResponse = result.getResponse();
+                List<User> updatedUserList = result.getFollowRequestList();
+
+                // refresh UI with the new follow request list update
+                if (jsonResponse.getStatus() == HttpStatus.OK && updatedUserList != null) {
+                    setData(updatedUserList);
+                    notifyDataSetChanged();
+
+                    mActivity.refreshUi(updatedUserList);
+                }
             }
         }
     }

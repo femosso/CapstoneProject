@@ -8,34 +8,36 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import com.capstone.application.R;
 import com.capstone.application.adapter.TeenListAdapter;
-import com.capstone.application.model.Movie;
 import com.capstone.application.model.TeenListRequest;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
+import com.capstone.application.utils.RestUriConstants;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TeensFragment extends Fragment {
-
     private static final String TAG = TeensFragment.class.getName();
 
     private Context mContext;
 
-    private ListView mListView;
+    private RecyclerView mRecyclerView;
 
-    private TeenListAdapter mAdapter;
+    private TextView mEmptyView;
 
     public TeensFragment() {
         // Required empty public constructor
@@ -51,15 +53,15 @@ public class TeensFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_teens, container, false);
 
-        mListView = (ListView) rootView.findViewById(R.id.list);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.listFragmentTeens);
+        mRecyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(mContext);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mEmptyView = (TextView) rootView.findViewById(R.id.txtEmptyView);
 
         new RetrieveTeensTask(TeensFragment.this).execute();
-
-        // Code to Add an item with default animation
-        //((TeenListAdapter) mAdapter).addItem(obj, index);
-
-        // Code to remove an item with default animation
-        //((TeenListAdapter) mAdapter).deleteItem(index);
 
         // Inflate the layout for this fragment
         return rootView;
@@ -75,72 +77,7 @@ public class TeensFragment extends Fragment {
         super.onDetach();
     }
 
-    /*private ArrayList<Teen> getTeens() {
-        ArrayList results = new ArrayList<Teen>();
-        for (int index = 0; index < 10; index++) {
-            Teen obj = new Teen(index + "/5/1990", String.valueOf((index * 30) / 2),
-                    new User("email", "firstname", "lastname"));
-            results.add(index, obj);
-        }
-        return results;
-    }*/
-
-    private static final String url = "http://api.androidhive.info/json/movies.json";
-    private ArrayList<Movie> movieList = new ArrayList<Movie>();
-
-/*    private void fill() {
-
-        // Creating volley request obj
-        JsonArrayRequest movieReq = new JsonArrayRequest(url,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        Log.d(TAG, response.toString());
-
-                        // Parsing json
-                        for (int i = 0; i < response.length(); i++) {
-                            try {
-
-                                JSONObject obj = response.getJSONObject(i);
-                                Movie movie = new Movie();
-                                movie.setTitle(obj.getString("title"));
-                                movie.setThumbnailUrl(obj.getString("image"));
-                                movie.setRating(((Number) obj.get("rating"))
-                                        .doubleValue());
-                                movie.setYear(obj.getInt("releaseYear"));
-
-                                // Genre is json array
-                                JSONArray genreArry = obj.getJSONArray("genre");
-                                ArrayList<String> genre = new ArrayList<String>();
-                                for (int j = 0; j < genreArry.length(); j++) {
-                                    genre.add((String) genreArry.get(j));
-                                }
-                                movie.setGenre(genre);
-
-                                // adding movie to movies array
-                                movieList.add(movie);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        mAdapter = new TeenListAdapter(getActivity(), movieList);
-                        mListView.setAdapter(mAdapter);
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
-            }
-        });
-
-        // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(movieReq);
-    }*/
-
     private class RetrieveTeensTask extends AsyncTask<Void, Void, TeenListRequest> {
-
         private ProgressDialog dialog;
 
         public RetrieveTeensTask(TeensFragment fragment) {
@@ -149,7 +86,7 @@ public class TeensFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(getString(R.string.progress_dialog_loading));
             dialog.show();
         }
 
@@ -163,7 +100,9 @@ public class TeensFragment extends Fragment {
             TeenListRequest result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "teen/list?email=" + loggedEmail;
+                final String url = Constants.getServerUrl(mContext) +
+                        RestUriConstants.TEEN_CONTROLLER + File.separator + RestUriConstants.LIST +
+                        "?" + RestUriConstants.PARAM_EMAIL + "=" + loggedEmail;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -171,7 +110,7 @@ public class TeensFragment extends Fragment {
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                // Make the HTTP GET request, marshaling the response to Teen object
+                // Make the HTTP GET request, marshaling the response to TeenListRequest object
                 result = restTemplate.getForObject(url, TeenListRequest.class);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -194,8 +133,18 @@ public class TeensFragment extends Fragment {
                 requester = result.getRequester();
             }
 
-            mAdapter = new TeenListAdapter(getActivity(), teenList, requester);
-            mListView.setAdapter(mAdapter);
+            teenList = teenList == null ? new ArrayList<User>() : teenList;
+
+            RecyclerView.Adapter adapter = new TeenListAdapter(getActivity(), teenList, requester);
+            mRecyclerView.setAdapter(adapter);
+
+            if (teenList.isEmpty()) {
+                mEmptyView.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
+            } else {
+                mEmptyView.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 }

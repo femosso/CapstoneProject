@@ -1,6 +1,5 @@
 package com.capstone.application.alarm;
 
-
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -18,7 +17,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.capstone.application.R;
 import com.capstone.application.activity.CheckInWizardActivity;
@@ -26,32 +24,34 @@ import com.capstone.application.database.PendingCheckInProvider;
 import com.capstone.application.database.PendingCheckInTable;
 import com.capstone.application.model.Question;
 import com.capstone.application.utils.Constants;
+import com.capstone.application.utils.RestUriConstants;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * When the mAlarm fires, this BroadcastReceiver receives the broadcast Intent
- * and then starts the IntentService {@code SampleSchedulingService} to do some work.
+ * When the check in alarm fires, this BroadcastReceiver receives the REQUEST_NEW_CHECK_IN_ACTION
+ * broadcast Intent and then ask the app's server for a new check in
  */
 public class TeenAlarmReceiver extends BroadcastReceiver {
     private static final String TAG = TeenAlarmReceiver.class.getName();
 
     private AlarmManager mAlarmMgr;
+
     private PendingIntent mAlarmIntent;
 
     public TeenAlarmReceiver() {
+        // Required empty public constructor
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "Action received " + intent.getAction());
-
-        Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
 
         if (intent.getAction().equals(Constants.REQUEST_NEW_CHECK_IN_ACTION)) {
             new RetrieveNewCheckIn(context).execute();
@@ -71,6 +71,7 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
 
             context.getContentResolver().insert(PendingCheckInProvider.CONTENT_URI, values);
 
+            // notify the ui to update pending check in counter in navigation drawer
             Intent notifyUi = new Intent(Constants.NOTIFY_PENDING_CHECK_IN_ACTION);
             LocalBroadcastManager.getInstance(context).sendBroadcast(notifyUi);
         }
@@ -91,13 +92,13 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_home)
-                .addAction(R.drawable.ic_menu_check, "Answer Now", answerNowPendingIntent)
-                .addAction(R.drawable.ic_home, "Later", laterPendingIntent)
-                .setContentTitle("New Check In")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .addAction(R.drawable.ic_check_in, context.getString(R.string.answer_now), answerNowPendingIntent)
+                .addAction(R.drawable.ic_later, context.getString(R.string.answer_later), laterPendingIntent)
+                .setContentTitle(context.getString(R.string.notification_new_check_in_title))
                 .setContentText(message)
                 .setAutoCancel(true)
-                /*.setSound(defaultSoundUri)*/
+                .setSound(defaultSoundUri)
                 .setContentIntent(answerNowPendingIntent)
                 .setDeleteIntent(laterPendingIntent);
 
@@ -108,8 +109,9 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Sets a repeating mAlarm that runs according to the teen's configuration. When the
-     * mAlarm fires, the app broadcasts an Intent to this WakefulBroadcastReceiver.
+     * Sets a repeating alarm that runs according to the teen configuration. When the
+     * alarm fires, the app broadcasts a REQUEST_NEW_CHECK_IN_ACTION Intent to query
+     * server for a new check in.
      */
     public void setAlarm(Context context) {
         mAlarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -119,8 +121,9 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
 
         mAlarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
+        // reads the alarm frequency from shared preferences
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String reminderFrequency = sharedPreferences.getString(Constants.REMINDER_FREQUENCY, null);
+        String reminderFrequency = sharedPreferences.getString(Constants.REMINDER_FREQUENCY_KEY, null);
 
         if (reminderFrequency != null) {
             Log.d(TAG, "Setting alarm for " + reminderFrequency + " times/day");
@@ -129,34 +132,31 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
                     AlarmManager.INTERVAL_DAY / Integer.valueOf(reminderFrequency), mAlarmIntent);
         }
 
-        // Enable {@code BootReceiver} to automatically restart the mAlarm when the
+        // Enable {@code BootReceiver} to automatically restart the alarm when the
         // device is rebooted.
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
 
-        pm.setComponentEnabledSetting(receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+        pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
     }
 
     public void cancelAlarm(Context context) {
-        // If the mAlarm has been set, cancel it.
+        // If the alarm has been set, cancel it.
         if (mAlarmMgr != null) {
             mAlarmMgr.cancel(mAlarmIntent);
         }
 
-        // Disable {@code SampleBootReceiver} so that it doesn't automatically restart the
-        // mAlarm when the device is rebooted.
+        // Disable {@code BootReceiver} so that it doesn't automatically restart the
+        // alarm when the device is rebooted.
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
 
-        pm.setComponentEnabledSetting(receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+        pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
     }
 
     public class RetrieveNewCheckIn extends AsyncTask<Void, Void, List<Question>> {
-
         private Context mContext;
 
         public RetrieveNewCheckIn(Context context) {
@@ -165,24 +165,26 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
 
         @Override
         protected List<Question> doInBackground(Void... params) {
-            return retrieveNewCheckInFromServer();
+            return retrieveNewCheckInFromServer(mContext);
         }
 
         @Override
         protected void onPostExecute(List<Question> questions) {
             if (questions != null) {
-                sendCheckInNotification(mContext, "new check in", questions);
+                sendCheckInNotification(mContext,
+                        mContext.getString(R.string.notification_new_check_in_content), questions);
             }
         }
     }
 
-    public static List<Question> retrieveNewCheckInFromServer() {
+    public static List<Question> retrieveNewCheckInFromServer(Context context) {
         Log.d(TAG, "Contacting server to retrieve new check in for this user");
 
         List<Question> questions = null;
         try {
             // The URL for making the GET request
-            final String url = Constants.SERVER_URL + "question/list";
+            final String url = Constants.getServerUrl(context) +
+                    RestUriConstants.QUESTION_CONTROLLER + File.separator + RestUriConstants.LIST;
 
             // Create a new RestTemplate instance
             RestTemplate restTemplate = new RestTemplate();
@@ -190,7 +192,7 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
             // Add the String message converter
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-            // Make the HTTP GET request, marshaling the response to Teen object
+            // Make the HTTP GET request, marshaling the response to Question[]
             Question[] result = restTemplate.getForObject(url, Question[].class);
 
             if (result != null) {

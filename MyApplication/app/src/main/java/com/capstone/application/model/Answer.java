@@ -5,7 +5,9 @@ import android.os.Parcelable;
 
 public class Answer implements Parcelable {
     private Long id;
+
     private Question question;
+
     private CheckIn checkIn;
 
     private String text;

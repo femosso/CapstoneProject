@@ -32,8 +32,8 @@ public class AnswerController {
     private UserDao userDao;
 
     @RequestMapping(value = RestUriConstants.HISTORIC, method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody Feedback requestHistoric(@RequestParam("email") String email,
-            @RequestParam("type") String type) {
+    public @ResponseBody Feedback requestHistoric(@RequestParam(RestUriConstants.PARAM_EMAIL) String email,
+            @RequestParam(RestUriConstants.PARAM_TYPE) String type) {
         User userDb = userDao.find(email, true);
         List<Answer> answersDb = (List<Answer>) answerDao.findByTeenAndType(email, type);
 

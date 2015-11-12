@@ -8,6 +8,7 @@ import java.util.List;
 
 public class Feedback implements Parcelable {
     private User user;
+
     private List<Answer> answerList;
 
     public Feedback() {

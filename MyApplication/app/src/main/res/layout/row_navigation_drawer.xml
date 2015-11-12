@@ -3,13 +3,14 @@
     xmlns:facebook="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="48dp"
-    android:background="@drawable/row_selector">
+    android:background="@drawable/nav_drawer_row_selector">
 
     <com.facebook.login.widget.ProfilePictureView
-        android:id="@+id/item_profile_pic"
+        android:id="@+id/imgProfilePic"
         android:layout_width="25dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
@@ -18,35 +19,39 @@
         facebook:preset_size="small" />
 
     <ImageView
-        android:id="@+id/item_icon"
+        android:id="@+id/imgHome"
         android:layout_width="25dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
         android:contentDescription="@string/desc_item_icon" />
 
     <TextView
-        android:id="@+id/item_name"
+        android:id="@+id/txtItemName"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawablePadding="16dp"
         android:gravity="center_vertical"
         android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:paddingEnd="40dp"
         android:paddingRight="40dp"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:textColor="@color/myTextPrimaryColor"
-        android:background="?android:attr/selectableItemBackground"
-        android:drawablePadding="16dp"
         android:textSize="14sp" />
 
     <TextView
-        android:id="@+id/item_counter"
+        android:id="@+id/txtItemCounter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+        android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/item_counter_bg"
-        android:textColor="@color/counter_text_color" />
+        android:background="@drawable/nav_drawer_item_counter"
+        android:textColor="@color/nav_drawer_counter_text_color" />
 </RelativeLayout>

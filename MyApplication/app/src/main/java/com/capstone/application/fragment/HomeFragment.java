@@ -15,16 +15,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.capstone.application.R;
 import com.capstone.application.activity.CheckInDetailsActivity;
 import com.capstone.application.adapter.CheckInListAdapter;
 import com.capstone.application.model.CheckIn;
 import com.capstone.application.utils.Constants;
+import com.capstone.application.utils.RestUriConstants;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +39,8 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+
+    private TextView mEmptyView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -48,21 +53,16 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.activity_card_view, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.my_recycler_view);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(mContext);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(mContext);
+        mRecyclerView.setLayoutManager(layoutManager);
 
-        // Code to Add an item with default animation
-        //((CheckInListAdapter) mAdapter).addItem(obj, index);
-
-        // Code to remove an item with default animation
-        //((CheckInListAdapter) mAdapter).deleteItem(index);
+        mEmptyView = (TextView) rootView.findViewById(R.id.txtEmptyView);
 
         new RetrieveCheckInsTask(HomeFragment.this).execute();
 
@@ -86,7 +86,6 @@ public class HomeFragment extends Fragment {
     }
 
     private class RetrieveCheckInsTask extends AsyncTask<Void, Void, List<CheckIn>> {
-
         private ProgressDialog dialog;
 
         public RetrieveCheckInsTask(HomeFragment fragment) {
@@ -95,7 +94,7 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(getString(R.string.progress_dialog_loading));
             dialog.show();
         }
 
@@ -109,7 +108,9 @@ public class HomeFragment extends Fragment {
             List<CheckIn> result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "checkIn/list?email=" + loggedEmail;
+                final String url = Constants.getServerUrl(mContext) +
+                        RestUriConstants.CHECK_IN_CONTROLLER + File.separator + RestUriConstants.LIST +
+                        "?" + RestUriConstants.PARAM_EMAIL + "=" + loggedEmail;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -117,7 +118,7 @@ public class HomeFragment extends Fragment {
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                // Make the HTTP GET request, marshaling the response to CheckIn object
+                // Make the HTTP GET request, marshaling the response to CheckIn[] object
                 CheckIn[] checkIns = restTemplate.getForObject(url, CheckIn[].class);
 
                 if (checkIns != null) {
@@ -136,18 +137,28 @@ public class HomeFragment extends Fragment {
                 dialog.dismiss();
             }
 
+            result = result == null ? new ArrayList<CheckIn>() : result;
+
             mAdapter = new CheckInListAdapter(result);
             mRecyclerView.setAdapter(mAdapter);
 
             ((CheckInListAdapter) mAdapter).setOnItemClickListener(new CheckInListAdapter.MyClickListener() {
                 @Override
                 public void onItemClick(int position, View v) {
-                    Log.i(TAG, " Clicked on Item " + position);
+                    Log.i(TAG, "Clicked on Item " + position);
 
                     CheckIn checkIn = ((CheckInListAdapter) mAdapter).getItem(position);
                     new RetrieveCheckInDetailTask(HomeFragment.this).execute(checkIn.getId());
                 }
             });
+
+            if (result.isEmpty()) {
+                mEmptyView.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
+            } else {
+                mEmptyView.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -160,34 +171,13 @@ public class HomeFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(getString(R.string.progress_dialog_loading));
             dialog.show();
         }
 
         @Override
         protected CheckIn doInBackground(Long... params) {
-            Log.d(TAG, "Contacting server to retrieve details of a check in");
-
-            long checkInId = params[0];
-
-            CheckIn result = null;
-            try {
-                // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "checkIn/view?id=" + checkInId;
-
-                // Create a new RestTemplate instance
-                RestTemplate restTemplate = new RestTemplate();
-
-                // Add the String message converter
-                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-
-                // Make the HTTP GET request, marshaling the response to CheckIn object
-                result = restTemplate.getForObject(url, CheckIn.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
+            return retrieveCheckInFromServer(mContext, params[0]);
         }
 
         @Override
@@ -201,5 +191,30 @@ public class HomeFragment extends Fragment {
 
             startActivity(intent);
         }
+    }
+
+    public static CheckIn retrieveCheckInFromServer(Context context, long checkInId) {
+        Log.d(TAG, "Contacting server to retrieve details of a check in");
+
+        CheckIn result = null;
+        try {
+            // The URL for making the GET request
+            final String url = Constants.getServerUrl(context) +
+                    RestUriConstants.CHECK_IN_CONTROLLER + File.separator +
+                    RestUriConstants.VIEW + "?" + RestUriConstants.PARAM_ID + "=" + checkInId;
+
+            // Create a new RestTemplate instance
+            RestTemplate restTemplate = new RestTemplate();
+
+            // Add the String message converter
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+            // Make the HTTP GET request, marshaling the response to CheckIn object
+            result = restTemplate.getForObject(url, CheckIn.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

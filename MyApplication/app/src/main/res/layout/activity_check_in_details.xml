@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".activity.CheckInDetailsActivity">
+    android:orientation="vertical">
 
     <include layout="@layout/toolbar" />
 
@@ -26,10 +24,10 @@
                 android:paddingBottom="16dp">
 
                 <TextView
-                    android:id="@+id/checkInInformationTitle"
+                    android:id="@+id/txtCheckInInformationTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Check-in Information"
+                    android:text="@string/check_in_information_divider"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textStyle="bold" />
 
@@ -38,39 +36,39 @@
                     android:layout_height="1dp"
                     android:background="@android:color/darker_gray" />
 
-                <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                <RelativeLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/row_teen_selector"
-                    android:padding="8dp">
+                    android:background="@drawable/row_teen_selector">
 
                     <TextView
-                        android:id="@+id/checkInDate"
+                        android:id="@+id/txtCheckInDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
 
                     <TextView
-                        android:id="@+id/checkInTime"
+                        android:id="@+id/txtCheckInTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:layout_alignBaseline="@+id/checkInPhoto"
-                        android:layout_alignBottom="@+id/checkInPhoto"
-                        android:layout_alignLeft="@+id/checkInDate"
-                        android:layout_alignStart="@+id/checkInDate" />
+                        android:layout_alignBaseline="@+id/btnCheckInPhoto"
+                        android:layout_alignBottom="@+id/btnCheckInPhoto"
+                        android:layout_alignLeft="@+id/txtCheckInDate"
+                        android:layout_alignStart="@+id/txtCheckInDate"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
 
                     <Button
-                        android:id="@+id/checkInPhoto"
+                        android:id="@+id/btnCheckInPhoto"
                         style="?android:attr/buttonStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"
                         android:layout_alignParentTop="true"
-                        android:layout_gravity="right"
-                        android:drawableLeft="@android:drawable/btn_star_big_on"
-                        android:text="Check In Photo" />
+                        android:layout_gravity="end"
+                        android:drawableLeft="@drawable/ic_photo"
+                        android:drawableStart="@drawable/ic_photo"
+                        android:text="@string/check_in_photo" />
                 </RelativeLayout>
 
             </LinearLayout>
@@ -83,10 +81,10 @@
                 android:paddingBottom="16dp">
 
                 <TextView
-                    android:id="@+id/teenInformationTitle"
+                    android:id="@+id/txtTeenInformationTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Teen Information"
+                    android:text="@string/teen_information_divider"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textStyle="bold" />
 
@@ -96,19 +94,19 @@
                     android:background="@android:color/darker_gray" />
 
                 <TextView
-                    android:id="@+id/teenName"
+                    android:id="@+id/txtTeenName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <TextView
-                    android:id="@+id/teenBirthday"
+                    android:id="@+id/txtTeenBirthday"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <TextView
-                    android:id="@+id/teenMedicalNumber"
+                    android:id="@+id/txtTeenMedicalNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -122,10 +120,10 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/questiondFeedbackTitle"
+                    android:id="@+id/txtQuestionsFeedbackTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Questions &amp; Feedback"
+                    android:text="@string/questions_and_feedback_divider"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textStyle="bold" />
 

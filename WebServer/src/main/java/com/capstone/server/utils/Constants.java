@@ -9,6 +9,13 @@ public class Constants {
     /** Session constants */
     public static final String SESSION_USER = "loggedUser";
 
+    /**
+     * Type of messages that could be sent via GCM
+     */
+    public static final String GCM_FOLLOW_REQUEST_TYPE = "followRequest";
+    public static final String GCM_NEW_CHECK_IN_TYPE = "newCheckIn";
+    public static final String GCM_ADMIN_TYPE = "admin";
+
     /** Types of user to interact with this application */
     public enum UserType {
         ADMIN,

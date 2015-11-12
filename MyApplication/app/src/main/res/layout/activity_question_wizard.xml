@@ -10,8 +10,9 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:gravity="left"
+        android:gravity="start"
         android:paddingBottom="8dp"
+        android:paddingEnd="@dimen/list_item_padding_right"
         android:paddingLeft="@dimen/list_item_padding_left"
         android:paddingRight="@dimen/list_item_padding_right"
         android:paddingTop="16dp" />
@@ -23,7 +24,6 @@
         android:layout_weight="1" />
 
     <View
-        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
@@ -34,11 +34,11 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/prev_button"
+            android:id="@+id/btnPrev"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="prev" />
+            android:text="@string/prev_question" />
 
         <View
             android:layout_width="1dp"
@@ -46,11 +46,11 @@
             android:background="?android:attr/listDivider" />
 
         <Button
-            android:id="@+id/next_button"
+            android:id="@+id/btnNext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="next" />
+            android:text="@string/next_question" />
     </LinearLayout>
 
 </LinearLayout>

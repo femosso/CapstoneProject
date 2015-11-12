@@ -68,27 +68,33 @@ public class JpaUserDao implements UserDao {
                 for(Follower follower : followerList) {
                     Hibernate.initialize(follower.getUser());
                 }
+
+                initializeFollower(user);
             } else if (user.getType() == UserType.FOLLOWER.ordinal()) {
-                Hibernate.initialize(user.getFollower());
-
-                // initialize list of pending teens request and its internal fields
-                List<Teen> pendingTeenList = user.getFollower().getPendingTeenList();
-                Hibernate.initialize(pendingTeenList);
-                for(Teen teen : pendingTeenList) {
-                    Hibernate.initialize(teen.getUser());
-                }
-
-                // initialize list of teens and its internal fields
-                List<Teen> teenList = user.getFollower().getTeenList();
-                Hibernate.initialize(teenList);
-                for(Teen teen : teenList) {
-                    Hibernate.initialize(teen.getUser());
-                }
-                Hibernate.initialize(user.getFollower().getPendingTeenList());
+                initializeFollower(user);
             }
             Hibernate.initialize(user.getDevice());
         }
         return user;
+    }
+
+    public void initializeFollower(User user) {
+        Hibernate.initialize(user.getFollower());
+
+        // initialize list of pending teens request and its internal fields
+        List<Teen> pendingTeenList = user.getFollower().getPendingTeenList();
+        Hibernate.initialize(pendingTeenList);
+        for(Teen teen : pendingTeenList) {
+            Hibernate.initialize(teen.getUser());
+        }
+
+        // initialize list of teens and its internal fields
+        List<Teen> teenList = user.getFollower().getTeenList();
+        Hibernate.initialize(teenList);
+        for(Teen teen : teenList) {
+            Hibernate.initialize(teen.getUser());
+        }
+        Hibernate.initialize(user.getFollower().getPendingTeenList());
     }
 
     @SuppressWarnings("unchecked")
@@ -102,7 +108,9 @@ public class JpaUserDao implements UserDao {
     @SuppressWarnings("unchecked")
     @Transactional
     public Collection<User> findAll() {
-        Query query = em.createQuery("SELECT e FROM User e");
+        // get all users in database except from the admin
+        Query query = em.createQuery("SELECT e FROM User e where not e.type=:arg1");
+        query.setParameter("arg1", 0);
         return (Collection<User>) query.getResultList();
     }
 }

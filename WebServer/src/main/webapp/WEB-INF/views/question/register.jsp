@@ -35,19 +35,25 @@
         <div class="col-md-8 column">
           <div class="panel panel-info">
             <div class="panel-heading">
-              <h3 class="panel-title">Question Registering EN</h3>
+              <h3 class="panel-title">
+                <spring:message code="label.question.register.panelTitle"/>
+              </h3>
             </div>
             <div class="panel-body">
               <form id="question-form" class="form-horizontal" role="form">
                 <div class="form-group">
                   <div class="col-xs-12">
-                    <label class="control-label" for="question-text">Question EN</label>
+                    <label class="control-label" for="question-text">
+                      <spring:message code="label.question.register.questionField"/>
+                    </label>
                     <input type="text" class="form-control" id="question-text" name="question-text">
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="col-xs-6 selectContainer">
-                    <label class="control-label">Type EN</label>
+                    <label class="control-label">
+                      <spring:message code="label.question.register.typeField"/>
+                    </label>
                     <select class="form-control selectpicker" id="question-type" data-size="${fn:length(types)}">
                       <c:forEach items="${types}" var="type">
                        <option>${type}</option>
@@ -55,7 +61,9 @@
                     </select>
                   </div>
                   <div class="col-xs-6 selectContainer">
-                    <label class="control-label">Format EN</label>
+                    <label class="control-label">
+                      <spring:message code="label.question.register.formatField"/>
+                    </label>
                     <select class="form-control selectpicker" id="question-format" data-size="${fn:length(formats)}">
                       <c:forEach items="${formats}" var="format">
                        <option>${format}</option>
@@ -66,7 +74,9 @@
                 <div class="form-group" id="question-alternatives">
                   <div class="col-xs-6">
                     <div class="input-group">
-                      <label class="control-label">Alternatives EN</label>
+                      <label class="control-label">
+                        <spring:message code="label.question.register.alternativesField"/>
+                      </label>
                       <span class="input-group-btn">
                         <button class="btn btn-default alternative add" type="button">+</button>
                       </span>
@@ -83,8 +93,9 @@
                   </div>
                 </div>
                 <button class="btn btn-default" id="submit-question" style="float:right"
-                    data-loading-text="Submiting.. EN" >
-                  <i class="icon-hand-right"></i> Submit EN
+                    data-loading-text="<spring:message code="label.question.register.submitting"/>" >
+                  <i class="icon-hand-right"></i>
+                  <spring:message code="label.question.register.submitButton"/>
                 </button>
               </form>
             </div>

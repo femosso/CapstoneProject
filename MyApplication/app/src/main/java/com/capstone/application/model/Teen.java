@@ -4,10 +4,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Teen implements Parcelable {
-
     private String email;
     private String birthday;
     private String medicalNumber;
@@ -16,6 +18,8 @@ public class Teen implements Parcelable {
 
     private List<Follower> followerList;
     private List<Follower> pendingFollowerList;
+
+    private String sharedData;
 
     public Teen() {
     }
@@ -52,6 +56,34 @@ public class Teen implements Parcelable {
         this.medicalNumber = medicalNumber;
     }
 
+    public String getSharedData() {
+        return sharedData;
+    }
+
+    public void setSharedData(String sharedData) {
+        this.sharedData = sharedData;
+    }
+
+    public Set<String> getSharedDataAsList() {
+        if (sharedData != null) {
+            return new HashSet<>(Arrays.asList(sharedData.split(",")));
+        }
+
+        return null;
+    }
+
+    public void setSharedDataAsList(Set<String> values) {
+        if (values != null) {
+            StringBuilder sb = new StringBuilder();
+            for (String s : values) {
+                sb.append(s);
+                sb.append(",");
+            }
+
+            sharedData = sb.toString();
+        }
+    }
+
     public List<Follower> getFollowerList() {
         return followerList;
     }
@@ -72,6 +104,7 @@ public class Teen implements Parcelable {
         email = in.readString();
         birthday = in.readString();
         medicalNumber = in.readString();
+        sharedData = in.readString();
         user = (User) in.readValue(User.class.getClassLoader());
 
         if (in.readByte() == 0x01) {
@@ -87,7 +120,6 @@ public class Teen implements Parcelable {
         } else {
             pendingFollowerList = null;
         }
-
     }
 
     @Override
@@ -100,6 +132,7 @@ public class Teen implements Parcelable {
         dest.writeString(email);
         dest.writeString(birthday);
         dest.writeString(medicalNumber);
+        dest.writeString(sharedData);
         dest.writeValue(user);
 
         if (followerList == null) {

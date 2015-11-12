@@ -3,14 +3,22 @@ package com.capstone.server.controller;
 
 import static com.capstone.server.utils.Validators.isValidEmail;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +32,14 @@ import com.capstone.server.dao.UserDao;
 import com.capstone.server.model.Device;
 import com.capstone.server.model.DeviceMessage;
 import com.capstone.server.model.FollowDataRequest;
+import com.capstone.server.model.FollowDataResponse;
 import com.capstone.server.model.Follower;
 import com.capstone.server.model.JsonResponse;
 import com.capstone.server.model.Teen;
 import com.capstone.server.model.TeenListRequest;
 import com.capstone.server.model.User;
+import com.capstone.server.utils.Constants;
+import com.capstone.server.utils.Constants.SignInProvider;
 import com.capstone.server.utils.Constants.UserType;
 
 @Controller
@@ -49,50 +60,46 @@ public class TeenController {
     private DeviceDao deviceDao;
 
     @RequestMapping(value = RestUriConstants.LIST, method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody TeenListRequest requestTeenList(@RequestParam("email") String email) {
+    public @ResponseBody TeenListRequest requestTeenList(@RequestParam(RestUriConstants.PARAM_EMAIL) String email) {
         if (!isValidEmail(email)) {
             sLogger.info("Invalid parameters");
             return null;
         }
 
         // get user that has requested the list of teens
-        User requestorDb = userDao.find(email, true);
-        if (requestorDb == null) {
+        User requesterDb = userDao.find(email, true);
+        if (requesterDb == null) {
             sLogger.info("No such e-mail " + email);
             return null;
         }
 
         sLogger.info("User " + email + " requested list of teens");
 
-        // add only the fields that matter to be sent to android app
-        User requestor = new User();
-        requestor.setEmail(requestorDb.getEmail());
-        requestor.setType(requestorDb.getType());
+        // get information of the requester, such as its teen and pending teen list
+        User requester = new User();
+        requester.setEmail(requesterDb.getEmail());
+        requester.setType(requesterDb.getType());
 
-        if (requestorDb.getType() == UserType.TEEN.ordinal()) {
-            List<Follower> pendingFollowerListDb = requestorDb.getTeen().getPendingFollowerList();
-            for (Follower item : pendingFollowerListDb) {
-                item.setTeenList(null);
-                item.setUser(null);
-                item.setPendingTeenList(null);
-            }
-            Teen teenRequestor = new Teen();
-            teenRequestor.setPendingFollowerList(pendingFollowerListDb);
-
-            requestor.setTeen(teenRequestor);
-        } else if (requestorDb.getType() == UserType.FOLLOWER.ordinal()) {
-            List<Teen> pendingTeenList = requestorDb.getFollower().getPendingTeenList();
-            for (Teen item : pendingTeenList) {
-                item.setFollowerList(null);
-                item.setUser(null);
-                item.setPendingFollowerList(null);
-            }
-            Follower followerRequestor = new Follower();
-            followerRequestor.setPendingTeenList(pendingTeenList);
-
-            requestor.setFollower(followerRequestor);
+        List<Teen> pendingTeenListDb = requesterDb.getFollower().getPendingTeenList();
+        for (Teen item : pendingTeenListDb) {
+            item.setFollowerList(null);
+            item.setUser(null);
+            item.setPendingFollowerList(null);
         }
-        
+
+        List<Teen> teenListDb = requesterDb.getFollower().getTeenList();
+        for (Teen item : teenListDb) {
+            item.setFollowerList(null);
+            item.setUser(null);
+            item.setPendingFollowerList(null);
+        }
+
+        Follower followerRequestor = new Follower();
+        followerRequestor.setPendingTeenList(pendingTeenListDb);
+        followerRequestor.setTeenList(teenListDb);
+
+        requester.setFollower(followerRequestor);
+
         // get all teens from database
         List<User> teensListDb = (List<User>) userDao.findByType(UserType.TEEN.ordinal());
 
@@ -100,7 +107,7 @@ public class TeenController {
         User user; Teen teen;
         List<User> teensList = new ArrayList<>();
         for(User item : teensListDb) {
-            if(!item.getEmail().equals(requestor.getEmail())) {
+            if(!item.getEmail().equals(requester.getEmail())) {
                 user = new User();
                 user.setEmail(item.getEmail());
                 user.setFirstName(item.getFirstName());
@@ -111,14 +118,14 @@ public class TeenController {
                 teen.setMedicalNumber(item.getTeen().getMedicalNumber());
 
                 user.setTeen(teen);
-                
+
                 teensList.add(user);
             }
         }
 
         TeenListRequest teenListRequest = new TeenListRequest();
         teenListRequest.setTeenList(teensList);
-        teenListRequest.setRequester(requestor);
+        teenListRequest.setRequester(requester);
 
         return teenListRequest;
     }
@@ -169,10 +176,19 @@ public class TeenController {
 
                 DeviceMessage deviceMessage = new DeviceMessage();
                 deviceMessage.setDeviceList(Arrays.asList(device));
-                deviceMessage.setMessage("send follow request");
+                deviceMessage.setMessage(userDb.getFirstName() + " wants to follow you!");
 
                 DeviceController deviceController = new DeviceController();
-                deviceController.asyncSend(deviceMessage);
+                deviceController.asyncSend(deviceMessage, Constants.GCM_FOLLOW_REQUEST_TYPE);
+
+/*                // if a teen wants to start following someone
+                if (userDb.getType() == UserType.TEEN.ordinal() && userDb.getFollower() == null) {
+                    Follower follower = new Follower();
+                    follower.setEmail(userDb.getEmail());
+                    follower.setUser(userDb);
+
+                    userDb.setFollower(follower);
+                }*/
 
                 // add userEmail to list of pending followers for this teen
                 teenPendingFollowersDb = getUpdatedList(userDb, teenPendingFollowersDb, true);
@@ -181,8 +197,7 @@ public class TeenController {
                 teenDb.setPendingFollowerList(teenPendingFollowersDb);
                 teenDao.update(teenDb);
             }
-            // request to unfollow teen
-        } else {
+        } else { // request to unfollow teen
             teenFollowersDb = getUpdatedList(userDb, teenFollowersDb, false);
 
             // save changes to database
@@ -195,7 +210,8 @@ public class TeenController {
     }
 
     @RequestMapping(value = RestUriConstants.PENDING + "/" + RestUriConstants.LIST, method = RequestMethod.GET)
-    public @ResponseBody List<User> requestPendingFollowRequestList(@RequestParam("email") String email) {
+    public @ResponseBody List<User> requestPendingFollowRequestList(
+            @RequestParam(RestUriConstants.PARAM_EMAIL) String email) {
         if (!isValidEmail(email)) {
             sLogger.info("Invalid parameters");
             return null;
@@ -218,8 +234,7 @@ public class TeenController {
 
         List<Follower> pendingFollowerListDb = requestorDb.getTeen().getPendingFollowerList();
         
-        List<User> usersList = new ArrayList<>();
-        User user;
+        List<User> usersList = new ArrayList<>(); User user;
         for(Follower follower : pendingFollowerListDb) {
             // set only fields that matter
             user = new User();
@@ -235,10 +250,10 @@ public class TeenController {
     }
 
     @RequestMapping(value = RestUriConstants.FOLLOW + "/" + RestUriConstants.SUBMIT, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse confirmFollowRequest(@RequestBody final FollowDataRequest followRequest) {
+    public @ResponseBody FollowDataResponse confirmFollowRequest(@RequestBody final FollowDataRequest followRequest) {
         if (!isValidFollowData(followRequest)) {
             sLogger.info("Invalid parameters");
-            return new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters");
+            return new FollowDataResponse(new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters"), null);
         }
 
         // User that is waiting the teen to confirm follow request
@@ -263,25 +278,78 @@ public class TeenController {
         teenDb.setPendingFollowerList(teenPendingFollowersDb);
         teenDao.update(teenDb);
 
-        // FIXME - Add appropriate return message
+        
+        List<User> updatedUsersList = new ArrayList<>();
+        User user;
+        for(Follower follower : teenPendingFollowersDb) {
+            // set only fields that matter
+            user = new User();
+            user.setEmail(follower.getUser().getEmail());
+            user.setFirstName(follower.getUser().getFirstName());
+            user.setLastName(follower.getUser().getLastName());
+            user.setType(follower.getUser().getType());
+            
+            updatedUsersList.add(user);
+        }
+        
+        return new FollowDataResponse(new JsonResponse(HttpStatus.OK, "good"), updatedUsersList);
+    }
+
+    @RequestMapping(value = RestUriConstants.SHARED_DATA, method = RequestMethod.POST)
+    public @ResponseBody JsonResponse updateSharedData(@RequestBody final Teen teen) {
+        if (!isValidTeen(teen)) {
+            sLogger.info("Invalid parameters");
+            return null;
+        }
+
+        Teen teenDb = teenDao.find(teen.getEmail());
+        teenDb.setSharedData(teen.getSharedData());
+
+        teenDao.update(teenDb);
+
         return new JsonResponse(HttpStatus.OK, "good");
     }
 
-    @RequestMapping(value = "test", method = RequestMethod.GET)
-    public String home() {
-        User userDb = userDao.find("gafer@globo.com", true);
-        Teen teenDb = teenDao.find("felipemosso61@hotmail.com", true);
+    @RequestMapping(value = RestUriConstants.PHOTO, method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    public @ResponseBody byte[] retrieveTeenPhoto(
+            @RequestParam(RestUriConstants.PARAM_EMAIL) String email) throws IOException {
+        if (!isValidEmail(email)) {
+            sLogger.info("Invalid parameters");
+            return null;
+        }
 
-        //User userDb = new User();
-        //userDb.setEmail("felipemosso61@hotmail.com");
-        
-        List<Follower> teenFollowersDb = teenDb.getFollowerList();
-        teenFollowersDb = getUpdatedList(userDb, teenFollowersDb, true);
+        User userDb = userDao.find(email);
+        System.out.println("Retrieving " + email + " photo");
 
-        // save changes to database
-        teenDb.setFollowerList(teenFollowersDb);
-        teenDao.update(teenDb);
-        
+        if (userDb != null) {
+            InputStream in = null;
+            try {
+                if (SignInProvider.FACEBOOK.ordinal() == userDb.getProvider()) {
+                    in = downloadFacebookProfilePicture(userDb.getFacebookId());
+                } else if (SignInProvider.APPLICATION.ordinal() == userDb.getProvider()) {
+                    in = new FileInputStream("C:\\Users\\User\\Desktop\\images\\download.jpg");
+                }
+
+                if (in != null) {
+                    return IOUtils.toByteArray(in);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private static final String PROFILE_PICTURE_URL = "https://graph.facebook.com/%s/picture?type=large";
+
+    private InputStream downloadFacebookProfilePicture(String uid) throws MalformedURLException, IOException {
+        HttpURLConnection.setFollowRedirects(false);
+        String profilePictureUrlString = new URL(String.format(PROFILE_PICTURE_URL, uid))
+                .openConnection().getHeaderField("location");
+
+        if (profilePictureUrlString != null) {
+            return new URL(profilePictureUrlString).openStream();
+        }
         return null;
     }
 

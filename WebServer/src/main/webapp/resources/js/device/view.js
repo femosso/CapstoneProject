@@ -46,6 +46,8 @@ function() {
         });
     }
 
+    $("#device").addClass("active");
+
     $("#send-message").click(function(e) {
         e.preventDefault();
 
@@ -92,13 +94,8 @@ function() {
 
     });
 
-    // FIXME - this is to gray out the send/remove buttons when no checkbox is checked
-    /*$("#devices-table input[type=checkbox]").click(function () {
-        if ($("#devices-table input:checkbox:checked").length > 0) {
-            alert("one checked");
-        } else {
-            alert("no one checked");
-        }
-    });*/
+    $("#devices-table input[type=checkbox]").click(function () {
+        $("#send-button").prop("disabled", !($("#devices-table input:checkbox:checked").length > 0));
+    });
 
 });

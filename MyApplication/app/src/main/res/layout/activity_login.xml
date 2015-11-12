@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#e3e3e3"
-    tools:context=".LoginActivity">
+    android:background="#e3e3e3">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="@dimen/activity_horizontal_margin">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:layout_marginTop="50dp"
             android:layout_marginBottom="50dp"
+            android:layout_marginTop="50dp"
+            android:layout_weight="0.5"
             android:orientation="vertical">
 
             <TextView
@@ -25,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:gravity="center"
-                android:text="Got It\nDiabetes Management"
+                android:text="@string/login_project_title"
                 android:textColor="#333333"
                 android:textSize="30sp" />
         </RelativeLayout>
@@ -44,7 +42,7 @@
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email"
+                    android:hint="@string/hint_email"
                     android:inputType="textEmailAddress" />
             </android.support.design.widget.TextInputLayout>
 
@@ -52,37 +50,36 @@
                 android:id="@+id/passwordWrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/emailWrapper"
                 android:layout_marginTop="4dp">
 
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Password"
+                    android:hint="@string/hint_password"
                     android:inputType="textPassword" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_login"
+                android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Login" />
+                android:text="@string/login" />
 
             <com.facebook.login.widget.LoginButton
-                android:id="@+id/btn_facebook_login"
+                android:id="@+id/btnFacebookLogin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 android:layout_marginTop="4dp" />
 
             <TextView
-                android:id="@+id/link_register"
+                android:id="@+id/txtRegisterLink"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Don't have an account yet? Sign up here!"
-                android:textSize="16dip" />
+                android:text="@string/sign_up"
+                android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

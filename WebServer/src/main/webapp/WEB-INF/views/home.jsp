@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set var="resources" scope="request">resources</c:set>
 
 <!DOCTYPE html>
@@ -18,13 +19,17 @@
     <div class="container">
       <jsp:include page="header.jsp" />
 
-      <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-        <h1>Navbar example</h1>
-        <p>This example is a quick exercise to illustrate how the
-          default, static navbar and fixed to top navbar work. It includes
-          the responsive CSS and HTML, so it also adapts to your viewport
-          and device.</p>
+        <c:choose>
+          <c:when test="${loggedUser.type == 0}">
+            <h1><spring:message code="label.home.welcome"/></h1>
+            <p><spring:message code="label.home.welcomeDescription"/></p>
+          </c:when>
+          <c:otherwise>
+            <h1><spring:message code="label.home.projectFullName"/></h1>
+            <p><spring:message code="label.home.welcomeDescription"/></p>
+          </c:otherwise>
+        </c:choose>
       </div>
     </div>
 
@@ -35,5 +40,8 @@
     <script src="${resources}/js/cryptojs/md5.js"></script>
     <script src="${resources}/js/toastr/toastr.min.js"></script>
     <script src="${resources}/js/login/box.js"></script>
+    <script>
+      $("#home").addClass("active");
+    </script>
   </body>
 </html>

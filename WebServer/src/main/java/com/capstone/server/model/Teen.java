@@ -2,7 +2,10 @@
 package com.capstone.server.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -40,6 +43,8 @@ public class Teen implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "PendingTeenFollower", joinColumns = @JoinColumn(name = "teenEmail") , inverseJoinColumns = @JoinColumn(name = "followerEmail") )
     private List<Follower> pendingFollowerList;
+
+    private String sharedData;
 
     public Teen() {
     }
@@ -92,4 +97,31 @@ public class Teen implements Serializable {
         this.pendingFollowerList = pendingFollowerList;
     }
 
+    public String getSharedData() {
+        return sharedData;
+    }
+
+    public void setSharedData(String sharedData) {
+        this.sharedData = sharedData;
+    }
+
+    public Set<String> getSharedDataAsList() {
+        if(sharedData != null) {
+            return new HashSet<>(Arrays.asList(sharedData.split(",")));
+        }
+
+        return null;
+    }
+
+    public void setSharedDataAsList(Set<String> values) {
+        if (values != null) {
+            StringBuilder sb = new StringBuilder();
+            for(String s : values) {
+                sb.append(s);
+                sb.append(",");
+            }
+
+            sharedData = sb.toString();
+        }
+    }
 }

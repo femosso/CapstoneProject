@@ -16,18 +16,27 @@
     <color name="myTextPrimaryColor">#212121</color>
     <color name="myNavigationColor">#000</color>
 
+    <!-- Navigation Drawer row colors -->
     <drawable name="pressed_gray">#0c000000</drawable>
     <drawable name="selected_gray">#2c000000</drawable>
 
-    <color name="counter_text_bg">#626262</color>
-    <color name="counter_text_color">#c5c4c4</color>
-
     <!-- Teen row colors -->
-    <color name="genre">#666666</color>
-    <color name="year">#888888</color>
     <color name="list_divider">#d9d9d9</color>
     <color name="list_row_start_color">#ffffff</color>
     <color name="list_row_end_color">#ffffff</color>
     <color name="list_row_hover_start_color">#ebeef0</color>
     <color name="list_row_hover_end_color">#ebeef0</color>
+
+    <!-- Follow request button colors -->
+    <color name="follow_request_checked">#751300</color>
+    <color name="follow_request_unchecked">#16750F</color>
+    <color name="follow_request_disabled">#547544</color>
+
+    <!-- Navigation Drawer counter colors -->
+    <color name="nav_drawer_counter_text_bg">#626262</color>
+    <color name="nav_drawer_counter_text_color">#c5c4c4</color>
+
+    <!-- Action bar counter colors -->
+    <color name="action_bar_counter_color">#ffff0000</color>
+    <color name="action_bar_counter_stroke_color">#ff222222</color>
 </resources>

@@ -50,16 +50,7 @@ public class JpaCheckInDao implements CheckInDao {
     public CheckIn find(long id, boolean forceLoad) {
         CheckIn checkIn = em.find(CheckIn.class, id);
         if (checkIn != null && forceLoad) {
-            Hibernate.initialize(checkIn.getUser());
-
-            // initialize list of answers
-            List<Answer> answerList = checkIn.getAnswerList();
-            Hibernate.initialize(answerList);
-
-            // initialize list of such answers' questions
-            for(Answer answer : answerList) {
-                Hibernate.initialize(answer.getQuestion());
-            }
+            initializeCheckIn(checkIn);
         }
 
         return checkIn;
@@ -78,11 +69,39 @@ public class JpaCheckInDao implements CheckInDao {
         Collection<CheckIn> checkIns = (Collection<CheckIn>) query.getResultList();
         if (checkIns != null && forceLoad) {
             for (CheckIn checkIn : checkIns) {
-                Hibernate.initialize(checkIn.getUser());
-                Hibernate.initialize(checkIn.getAnswerList());
+                initializeCheckIn(checkIn);
             }
         }
 
         return checkIns;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Transactional
+    public Collection<CheckIn> findByTeen(String email) {
+        Query query = em.createQuery(
+                "SELECT e FROM CheckIn e where e.user.email=:arg1");
+        query.setParameter("arg1", email);
+
+        Collection<CheckIn> checkIns = (Collection<CheckIn>) query.getResultList();
+        if(checkIns != null) {
+            for(CheckIn checkIn : checkIns) {
+                initializeCheckIn(checkIn);
+            }
+        }
+        return checkIns;
+    }
+
+    public void initializeCheckIn(CheckIn checkIn) {
+        Hibernate.initialize(checkIn.getUser());
+
+        // initialize list of answers
+        List<Answer> answerList = checkIn.getAnswerList();
+        Hibernate.initialize(answerList);
+
+        // initialize list of such answers' questions
+        for(Answer answer : answerList) {
+            Hibernate.initialize(answer.getQuestion());
+        }
     }
 }

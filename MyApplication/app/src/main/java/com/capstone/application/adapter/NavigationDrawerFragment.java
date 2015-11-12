@@ -33,9 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fragment used for managing interactions for and presentation of a navigation drawer.
- * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
- * design guidelines</a> for a complete explanation of the behaviors implemented here.
+ * Fragment used for managing interactions and presentation of a navigation drawer.
  */
 public class NavigationDrawerFragment extends Fragment implements NavigationDrawerCallbacks {
 
@@ -60,6 +58,8 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
      */
     private ActionBarDrawerToggle mActionBarDrawerToggle;
 
+    private NavigationDrawerAdapter mAdapter;
+
     private DrawerLayout mDrawerLayout;
 
     private RecyclerView mDrawerList;
@@ -69,7 +69,6 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
     private int mCurrentSelectedPosition = 0;
 
     private boolean mFromSavedInstanceState;
-
     private boolean mUserLearnedDrawer;
 
     private static String[] mNavItemLabels = null;
@@ -80,19 +79,13 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
 
     private Context mContext;
 
-    private int mUserType;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mContext = getActivity().getApplicationContext();
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mUserType = sharedPreferences.getInt(Constants.USER_TYPE, -1);
-
-        // Read in the flag indicating whether or not the user has demonstrated awareness of the
-        // drawer. See PREF_USER_LEARNED_DRAWER for details.
+        // Read in the flag indicating whether or not the user has demonstrated awareness of the drawer.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
@@ -117,8 +110,6 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
         };
     }
 
-    NavigationDrawerAdapter mAdapter;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
@@ -134,6 +125,7 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
         mDrawerList.setAdapter(mAdapter);
 
         selectItem(mCurrentSelectedPosition, false);
+
         return view;
     }
 
@@ -166,7 +158,7 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
 
         // if logged user is not a teen, hide Check In tab from sliding menu
         int userType = sharedPreferences.getInt(Constants.USER_TYPE, -1);
-        if(userType != Constants.UserType.TEEN.ordinal()) {
+        if (userType != Constants.UserType.TEEN.ordinal()) {
             items.remove(2);
         } else {
             items.get(2).setCount(getPendingCheckInCount());
@@ -219,11 +211,13 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
                 if (!isAdded()) {
                     return;
                 }
+
                 if (!mUserLearnedDrawer) {
                     mUserLearnedDrawer = true;
                     SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
                 }
+
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -250,11 +244,6 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
     }
 
     private void selectItem(int position, boolean triggerCallbacks) {
-        // if logged user is not a teen, there will not be check in item on sliding menu
-        if (mUserType != Constants.UserType.TEEN.ordinal() && position > 1) {
-            position++;
-        }
-
         mCurrentSelectedPosition = position;
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
@@ -324,12 +313,19 @@ public class NavigationDrawerFragment extends Fragment implements NavigationDraw
     public void updateQuestionCounter() {
         // update question item counter
         mAdapter.updateCounter(2, getPendingCheckInCount());
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemChanged(2);
     }
 
     private int getPendingCheckInCount() {
+        int count = 0;
         Cursor cursor = mContext.getContentResolver().query(PendingCheckInProvider.CONTENT_URI,
                 null, null, null, null);
-        return cursor != null ? cursor.getCount() : 0;
+
+        if (cursor != null) {
+            count = cursor.getCount();
+            cursor.close();
+        }
+
+        return count;
     }
 }

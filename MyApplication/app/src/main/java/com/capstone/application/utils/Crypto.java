@@ -3,9 +3,12 @@ package com.capstone.application.utils;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Helper class to get the hash of password to be sent over to the app's server when performing login
+ */
 public class Crypto {
 
-    public static final String md5(final String s) {
+    public static String md5(final String s) {
         try {
             // Create MD5 Hash
             MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
@@ -13,9 +16,9 @@ public class Crypto {
             byte messageDigest[] = digest.digest();
 
             // Create Hex String
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++) {
-                String h = Integer.toHexString(0xFF & messageDigest[i]);
+            StringBuilder hexString = new StringBuilder();
+            for (byte item : messageDigest) {
+                String h = Integer.toHexString(0xFF & item);
                 while (h.length() < 2) {
                     h = "0" + h;
                 }

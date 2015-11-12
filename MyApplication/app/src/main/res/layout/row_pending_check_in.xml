@@ -6,7 +6,7 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/date"
+        android:id="@+id/txtDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="title"
@@ -14,24 +14,24 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/delayTime"
+        android:id="@+id/txtDelayTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Small Text"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:layout_alignBottom="@+id/button2"
+        android:layout_alignBottom="@+id/btnAnswerNow"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <Button
+        android:id="@+id/btnAnswerNow"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Answer Now"
-        android:id="@+id/button2"
-        android:layout_below="@+id/date"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="45dp" />
+        android:layout_below="@+id/txtDate"
+        android:layout_marginTop="45dp"
+        android:text="@string/answer_now" />
 
 </RelativeLayout>

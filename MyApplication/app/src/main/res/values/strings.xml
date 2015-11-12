@@ -1,11 +1,17 @@
 <resources>
     <string name="app_name">My Application</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="action_search">Search</string>
+    <string name="facebook_app_id">1569471569983376</string>
+
+    <!-- NavigationDrawerFragment -->
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
 
+    <!-- Actions in menu/main.xml -->
+    <string name="action_about">About</string>
+    <string name="action_pending_requests">Pending Requests</string>
+
+    <!-- Navigation Drawer Items -->
     <string name="nav_item_home">Home</string>
     <string name="nav_item_teens">Teens</string>
     <string name="nav_item_check_ins">Check Ins</string>
@@ -15,7 +21,128 @@
     <!-- Content Description -->
     <string name="desc_item_icon">Item Icon</string>
 
-    <string name="facebook_app_id">1569471569983376</string>
+    <!-- Activity Names -->
+    <string name="activity_name_about">About</string>
+    <string name="activity_name_check_in_details">Check-in Details</string>
+    <string name="activity_name_check_in_photo">Check-in Photo</string>
+    <string name="activity_name_follow_request">Follow Request List</string>
+    <string name="activity_name_graph_view">Graph View</string>
 
-    <string name="no_logged_user">No user logged in</string>
+    <!-- CheckInPhotoActivity -->
+    <string name="check_in_photo_not_loaded">Could not load any image from server</string>
+
+    <!-- CheckInDetailsActivity -->
+    <string name="check_in_date">Date:&#160;</string>
+    <string name="check_in_time">Time:&#160;</string>
+    <string name="teen_name">Name:&#160;</string>
+    <string name="teen_birthday">Birthday:&#160;</string>
+    <string name="teen_medical_number">Medical Number:&#160;</string>
+    <string name="check_in_history_not_loaded">Could not load the history of this question</string>
+
+    <!-- CheckInWizardActivity -->
+    <string name="check_in_wizard_not_initialized">Not able to initialize wizard - no questions</string>
+    <string name="check_in_wizard_not_answered">You must answer all questions before proceed!</string>
+    <string name="check_in_wizard_finish">Finish</string>
+    <string name="check_in_wizard_review">Review</string>
+    <string name="check_in_wizard_next">Next</string>
+    <string name="check_in_confirm_alert_title">Would you like to send this check in to server?</string>
+    <string name="check_in_confirm_alert_negative">Add Photo</string>
+    <string name="check_in_confirm_alert_positive">Send</string>
+    <string name="check_in_confirm_alert_neutral">Cancel</string>
+
+    <!-- LineChartActivity -->
+    <string name="chart_no_data">You need to provide data for the chart.</string>
+
+    <!-- LoginActivity -->
+    <string name="not_valid_email">Not a valid email address!</string>
+    <string name="not_valid_password">Not a valid password!</string>
+    <string name="login_failure">Fail to login, please try again later</string>
+    <string name="unexpected_result">Unexpected result</string>
+    <string name="no_user_logged_in">No user logged in, please log in again</string>
+
+    <!-- RegisterActivity -->
+    <string name="not_valid_name">Not a valid name!</string>
+    <string name="not_valid_date">Not a valid date!</string>
+    <string name="not_valid_medical_number">Not a medical number!</string>
+
+    <!-- FollowRequestListAdapter -->
+    <string name="user_type">User Type:&#160;</string>
+    <string name="user_type_teen">Teen</string>
+    <string name="user_type_follower">Follower</string>
+
+    <!-- PendingCheckInListAdapter -->
+    <string name="last_pending_check_in_time">"%1$s min, %2$s sec ago"</string>
+    <string name="do_check_in_now">Do a Check In now!</string>
+
+    <!-- TeenAlarmReceiver -->
+    <string name="notification_new_check_in_title">New Check In</string>
+    <string name="notification_new_check_in_content">It\'s time for a new check in!</string>
+    <string name="answer_now">Answer Now</string>
+    <string name="answer_later">Later</string>
+
+    <!-- Texts displayed in empty views -->
+    <string name="no_check_in_retrieve">No check in retrieved.</string>
+    <string name="no_teen_retrieve">No teen retrieved.</string>
+    <string name="no_pending_follow_request">You have no pending follow request.</string>
+    <string name="no_pending_check_in">You have no pending check ins.</string>
+
+    <!-- Common information from Async Tasks -->
+    <string name="progress_dialog_loading">Loading data from server, please wait.</string>
+    <string name="progress_dialog_sending">Sending data to server, please wait.</string>
+
+    <!-- preferences.xml -->
+    <string name="reminder_frequency_title">Reminder Frequency</string>
+    <string name="reminder_frequency_summary">How many times per day you would like to be asked about your health conditions.</string>
+    <string name="shared_data_title">Shared Data</string>
+    <string name="shared_data_summary">Which kind of data you would like to shared with your followers.</string>
+    <string name="server_url_title">Server URL</string>
+    <string name="server_url_summary">The URL where this application server is hosted.</string>
+
+    <!-- action_bar_notification_icon.xml -->
+    <string name="img_notification_description">Notification</string>
+
+    <!-- activity_about.xml -->
+    <string name="about_git_hub_directories">This application uses the following GitHub repositories:</string>
+    <string name="about_graph_views">Graph Views</string>
+    <string name="about_graph_views_link">https://github.com/PhilJay/MPAndroidChart/</string>
+    <string name="about_check_in_wizard">Check In Wizard</string>
+    <string name="about_check_in_link">https://github.com/TechFreak/WizardPager/</string>
+
+    <!-- activity_check_in_details.xml -->
+    <string name="check_in_information_divider">Check-in Information</string>
+    <string name="check_in_photo">Check In Photo</string>
+    <string name="teen_information_divider">Teen Information</string>
+    <string name="questions_and_feedback_divider">Questions &amp; Feedback</string>
+
+    <!-- activity_check_in_photo.xml -->
+    <string name="img_check_in_description">Check In Photo</string>
+
+    <!-- activity_login.xml -->
+    <string name="login_project_title">Got It\nDiabetes Management</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Don\'t have an account yet? Sign up here!</string>
+
+    <!-- activity_question_wizard.xml -->
+    <string name="next_question">next</string>
+    <string name="prev_question">prev</string>
+
+    <!-- activity_register.xml -->
+    <string name="img_register_description">Registering image</string>
+    <string name="i_am_a_teen">I am a Teen!</string>
+    <string name="hint_name">Name</string>
+    <string name="hint_medical_number">Medical Number</string>
+    <string name="hint_date_of_birth">Date of Birth</string>
+    <string name="create_account_button">Create Account</string>
+    <string name="create_account_facebook_button">Register with Facebook</string>
+
+    <!-- row_follow_request.xml -->
+    <string name="confirm_follow_request">Confirm</string>
+    <string name="deny_follow_request">Deny</string>
+
+    <!-- row_teen.xml -->
+    <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
+    <string name="requested">Requested</string>
 </resources>

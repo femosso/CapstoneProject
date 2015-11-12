@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Question implements Parcelable {
-
     private Long id;
 
     private String text;

@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.capstone.application.R;
 import com.capstone.application.activity.CheckInWizardActivity;
 import com.capstone.application.alarm.TeenAlarmReceiver;
-import com.capstone.application.fragment.CheckInsFragment;
+import com.capstone.application.fragment.PendingCheckInsFragment;
 import com.capstone.application.model.PendingCheckIn;
 import com.capstone.application.model.Question;
 import com.capstone.application.utils.Constants;
@@ -29,11 +29,11 @@ public class PendingCheckInListAdapter extends BaseAdapter {
     private static final String TAG = PendingCheckInListAdapter.class.getName();
 
     private Activity mActivity;
-    private CheckInsFragment mFragment;
+    private PendingCheckInsFragment mFragment;
     private LayoutInflater inflater;
     private List<PendingCheckIn> mPendingCheckInItems;
 
-    public PendingCheckInListAdapter(CheckInsFragment fragment, List<PendingCheckIn> pendingCheckIns) {
+    public PendingCheckInListAdapter(PendingCheckInsFragment fragment, List<PendingCheckIn> pendingCheckIns) {
         mFragment = fragment;
         mActivity = mFragment.getActivity();
         setPendingCheckInList(pendingCheckIns);
@@ -72,10 +72,10 @@ public class PendingCheckInListAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.row_pending_check_in, parent, false);
 
             viewHolder = new ViewHolderItem();
-            viewHolder.date = (TextView) convertView.findViewById(R.id.date);
-            viewHolder.delayTime = (TextView) convertView.findViewById(R.id.delayTime);
+            viewHolder.date = (TextView) convertView.findViewById(R.id.txtDate);
+            viewHolder.delayTime = (TextView) convertView.findViewById(R.id.txtDelayTime);
 
-            viewHolder.answerNow = (Button) convertView.findViewById(R.id.button2);
+            viewHolder.answerNow = (Button) convertView.findViewById(R.id.btnAnswerNow);
             viewHolder.answerNow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -93,7 +93,7 @@ public class PendingCheckInListAdapter extends BaseAdapter {
 
         long delay = System.currentTimeMillis() - pendingCheckIn.getDate();
 
-        String value = String.format("%d min, %d sec",
+        String value = mActivity.getString(R.string.last_pending_check_in_time,
                 TimeUnit.MILLISECONDS.toMinutes(delay),
                 TimeUnit.MILLISECONDS.toSeconds(delay) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delay)));
@@ -106,6 +106,7 @@ public class PendingCheckInListAdapter extends BaseAdapter {
     public static class ViewHolderItem {
         TextView date;
         TextView delayTime;
+
         Button answerNow;
     }
 
@@ -121,13 +122,13 @@ public class PendingCheckInListAdapter extends BaseAdapter {
 
         @Override
         protected void onPreExecute() {
-            mDialog.setMessage("Doing something, please wait.");
+            mDialog.setMessage(mActivity.getString(R.string.progress_dialog_loading));
             mDialog.show();
         }
 
         @Override
         protected List<Question> doInBackground(Void... params) {
-            return TeenAlarmReceiver.retrieveNewCheckInFromServer();
+            return TeenAlarmReceiver.retrieveNewCheckInFromServer(mActivity);
         }
 
         @Override
@@ -141,7 +142,7 @@ public class PendingCheckInListAdapter extends BaseAdapter {
                 intent.putParcelableArrayListExtra("questions", new ArrayList<>(questions));
                 intent.putExtra("pendingCheckInId", mPendingCheckInId);
 
-                mFragment.startActivityForResult(intent, CheckInsFragment.WIZARD_REQUEST_CODE);
+                mFragment.startActivityForResult(intent, PendingCheckInsFragment.WIZARD_REQUEST_CODE);
             }
         }
     }

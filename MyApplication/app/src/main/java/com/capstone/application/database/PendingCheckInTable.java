@@ -24,8 +24,8 @@ public class PendingCheckInTable {
 
     public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         Log.w(PendingCheckInTable.class.getName(), "Upgrading database from version "
-                + oldVersion + " to " + newVersion
-                + ", which will destroy all old data");
+                + oldVersion + " to " + newVersion + ", which will destroy all old data");
+
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_PENDING_CHECK_IN);
         onCreate(database);
     }

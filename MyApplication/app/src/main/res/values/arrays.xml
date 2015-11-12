@@ -12,10 +12,10 @@
     <!-- navigation drawer item icons  -->
     <array name="nav_drawer_icons">
         <item>@drawable/ic_home</item>
-        <item>@drawable/ic_whats_hot</item>
-        <item>@drawable/ic_people</item>
-        <item>@drawable/ic_photos</item>
-        <item>@drawable/ic_communities</item>
+        <item>@drawable/ic_teens</item>
+        <item>@drawable/ic_check_in</item>
+        <item>@drawable/ic_settings</item>
+        <item>@drawable/ic_logout</item>
     </array>
 
     <!-- possible reminder frequency values in settings preference -->
@@ -36,11 +36,5 @@
         <item>Type 1</item>
         <item>Type 2</item>
         <item>Type 3</item>
-    </string-array>
-
-    <string-array name="shared_data_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
     </string-array>
 </resources>

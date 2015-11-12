@@ -5,15 +5,20 @@
         android:entries="@array/reminder_frequency"
         android:entryValues="@array/reminder_frequency_values"
         android:key="reminderFrequency"
-        android:summary="How many times per day you would like to be asked about your health conditions"
-        android:title="Reminder Frequency" />
+        android:summary="@string/reminder_frequency_summary"
+        android:title="@string/reminder_frequency_title" />
 
     <MultiSelectListPreference
-        android:defaultValue="@array/shared_data_values"
+        android:defaultValue="@array/shared_data"
         android:entries="@array/shared_data"
-        android:entryValues="@array/shared_data_values"
+        android:entryValues="@array/shared_data"
         android:key="sharedData"
-        android:summary="Which kind of data you would like to shared with your followers"
-        android:title="Shared Data" />
+        android:summary="@string/shared_data_summary"
+        android:title="@string/shared_data_title" />
 
+    <EditTextPreference
+        android:summary="@string/server_url_summary"
+        android:title="@string/server_url_title"
+        android:key="serverUrl"
+        android:defaultValue="http://192.168.0.105:8080/WebServer"/>
 </PreferenceScreen>

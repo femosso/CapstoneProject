@@ -15,10 +15,10 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="${ctx}"><spring:message code="label.header.home"/></a></li>
+        <li id="home"><a href="${ctx}"><spring:message code="label.header.home"/></a></li>
         <c:choose>
           <c:when test="${loggedUser.type == 0}">
-            <li class="dropdown">
+            <li id="question" class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                 <spring:message code="label.header.question"/><span class="caret"></span>
               </a>
@@ -27,7 +27,7 @@
                 <li><a href="${ctx}/question/view"><spring:message code="label.header.viewRemoveQuestions"/></a></li>
               </ul>
             </li>
-            <li class="dropdown">
+            <li id="device" class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                 <spring:message code="label.header.device"/><span class="caret"></span>
               </a>
@@ -41,7 +41,7 @@
       <ul class="nav navbar-nav navbar-right">
         <c:choose>
           <c:when test="${loggedUser == null}">
-            <li><a href="${ctx}/login/register"><spring:message code="label.header.signUp"/></a></li>
+            <li id="register"><a href="${ctx}/login/register"><spring:message code="label.header.signUp"/></a></li>
           </c:when>
         </c:choose>
         <li class="dropdown">

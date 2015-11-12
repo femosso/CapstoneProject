@@ -1,9 +1,9 @@
 package com.capstone.application.activity;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -36,8 +36,6 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
 
     private LineChart mChart;
 
-    private Context mContext;
-
     private String mInformationType;
 
     @Override
@@ -45,26 +43,28 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_linechart);
 
-        mContext = getApplicationContext();
-
         // set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Graphic View");
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Feedback feedback = null;
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(getString(R.string.activity_name_graph_view));
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            feedback = extras.getParcelable("feedback");
+            Feedback feedback = extras.getParcelable("feedback");
             mInformationType = extras.getString("type");
-        }
 
-        initOverallInformation(feedback);
-        initChart(feedback.getAnswerList());
+            if (feedback != null) {
+                initOverallInformation(feedback);
+                initChart(feedback.getAnswerList());
+            }
+        }
     }
 
     /**
@@ -80,17 +80,18 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         String startDate = new SimpleDateFormat(Constants.DATE_FORMAT).format(start);
         String endDate = new SimpleDateFormat(Constants.DATE_FORMAT).format(end);
 
-        TextView informationType = (TextView) findViewById(R.id.informationType);
-        informationType.setText(Html.fromHtml("<b>" + feedback.getUser().getFirstName() + "</b>'s " + mInformationType + " data from " + startDate + " to " + endDate));
+        TextView informationType = (TextView) findViewById(R.id.txtInformationType);
+        informationType.setText(Html.fromHtml("<b>" + feedback.getUser().getFirstName() +
+                "</b>'s " + mInformationType + " data from " + startDate + " to " + endDate));
     }
 
     private void initChart(List<Answer> answerList) {
-        mChart = (LineChart) findViewById(R.id.chart1);
+        mChart = (LineChart) findViewById(R.id.lineChart);
         mChart.setOnChartValueSelectedListener(this);
 
         // no description text
         mChart.setDescription("");
-        mChart.setNoDataTextDescription("You need to provide data for the chart.");
+        mChart.setNoDataTextDescription(getString(R.string.chart_no_data));
 
         // enable touch gestures
         mChart.setTouchEnabled(true);
@@ -106,7 +107,7 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
 
         // set an alternative background color
         // mChart.setBackgroundColor(Color.GRAY);
-// add data
+        // add data
         setData(answerList);
 
         mChart.animateX(2500);
@@ -161,7 +162,7 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         ArrayList<Entry> yVals = new ArrayList<>();
 
         String date;
-        int count = 1;
+        int count = 0;
         for (Answer answer : answerList) {
             try {
                 date = new SimpleDateFormat("MM/dd HH:mm").format(answer.getCheckIn().getDate());
@@ -203,12 +204,9 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
 
     @Override
     public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
-        Log.i("Entry selected", e.toString());
-        Log.i("", "low: " + mChart.getLowestVisibleXIndex() + ", high: " + mChart.getHighestVisibleXIndex());
     }
 
     @Override
     public void onNothingSelected() {
-        Log.i("Nothing selected", "Nothing selected.");
     }
 }

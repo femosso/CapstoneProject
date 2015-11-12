@@ -1,11 +1,12 @@
 
 package com.capstone.server.controller;
 
+import static com.capstone.server.utils.Validators.isValidDate;
 import static com.capstone.server.utils.Validators.isValidEmail;
 import static com.capstone.server.utils.Validators.isValidString;
-import static com.capstone.server.utils.Validators.isValidDate;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.capstone.server.dao.FollowerDao;
 import com.capstone.server.dao.TeenDao;
 import com.capstone.server.dao.UserDao;
 import com.capstone.server.model.Follower;
@@ -30,6 +30,7 @@ import com.capstone.server.model.LoginResponse;
 import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants;
+import com.capstone.server.utils.Constants.QuestionType;
 import com.capstone.server.utils.Constants.SignInProvider;
 import com.capstone.server.utils.Constants.UserType;
 
@@ -46,9 +47,6 @@ public class LoginController implements MessageSourceAware {
 
     @Autowired
     private TeenDao teenDao;
-
-    @Autowired
-    private FollowerDao followerDao;
 
     private MessageSource messageSource;
 
@@ -84,6 +82,16 @@ public class LoginController implements MessageSourceAware {
 
             // set relevant information
             user.setType(userDb.getType());
+
+            // if logged user is a teen, load some basic informations (sharedData and etc)
+            if (user.getType() == UserType.TEEN.ordinal()) {
+                Teen teenDb = teenDao.find(user.getEmail());
+
+                Teen teen = new Teen();
+                teen.setSharedData(teenDb.getSharedData());
+
+                user.setTeen(teen);
+            }
 
             loginResponse.setJsonResponse(new JsonResponse(HttpStatus.OK, output));
             loginResponse.setUser(user);
@@ -126,6 +134,16 @@ public class LoginController implements MessageSourceAware {
                 Teen teen = user.getTeen();
                 teen.setUser(user);
                 teen.setEmail(user.getEmail());
+
+                // at first, all check-in data should be shared
+                teen.setSharedDataAsList(new HashSet<>(Arrays.asList(QuestionType.names())));
+
+                // as all teen could be a follower, we initialize follower instance for this teen
+                Follower follower = new Follower();
+                follower.setEmail(user.getEmail());
+                follower.setUser(user);
+
+                user.setFollower(follower);
             } else if (user.getType() == UserType.FOLLOWER.ordinal()) {
                 Follower follower = user.getFollower();
                 follower.setUser(user);

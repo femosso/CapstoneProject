@@ -3,8 +3,8 @@ package com.capstone.application.model;
 import org.springframework.http.HttpStatus;
 
 public class JsonResponse {
-
     private HttpStatus status;
+
     private String message;
 
     public JsonResponse() {

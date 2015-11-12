@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragment.QuestionsFragment">
+    android:layout_height="match_parent">
 
     <ListView
-        android:id="@+id/list"
+        android:id="@+id/listPendingCheckIns"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:divider="@color/list_divider"
@@ -14,26 +12,25 @@
         android:listSelector="@drawable/row_teen_selector" />
 
     <RelativeLayout
-        android:id="@+id/empty"
+        android:id="@+id/emptyLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/checkInNowButton"
+            android:id="@+id/btnCheckInNow"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:text="Do a Check In now!" />
+            android:text="@string/do_check_in_now" />
 
         <TextView
-            android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/checkInNowButton"
+            android:layout_above="@+id/btnCheckInNow"
             android:layout_centerHorizontal="true"
-            android:text="You have no pending check ins."
+            android:text="@string/no_pending_check_in"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </RelativeLayout>
 </RelativeLayout>

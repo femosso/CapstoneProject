@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Follower implements Parcelable {
-
     private String email;
 
     private User user;

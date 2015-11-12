@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,10 +25,14 @@ import com.capstone.server.dao.CheckInDao;
 import com.capstone.server.dao.UserDao;
 import com.capstone.server.model.Answer;
 import com.capstone.server.model.CheckIn;
+import com.capstone.server.model.Device;
+import com.capstone.server.model.DeviceMessage;
+import com.capstone.server.model.Follower;
 import com.capstone.server.model.JsonResponse;
 import com.capstone.server.model.Question;
 import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
+import com.capstone.server.utils.Constants;
 
 @Controller
 @RequestMapping(RestUriConstants.CHECK_IN_CONTROLLER)
@@ -51,52 +54,60 @@ public class CheckInController {
         }
 
         // get user that has requested the list of latest check ins
-        User requestorDb = userDao.find(email, true);
-        if (requestorDb == null) {
+        User requesterDb = userDao.find(email, true);
+        if (requesterDb == null) {
             sLogger.info("No such e-mail " + email);
             return null;
         }
 
         sLogger.info("User " + email + " requested list of latest check ins");
 
-        List<CheckIn> checkInsDb = (List<CheckIn>) checkInDao.findAll(true);
-
-        // add only the fields that matter to be sent to android app
-        CheckIn checkIn; Teen teen; User user;
         List<CheckIn> checkIns = new ArrayList<>();
-        for (CheckIn checkInDb : checkInsDb) {
-            teen = new Teen();
-            teen.setBirthday(checkInDb.getUser().getTeen().getBirthday());
-            teen.setMedicalNumber(checkInDb.getUser().getTeen().getMedicalNumber());
 
-            user = new User();
-            user.setEmail(checkInDb.getUser().getEmail());
-            user.setFirstName(checkInDb.getUser().getFirstName());
-            user.setTeen(teen);
+        // retrieve all teens that the requester user is following
+        List<Teen> teenListDb = requesterDb.getFollower().getTeenList();
+        for (Teen teenDb : teenListDb) {
+            // get all the check ins of each user the requester is following
+            List<CheckIn> checkInsDb = (List<CheckIn>) checkInDao.findByTeen(teenDb.getEmail());
 
-            checkIn = new CheckIn();
-            checkIn.setUser(user);
+            // add only the fields that matter to be sent to android app
+            CheckIn checkIn; User user;
+            for (CheckIn checkInDb : checkInsDb) {
+                user = new User();
+                user.setEmail(checkInDb.getUser().getEmail());
+                user.setFirstName(checkInDb.getUser().getFirstName());
+                user.setLastName(checkInDb.getUser().getLastName());
 
-            checkIn.setId(checkInDb.getId());
-            checkIn.setDate(checkInDb.getDate());
+                checkIn = new CheckIn();
+                checkIn.setUser(user);
 
-            checkIns.add(checkIn);
+                checkIn.setId(checkInDb.getId());
+                checkIn.setDate(checkInDb.getDate());
+
+                checkIn.setAnswerList(buildAnswerList(checkInDb, teenDb));
+                checkIns.add(checkIn);
+            }
         }
 
         return checkIns;
     }
 
     @RequestMapping(value = RestUriConstants.VIEW, method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody CheckIn requestCheckIn(@RequestParam("id") long id) {
+    public @ResponseBody CheckIn requestCheckIn(@RequestParam(RestUriConstants.PARAM_ID) long id) {
         CheckIn checkInDb = checkInDao.find(id, true);
+
+        if (checkInDb == null) {
+            return null;
+        }
 
         // add only the fields that matter to be sent to android app
         Teen teen; User user; CheckIn checkIn;
-        Answer answer; List<Answer> answers; Question question;
+
+        Teen teenDb = checkInDb.getUser().getTeen();
 
         teen = new Teen();
-        teen.setBirthday(checkInDb.getUser().getTeen().getBirthday());
-        teen.setMedicalNumber(checkInDb.getUser().getTeen().getMedicalNumber());
+        teen.setBirthday(teenDb.getBirthday());
+        teen.setMedicalNumber(teenDb.getMedicalNumber());
 
         user = new User();
         user.setEmail(checkInDb.getUser().getEmail());
@@ -109,19 +120,7 @@ public class CheckInController {
         checkIn.setId(checkInDb.getId());
         checkIn.setDate(checkInDb.getDate());
 
-        answers = new ArrayList<>();
-        for (Answer answerDb : checkInDb.getAnswerList()) {
-            question = new Question();
-            question.setText(answerDb.getQuestion().getText());
-            question.setType(answerDb.getQuestion().getType());
-
-            answer = new Answer();
-            answer.setText(answerDb.getText());
-            answer.setQuestion(question);
-
-            answers.add(answer);
-        }
-        checkIn.setAnswerList(answers);
+        checkIn.setAnswerList(buildAnswerList(checkInDb, teenDb));
 
         return checkIn;
     }
@@ -163,18 +162,59 @@ public class CheckInController {
 
         checkInDao.persist(checkIn);
 
+        // notify all the followers of the user which has just done the check in
+        User userDb = userDao.find(checkIn.getUser().getEmail(), true);
+
+        // list of device which will be notified about the new check in
+        List<Device> deviceList = new ArrayList<>();
+
+        List<Follower> followers = userDb.getTeen().getFollowerList();
+        for(Follower followerDb : followers) {
+            deviceList.add(followerDb.getUser().getDevice());
+        }
+
+        DeviceMessage deviceMessage = new DeviceMessage();
+        deviceMessage.setDeviceList(deviceList);
+        deviceMessage.setMessage(userDb.getFirstName() + " has published a new check-in!");
+
+        DeviceController deviceController = new DeviceController();
+        deviceController.asyncSend(deviceMessage, Constants.GCM_NEW_CHECK_IN_TYPE, String.valueOf(checkIn.getId()));
+
         return new JsonResponse(HttpStatus.OK, "ok");
     }
 
-    @RequestMapping(value = "photo/{id}", method = RequestMethod.GET)
-    public @ResponseBody FileSystemResource retrieveCheckInPhoto(@PathVariable("id") long id) {
+    @RequestMapping(value = RestUriConstants.PHOTO, method = RequestMethod.GET)
+    public @ResponseBody FileSystemResource retrieveCheckInPhoto(@RequestParam(RestUriConstants.PARAM_ID) long id) {
         CheckIn checkInDb = checkInDao.find(id);
-        System.out.println("id " + id + " path " + checkInDb.getPhotoPath());
-
         if (checkInDb.getPhotoPath() != null) {
             return new FileSystemResource(checkInDb.getPhotoPath());
         }
+
         return null;
+    }
+
+    private List<Answer> buildAnswerList(CheckIn checkInDb, Teen teenDb) {
+        Question question; Answer answer;
+        List<Answer> answers = new ArrayList<>();
+
+        for (Answer answerDb : checkInDb.getAnswerList()) {
+            String questionType = answerDb.getQuestion().getType();
+
+            // only add answer information if teen desires to shared this kind of data
+            if (teenDb.getSharedDataAsList().contains(questionType)) {
+                question = new Question();
+                question.setType(questionType);
+                question.setText(answerDb.getQuestion().getText());
+
+                answer = new Answer();
+                answer.setText(answerDb.getText());
+                answer.setQuestion(question);
+
+                answers.add(answer);
+            }
+        }
+
+        return answers;
     }
 
     private boolean isValidCheckIn(CheckIn checkIn) {

@@ -2,7 +2,9 @@ package com.capstone.application.model;
 
 public class FollowDataRequest {
     private User user;
+
     private Teen teen;
+
     private boolean follow;
 
     public FollowDataRequest() {

@@ -25,6 +25,7 @@ import com.capstone.application.utils.Constants;
 import com.capstone.application.utils.Constants.SignInProvider;
 import com.capstone.application.utils.Constants.UserType;
 import com.capstone.application.utils.Crypto;
+import com.capstone.application.utils.RestUriConstants;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -41,24 +42,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
-
 public class RegisterActivity extends FragmentActivity {
-
     private static final String TAG = RegisterActivity.class.getName();
 
     private TextInputLayout mUsernameWrapper;
     private TextInputLayout mEmailWrapper;
     private TextInputLayout mPasswordWrapper;
 
+    // teen specific inputs
     private TextInputLayout mMedicalNumberWrapper;
     private TextInputLayout mBirthdayWrapper;
 
     private CheckBox mCheckBoxTeen;
 
+    // callback manager for facebook login
     private CallbackManager mCallbackManager;
 
     private Context mContext;
@@ -87,9 +89,34 @@ public class RegisterActivity extends FragmentActivity {
         mEmailWrapper = (TextInputLayout) findViewById(R.id.inputEmailWrapper);
         mPasswordWrapper = (TextInputLayout) findViewById(R.id.inputPasswordWrapper);
 
+        initCustomRegister();
+        initFacebookRegister();
+
+        // initialize the views related to teen registration
+        mCheckBoxTeen = (CheckBox) findViewById(R.id.checkBoxTeen);
+        mCheckBoxTeen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int visibility = ((CheckBox) v).isChecked() ? View.VISIBLE : View.GONE;
+                // if checkbox is disable, hides medical number and date of birth fields
+                mMedicalNumberWrapper.setVisibility(visibility);
+                mBirthdayWrapper.setVisibility(visibility);
+            }
+        });
+
         mMedicalNumberWrapper = (TextInputLayout) findViewById(R.id.inputMedicalNumberWrapper);
 
-        final Button registerButton = (Button) findViewById(R.id.btn_register);
+        mBirthdayWrapper = (TextInputLayout) findViewById(R.id.inputBirthdayWrapper);
+        mBirthdayWrapper.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog();
+            }
+        });
+    }
+
+    private void initCustomRegister() {
+        final Button registerButton = (Button) findViewById(R.id.btnRegister);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,33 +128,11 @@ public class RegisterActivity extends FragmentActivity {
                 }
             }
         });
-
-        initFacebookRegister();
-
-        // initialize the views related to Teen registration
-        mBirthdayWrapper = (TextInputLayout) findViewById(R.id.inputBirthdayWrapper);
-        mBirthdayWrapper.getEditText().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
-
-        mCheckBoxTeen = (CheckBox) findViewById(R.id.checkBoxTeen);
-        mCheckBoxTeen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int visibility = ((CheckBox) v).isChecked() ? View.VISIBLE : View.GONE;
-                // if checkbox is disable, hides medical number and date of birth fields
-                mMedicalNumberWrapper.setVisibility(visibility);
-                mBirthdayWrapper.setVisibility(visibility);
-            }
-        });
     }
 
     private void initFacebookRegister() {
         // set required permission
-        final LoginButton facebookLoginButton = (LoginButton) findViewById(R.id.btn_facebook_register);
+        final LoginButton facebookLoginButton = (LoginButton) findViewById(R.id.btnFacebookRegister);
         facebookLoginButton.setReadPermissions(Arrays.asList("public_profile, email, user_birthday"));
 
         // register Facebook callback
@@ -145,7 +150,7 @@ public class RegisterActivity extends FragmentActivity {
                                     public void onCompleted(JSONObject object,
                                                             GraphResponse response) {
 
-                                        User user = buildUserObject(response.getJSONObject());
+                                        User user = buildUserObjectFromJson(response.getJSONObject());
                                         if (user != null) {
                                             doRegistering(user);
                                         }
@@ -171,7 +176,7 @@ public class RegisterActivity extends FragmentActivity {
 
     }
 
-    private User buildUserObject(JSONObject jsonObject) {
+    private User buildUserObjectFromJson(JSONObject jsonObject) {
         boolean valid = true;
 
         User user;
@@ -194,7 +199,7 @@ public class RegisterActivity extends FragmentActivity {
 
                 Teen teen = new Teen();
                 if (!isValidString(medicalNumber)) {
-                    mMedicalNumberWrapper.setError("Not a medical number!");
+                    mMedicalNumberWrapper.setError(getString(R.string.not_valid_medical_number));
                     valid = false;
                 } else {
                     mMedicalNumberWrapper.setErrorEnabled(false);
@@ -253,7 +258,7 @@ public class RegisterActivity extends FragmentActivity {
         String password = mPasswordWrapper.getEditText().getText().toString();
 
         if (username.isEmpty() || username.length() < 3) {
-            mUsernameWrapper.setError("at least 3 characters");
+            mUsernameWrapper.setError(getString(R.string.not_valid_name));
             valid = false;
         } else {
             mUsernameWrapper.setErrorEnabled(false);
@@ -264,7 +269,7 @@ public class RegisterActivity extends FragmentActivity {
         }
 
         if (!LoginActivity.validateEmail(email)) {
-            mEmailWrapper.setError("Not a valid email address!");
+            mEmailWrapper.setError(getString(R.string.not_valid_email));
             valid = false;
         } else {
             mEmailWrapper.setErrorEnabled(false);
@@ -272,7 +277,7 @@ public class RegisterActivity extends FragmentActivity {
         }
 
         if (!LoginActivity.validatePassword(password)) {
-            mPasswordWrapper.setError("Not a valid password!");
+            mPasswordWrapper.setError(getString(R.string.not_valid_password));
             valid = false;
         } else {
             mPasswordWrapper.setErrorEnabled(false);
@@ -286,7 +291,7 @@ public class RegisterActivity extends FragmentActivity {
 
             Teen teen = new Teen();
             if (!isValidDate(birthday)) {
-                mBirthdayWrapper.setError("Not a valid date!");
+                mBirthdayWrapper.setError(getString(R.string.not_valid_date));
                 valid = false;
             } else {
                 mBirthdayWrapper.setErrorEnabled(false);
@@ -294,7 +299,7 @@ public class RegisterActivity extends FragmentActivity {
             }
 
             if (!isValidString(medicalNumber)) {
-                mMedicalNumberWrapper.setError("Not a medical number!");
+                mMedicalNumberWrapper.setError(getString(R.string.not_valid_medical_number));
                 valid = false;
             } else {
                 mMedicalNumberWrapper.setErrorEnabled(false);
@@ -317,8 +322,6 @@ public class RegisterActivity extends FragmentActivity {
     }
 
     private void doRegistering(User user) {
-        Toast.makeText(mContext, "OK! Registering is fine.", Toast.LENGTH_SHORT).show();
-
         new RegisterAccountTask(RegisterActivity.this).execute(user);
     }
 
@@ -331,7 +334,6 @@ public class RegisterActivity extends FragmentActivity {
     }
 
     private class RegisterAccountTask extends AsyncTask<User, Void, RegistrationResponse> {
-
         private ProgressDialog dialog;
 
         public RegisterAccountTask(RegisterActivity activity) {
@@ -340,7 +342,7 @@ public class RegisterActivity extends FragmentActivity {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(getString(R.string.progress_dialog_sending));
             dialog.show();
         }
 
@@ -353,7 +355,9 @@ public class RegisterActivity extends FragmentActivity {
             JsonResponse result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "login/register/submit";
+                final String url = Constants.getServerUrl(mContext) +
+                        RestUriConstants.LOGIN_CONTROLLER + File.separator +
+                        RestUriConstants.REGISTER + File.separator + RestUriConstants.SUBMIT;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();
@@ -361,7 +365,7 @@ public class RegisterActivity extends FragmentActivity {
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                // Make the HTTP GET request, marshaling the response to User object
+                // Make the HTTP POST request, marshaling the response to JsonResponse object
                 result = restTemplate.postForObject(url, user, JsonResponse.class);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -394,7 +398,6 @@ public class RegisterActivity extends FragmentActivity {
         }
     }
 
-    // FIXME - This should trigger GCM registration as well
     public void onRegisterSuccess(User user) {
         Intent result = new Intent();
         result.putExtra("result", user);
@@ -405,7 +408,7 @@ public class RegisterActivity extends FragmentActivity {
 
     private void handleRegisteringResult(JsonResponse result) {
         // TODO - treat better the types of return (make it compliant with internationalization method)
-        String outputMessage = "Unexpected result";
+        String outputMessage = getString(R.string.unexpected_result);
         if (result != null) {
             switch (result.getStatus()) {
                 case OK:
@@ -421,12 +424,13 @@ public class RegisterActivity extends FragmentActivity {
     private static boolean isValidDate(String date) {
         boolean ret = false;
         if (date != null) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT);
             simpleDateFormat.setLenient(false);
             try {
                 simpleDateFormat.parse(date);
                 ret = true;
             } catch (ParseException e) {
+                Log.e(TAG, "Not a valid dae " + e.getMessage());
             }
         }
         return ret;

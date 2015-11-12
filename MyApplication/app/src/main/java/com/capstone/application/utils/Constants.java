@@ -1,11 +1,17 @@
 package com.capstone.application.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 public class Constants {
 
-    /**
-     * Project package name
-     */
-    public static final String SERVER_URL = "http://192.168.0.109:8080/WebServer/";
+    private static final String DEFAULT_SERVER_URL = "http://192.168.0.105:8080/WebServer";
+
+    public static String getServerUrl(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(Constants.SERVER_URL_KEY, DEFAULT_SERVER_URL);
+    }
 
     /**
      * GCM management constant to be stored in SharedPreference
@@ -13,10 +19,15 @@ public class Constants {
     public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
 
     /**
-     * GCM management action to notify UI thread when new GCM message has come
+     * Type of messages that could be sent via GCM
      */
-    // FIXME - make the next two action in the app's default (capstone.intent.action...)
-    public static final String REGISTRATION_COMPLETE_ACTION = "registrationComplete";
+    public static final String GCM_FOLLOW_REQUEST_TYPE = "followRequest";
+    public static final String GCM_NEW_CHECK_IN_TYPE = "newCheckIn";
+    public static final String GCM_ADMIN_TYPE = "admin";
+
+    /**
+     * Intent action that is sent when new follow request has come for the logged teen
+     */
     public static final String NEW_FOLLOW_REQUEST_ACTION = "capstone.intent.action.NEW_FOLLOW_REQUEST";
 
     /**
@@ -25,7 +36,7 @@ public class Constants {
     public static final String REQUEST_NEW_CHECK_IN_ACTION = "capstone.intent.action.REQUEST_NEW_CHECK_IN";
 
     /**
-     * Intent action that is sent when a Teen decides to postpone a check in
+     * Intent action that is sent when a teen decides to postpone a check in
      */
     public static final String ADD_PENDING_CHECK_IN_ACTION = "capstone.intent.action.ADD_PENDING_CHECK_IN";
 
@@ -57,18 +68,19 @@ public class Constants {
     }
 
     /**
-     * Email and Type of login made by user to be stored in SharedPreference
+     * Some useful information related to the logged in user to be stored in SharedPreference
      */
     public static final String SIGN_IN_PROVIDER = "signInProvider";
     public static final String LOGGED_EMAIL = "loggedEmail";
     public static final String USER_TYPE = "userType";
-
     public static final String PENDING_FOLLOW_REQUEST_COUNTER = "pendingFollowRequestCounter";
 
     /**
      * SharedPreference key of the options available in PreferencesFragment
      */
-    public static final String REMINDER_FREQUENCY = "reminderFrequency";
+    public static final String REMINDER_FREQUENCY_KEY = "reminderFrequency";
+    public static final String SHARED_DATA_KEY = "sharedData";
+    public static final String SERVER_URL_KEY = "serverUrl";
 
     /**
      * Types of question that could be created by the admin
@@ -142,11 +154,15 @@ public class Constants {
         }
     }
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    /**
+     * Constants related to date/time format that will be displayed
+     */
+    public static final String DATE_FORMAT = "MM/dd/yyyy";
     public static final String TIME_FORMAT = "HH:mm:ss";
-
     public static final String DATE_TIME_FORMAT = DATE_FORMAT + " " + TIME_FORMAT;
 
+    /**
+     * Temporary path where the check in photo will be saved while it has not been sent to server
+     */
     public static final String SAVE_IMAGES_PATH = "/mnt/sdcard/Capstone/Images/";
-
 }

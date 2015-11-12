@@ -2,6 +2,7 @@ package com.capstone.application.model;
 
 public class LoginResponse {
     private JsonResponse jsonResponse;
+
     private User user;
 
     public LoginResponse() {

@@ -2,7 +2,6 @@
 package com.capstone.server.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,15 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.capstone.server.dao.CheckInDao;
 import com.capstone.server.dao.QuestionDao;
-import com.capstone.server.dao.TeenDao;
 import com.capstone.server.model.Alternative;
-import com.capstone.server.model.Answer;
-import com.capstone.server.model.CheckIn;
 import com.capstone.server.model.JsonResponse;
 import com.capstone.server.model.Question;
-import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants.QuestionFormat;
 import com.capstone.server.utils.Constants.QuestionType;
 
@@ -39,12 +33,6 @@ public class QuestionController {
 
     @Autowired
     private QuestionDao questionDao;
-
-    @Autowired
-    private CheckInDao checkInDao;
-
-    @Autowired
-    private TeenDao teenDao;
 
     @RequestMapping(RestUriConstants.REGISTER)
     public String showRegisterForm(Model model) {
@@ -120,60 +108,7 @@ public class QuestionController {
             }
         }
 
-        /*Question question = null;
-        if(questionsList != null) {
-            // random some question to be sent to teen
-            Random r = new Random();
-            int sortedQuestion = r.nextInt(questionsList.size()) + 1;
-
-            System.out.println("sortedQuestion = " + sortedQuestion);
-            question = questionDao.find(sortedQuestion, true);
-        }*/
-
         return questionList;
-    }
-
-   /* @RequestMapping(RestUriConstants.CHECKIN + "/" + RestUriConstants.SEND)
-    public @ResponseBody JsonResponse sendCheckIn(@RequestBody final CheckIn checkIn) {
-        if (!isValidCheckIn(checkIn)) {
-            sLogger.info("Invalid parameters");
-            return new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters");
-        }
-
-        for(Answer item : checkIn.getAnswerList()) {
-            item.setCheckIn(checkIn);
-        }
-
-        checkInDao.persist(checkIn);
-
-        return new JsonResponse(HttpStatus.OK, "ok");
-    }*/
-
-    @RequestMapping(value = "test", method = RequestMethod.GET)
-    public String home() {
-        Question question = new Question();
-        question.setId(1);
-
-        Answer answer = new Answer();
-        answer.setText("blablabla");
-        answer.setQuestion(question);
-
-        User user = new User();
-        user.setEmail("felipemosso61@hotmail.com");
-
-        CheckIn checkIn = new CheckIn();
-        checkIn.setDate(System.currentTimeMillis());
-        checkIn.setUser(user);
-
-        checkIn.setAnswerList(Arrays.asList(answer));
-
-        for(Answer item : checkIn.getAnswerList()) {
-            item.setCheckIn(checkIn);
-        }
-
-        checkInDao.persist(checkIn);
-
-        return null;
     }
 
     @RequestMapping(value = RestUriConstants.DELETE, method = RequestMethod.DELETE)

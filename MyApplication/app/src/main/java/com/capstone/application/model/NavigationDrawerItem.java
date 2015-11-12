@@ -1,7 +1,6 @@
 package com.capstone.application.model;
 
 public class NavigationDrawerItem {
-
     private String mTitle;
 
     private int mIcon;

@@ -2,165 +2,154 @@ package com.capstone.application.adapter;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.capstone.application.AppController;
 import com.capstone.application.R;
 import com.capstone.application.model.FollowDataRequest;
-import com.capstone.application.model.Follower;
 import com.capstone.application.model.JsonResponse;
 import com.capstone.application.model.Teen;
 import com.capstone.application.model.User;
 import com.capstone.application.utils.Constants;
+import com.capstone.application.utils.RestUriConstants;
+import com.capstone.application.volley.AppController;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 
-public class TeenListAdapter extends BaseAdapter {
+public class TeenListAdapter extends RecyclerView.Adapter<TeenListAdapter.ViewHolderItem> {
     private static final String TAG = TeenListAdapter.class.getName();
 
-    private Activity mActivity;
-    private LayoutInflater inflater;
-    private List<User> mUserItems;
-    private User mRequester;
     private ImageLoader mImageLoader = AppController.getInstance().getImageLoader();
+
+    private Activity mActivity;
+
+    private List<User> mUserItems;
+
+    private User mRequester;
+
+    public class ViewHolderItem extends RecyclerView.ViewHolder {
+        NetworkImageView thumbNail;
+
+        TextView fullName;
+        TextView medicalNumber;
+        TextView birthday;
+
+        ToggleButton followRequest;
+
+        public ViewHolderItem(View itemView) {
+            super(itemView);
+            thumbNail = (NetworkImageView) itemView.findViewById(R.id.imgThumbnail);
+            fullName = (TextView) itemView.findViewById(R.id.txtFullName);
+            medicalNumber = (TextView) itemView.findViewById(R.id.txtMedicalNumber);
+            birthday = (TextView) itemView.findViewById(R.id.txtBirthday);
+            followRequest = (ToggleButton) itemView.findViewById(R.id.btnFollowRequest);
+        }
+    }
 
     public TeenListAdapter(Activity activity, List<User> userItems, User requester) {
         mActivity = activity;
-        mUserItems = (userItems == null ? new ArrayList<User>() : userItems);
+        mUserItems = userItems;
         mRequester = requester;
     }
 
     @Override
-    public int getCount() {
-        return mUserItems.size();
+    public ViewHolderItem onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_teen, parent, false);
+        return new ViewHolderItem(view);
     }
 
     @Override
-    public Object getItem(int location) {
-        return mUserItems.get(location);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolderItem viewHolder;
-
-        if (convertView == null) {
-            if (inflater == null) {
-                inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            }
-            convertView = inflater.inflate(R.layout.row_teen, parent, false);
-
-            viewHolder = new ViewHolderItem();
-            viewHolder.thumbNail = (NetworkImageView) convertView.findViewById(R.id.thumbnail);
-            viewHolder.title = (TextView) convertView.findViewById(R.id.title);
-            viewHolder.rating = (TextView) convertView.findViewById(R.id.rating);
-            viewHolder.genre = (TextView) convertView.findViewById(R.id.genre);
-            //viewHolder.year = (TextView) convertView.findViewById(R.id.releaseYear);
-            viewHolder.follow = (Switch) convertView.findViewById(R.id.switch1);
-
-            viewHolder.follow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    buttonView.setText(isChecked ? "follow request sent" : "follow");
-                    if(isChecked) {
-                        buttonView.setEnabled(false);
-                    }
-                    sendFollowRequest(mUserItems.get(position), isChecked);
-                }
-            });
-
-            // store the holder with the view.
-            convertView.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolderItem) convertView.getTag();
-        }
-
+    public void onBindViewHolder(ViewHolderItem holder, final int position) {
         if (mImageLoader == null) {
             mImageLoader = AppController.getInstance().getImageLoader();
         }
+
+        holder.followRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ToggleButton toggleButton = (ToggleButton) v;
+                if (toggleButton.isChecked()) {
+                    toggleButton.setTextOn(mActivity.getString(R.string.requested));
+                    v.setEnabled(false);
+                }
+                sendFollowRequest(mUserItems.get(position), toggleButton.isChecked());
+            }
+        });
 
         // getting user data for the row
         User user = mUserItems.get(position);
 
         if (user != null) {
-            // thumbnail image
-            //thumbNail.setImageUrl(m.getThumbnailUrl(), mImageLoader);
+            String url = Constants.getServerUrl(mActivity) + RestUriConstants.TEEN_CONTROLLER +
+                    File.separator + RestUriConstants.PHOTO + "?" +
+                    RestUriConstants.PARAM_EMAIL + "=" + user.getEmail();
+
+            holder.thumbNail.setImageUrl(url, mImageLoader);
 
             if (user.getFirstName() != null) {
-                // title
-                viewHolder.title.setText(user.getFirstName());
+                holder.fullName.setText(user.getFirstName());
+            }
+
+            if (user.getLastName() != null) {
+                holder.fullName.setText(holder.fullName.getText() + " " + user.getLastName());
             }
 
             if (user.getTeen() != null) {
                 if (user.getTeen().getMedicalNumber() != null) {
-                    // rating
-                    //rating.setText("Rating: " + String.valueOf(m.getRating()));
-                    viewHolder.rating.setText(user.getTeen().getMedicalNumber());
+                    holder.medicalNumber.setText(mActivity.getString(R.string.teen_medical_number)
+                            + user.getTeen().getMedicalNumber());
                 }
                 if (user.getTeen().getBirthday() != null) {
-                    // release year
-                    //viewHolder.year.setText(user.getTeen().getBirthday());
+                    holder.birthday.setText(mActivity.getString(R.string.teen_birthday)
+                            + user.getTeen().getBirthday());
                 }
             }
-            // genre
-        /*String genreStr = "";
-        for (String str : m.getGenre()) {
-            genreStr += str + ", ";
-        }
-        genreStr = genreStr.length() > 0 ? genreStr.substring(0,
-                genreStr.length() - 2) : genreStr;
-        genre.setText(genreStr);*/
 
-            if(mRequester.getType() == Constants.UserType.TEEN.ordinal()) {
-                List<Follower> followerList = mRequester.getTeen().getPendingFollowerList();
-                for (Follower item : followerList) {
-                    if(item.getEmail().equals(user.getEmail())) {
-                        viewHolder.follow.setEnabled(false);
-                    }
+            List<Teen> pendingTeenList = mRequester.getFollower().getPendingTeenList();
+            for (Teen item : pendingTeenList) {
+                if (item.getEmail().equals(user.getEmail())) {
+                    // if follow request if pending, mark button as checked but disable it
+                    holder.followRequest.setChecked(true);
+                    holder.followRequest.setTextOn(mActivity.getString(R.string.requested));
+                    holder.followRequest.setEnabled(false);
+                    break;
                 }
-            } else if (mRequester.getType() == Constants.UserType.FOLLOWER.ordinal()) {
-                List<Teen> teenList = mRequester.getFollower().getPendingTeenList();
-                for (Teen item : teenList) {
-                    if(item.getEmail().equals(user.getEmail())) {
-                        viewHolder.follow.setEnabled(false);
-                    }
-                }
-
             }
 
+            List<Teen> teenList = mRequester.getFollower().getTeenList();
+            for (Teen item : teenList) {
+                if (item.getEmail().equals(user.getEmail())) {
+                    // if follow request is approved, mark button as checked and enables it
+                    holder.followRequest.setChecked(true);
+                    holder.followRequest.setTextOn(mActivity.getString(R.string.unfollow));
+                    holder.followRequest.setEnabled(true);
+                    break;
+                }
+            }
         }
-
-        return convertView;
     }
 
-    public static class ViewHolderItem {
-        NetworkImageView thumbNail;
-        TextView title;
-        TextView rating;
-        TextView genre;
-        //TextView year;
-        Switch follow;
+    public User getItem(int position) {
+        return mUserItems.get(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mUserItems.size();
     }
 
     private void sendFollowRequest(User user, boolean follow) {
@@ -168,16 +157,14 @@ public class TeenListAdapter extends BaseAdapter {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
             String loggedEmail = sharedPreferences.getString(Constants.LOGGED_EMAIL, null);
 
-            if(loggedEmail != null) {
+            if (loggedEmail != null) {
                 Teen teen = new Teen();
                 teen.setEmail(user.getEmail());
 
                 User loggedUser = new User();
                 loggedUser.setEmail(loggedEmail);
 
-                Log.d(TAG, "User " + loggedUser.getEmail() + " teen " + teen.getEmail() + " follow -> " + follow);
-                FollowDataRequest followData = new FollowDataRequest(loggedUser, teen, follow);
-                new FollowTask().execute(followData);
+                new FollowTask().execute(new FollowDataRequest(loggedUser, teen, follow));
             }
         }
     }
@@ -192,7 +179,7 @@ public class TeenListAdapter extends BaseAdapter {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Doing something, please wait.");
+            dialog.setMessage(mActivity.getString(R.string.progress_dialog_sending));
             dialog.show();
         }
 
@@ -205,7 +192,9 @@ public class TeenListAdapter extends BaseAdapter {
             JsonResponse result = null;
             try {
                 // The URL for making the GET request
-                final String url = Constants.SERVER_URL + "teen/follow/send";
+                final String url = Constants.getServerUrl(mActivity) +
+                        RestUriConstants.TEEN_CONTROLLER + File.separator +
+                        RestUriConstants.FOLLOW + File.separator + RestUriConstants.SEND;
 
                 // Create a new RestTemplate instance
                 RestTemplate restTemplate = new RestTemplate();

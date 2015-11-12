@@ -27,17 +27,19 @@
             <table id="devices-table" class="table table-striped">
               <thead>
                 <tr>
-                  <th>Token EN</th>
                   <th><input type="checkbox" id="check-all" /></th>
+                  <th><spring:message code="label.device.view.emailColumn"/></th>
+                  <th><spring:message code="label.device.view.tokenColumn"/></th>
                 </tr>
               </thead>
               <tbody>
-                <c:forEach items="${devices}" var="device">
+                <c:forEach items="${users}" var="user">
                   <tr>
-                    <td>${device.token}</td>
                     <td>
                       <input type="checkbox" class="check-this">
                     </td>
+                    <td>${user.email}</td>
+                    <td>${user.device.token}</td>
                   </tr>
                 </c:forEach>
               </tbody>
@@ -45,16 +47,16 @@
           </div>
         </div>
       </div>
-      <p data-placement="top" data-toggle="tooltip" title="Send">
-        <button class="btn btn-primary btn-xs" data-title="Send" data-toggle="modal" data-target="#send">
-          <span class="glyphicon glyphicon-pencil"></span>
-        </button>
-      </p>
-      <p data-placement="top" data-toggle="tooltip" title="Delete">
-        <button class="btn btn-danger btn-xs" data-title="Delete" data-toggle="modal" data-target="#delete">
-          <span class="glyphicon glyphicon-trash"></span>
-        </button>
-      </p>
+      <div class="row" style="float: right;">
+        <div class="col-xs-6"><br>
+          <p data-placement="top" data-toggle="tooltip" title="Send">
+            <button class="btn btn-primary btn-xs" data-title="Send" data-toggle="modal"
+                data-target="#send" id="send-button" disabled>
+              Send Message <span class="glyphicon glyphicon-pencil"></span>
+            </button>
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="modal fade" id="send" tabindex="-1" role="dialog" aria-labelledby="send" aria-hidden="true">
@@ -64,13 +66,17 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
               <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
             </button>
-            <h4 class="modal-title custom_align" id="Heading">Send Message EN</h4>
+            <h4 class="modal-title custom_align" id="Heading">
+              <spring:message code="label.device.view.sendMessageTitle"/>
+            </h4>
           </div>
           <div class="modal-body">
             <form id="device-form" class="form-horizontal" role="form">
               <div class="form-group">
                 <div class="col-xs-12">
-                  <label class="control-label" for="device-message">Message EN</label>
+                  <label class="control-label" for="device-message">
+                    <spring:message code="label.device.view.sendMessageEditText"/>
+                  </label>
                   <input type="text" class="form-control" id="device-message" name="device-message">
                 </div>
               </div>
@@ -78,34 +84,9 @@
           </div>
           <div class="modal-footer ">
             <button class="btn btn-warning btn-lg" id="send-message" style="width: 100%;"
-                data-loading-text="Updating.. EN" >
-              <span class="glyphicon glyphicon-ok-sign"></span> Update EN
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="send" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-              <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-            </button>
-            <h4 class="modal-title custom_align" id="Heading">Remove Question EN</h4>
-          </div>
-          <div class="modal-body">
-            <div class="alert alert-danger">
-              <span class="glyphicon glyphicon-warning-sign"></span> Are you sure you want to remove this question? EN
-            </div>
-          </div>
-          <div class="modal-footer ">
-            <button value="Submit" class="btn btn-success" id="delete-device">
-              <span class="glyphicon glyphicon-ok-sign"></span> Yes EN
-            </button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">
-              <span class="glyphicon glyphicon-remove"></span> No EN
+                data-loading-text="<spring:message code="label.device.view.updating"/>" >
+              <span class="glyphicon glyphicon-ok-sign"></span>
+              <spring:message code="label.device.view.sendMessage"/>
             </button>
           </div>
         </div>

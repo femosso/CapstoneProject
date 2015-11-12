@@ -127,6 +127,8 @@ function() {
         });
     }
 
+    $("#register").addClass("active");
+
     $('#datepicker-container input').datepicker({
         format: "dd/MM/yyyy",
         startView: 2,

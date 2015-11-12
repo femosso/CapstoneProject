@@ -1,75 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/row_teen_selector"
-    android:padding="8dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <!-- Thumbnail Image -->
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/thumbnail"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="8dp" />
-
-    <!-- Movie Title -->
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/thumbnail"
-        android:layout_toRightOf="@+id/thumbnail"
-        android:textSize="@dimen/title"
-        android:textStyle="bold"
-        android:text="title"/>
-
-    <!-- Rating -->
-    <TextView
-        android:id="@+id/rating"
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/title"
-        android:layout_marginTop="1dip"
-        android:layout_toRightOf="@+id/thumbnail"
-        android:textSize="@dimen/rating"
-        android:text="rating"/>
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardCornerRadius="2dp"
+        card_view:contentPadding="10dp">
 
-    <!-- Genre -->
-    <TextView
-        android:id="@+id/genre"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rating"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/thumbnail"
-        android:textColor="@color/genre"
-        android:textSize="@dimen/genre"
-        android:text="genre"/>
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-    <Switch
-        android:id="@+id/switch1"
+            <com.android.volley.toolbox.NetworkImageView
+                android:id="@+id/imgThumbnail"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp" />
 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:textColor="@color/year"
-        android:textSize="@dimen/year"
-        android:text="New Switch" />
+            <TextView
+                android:id="@+id/txtFullName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/imgThumbnail"
+                android:layout_toEndOf="@+id/imgThumbnail"
+                android:layout_toRightOf="@+id/imgThumbnail"
+                android:text="title"
+                android:textSize="@dimen/title"
+                android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/txtMedicalNumber"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/txtFullName"
+                android:layout_toEndOf="@+id/imgThumbnail"
+                android:layout_toLeftOf="@+id/btnFollowRequest"
+                android:layout_toRightOf="@+id/imgThumbnail"
+                android:layout_toStartOf="@+id/btnFollowRequest"
+                android:text="rating"
+                android:textSize="@dimen/genre" />
 
-    <!-- Release Year -->
-<!--    <TextView
-        android:id="@+id/releaseYear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:textColor="@color/year"
-        android:textSize="@dimen/year"
-        android:text="year"/>-->
+            <TextView
+                android:id="@+id/txtBirthday"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/txtMedicalNumber"
+                android:layout_toEndOf="@+id/imgThumbnail"
+                android:layout_toLeftOf="@+id/btnFollowRequest"
+                android:layout_toRightOf="@+id/imgThumbnail"
+                android:layout_toStartOf="@+id/btnFollowRequest"
+                android:text="genre"
+                android:textSize="@dimen/genre" />
 
+            <ToggleButton
+                android:id="@+id/btnFollowRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/txtBirthday"
+                android:background="@drawable/btn_toggle_follow_selector"
+                android:checked="false"
+                android:textColor="#FFFFFF"
+                android:textOff="@string/follow"
+                android:textOn="@string/unfollow"
+                android:textSize="12sp" />
 
-
-</RelativeLayout>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

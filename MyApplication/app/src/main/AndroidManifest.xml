@@ -5,10 +5,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <permission
         android:name="com.capstone.application.permission.C2D_MESSAGE"
@@ -16,7 +18,7 @@
     <uses-permission android:name="com.capstone.application.permission.C2D_MESSAGE" />
 
     <application
-        android:name=".AppController"
+        android:name=".volley.AppController"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -36,6 +38,9 @@
         <activity android:name=".activity.FollowRequestActivity" />
         <activity android:name=".activity.CheckInDetailsActivity" />
         <activity android:name=".activity.LineChartActivity" />
+        <activity android:name=".activity.PieChartActivity" />
+        <activity android:name=".activity.CheckInPhotoActivity" />
+        <activity android:name=".activity.AboutActivity" />
 
         <activity
             android:name=".activity.CheckInWizardActivity"
@@ -49,8 +54,8 @@
 
         <provider
             android:name=".database.PendingCheckInProvider"
-            android:authorities="com.capstone.application.diabetes" >
-        </provider>
+            android:authorities="com.capstone.application.diabetes"
+            android:exported="false" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -68,10 +73,12 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".alarm.TeenAlarmReceiver">
+        <receiver
+            android:name=".alarm.TeenAlarmReceiver"
+            android:exported="false">
             <intent-filter>
-                <action android:name="capstone.intent.action.ADD_PENDING_QUESTION"></action>
-                <action android:name="capstone.intent.action.REQUEST_NEW_QUESTION"></action>
+                <action android:name="capstone.intent.action.ADD_PENDING_QUESTION" />
+                <action android:name="capstone.intent.action.REQUEST_NEW_QUESTION" />
             </intent-filter>
         </receiver>
 
@@ -79,7 +86,7 @@
             android:name=".alarm.BootReceiver"
             android:enabled="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 

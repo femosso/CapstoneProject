@@ -3,6 +3,8 @@ package com.capstone.server.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Auxiliary class that carries useful informations to load the list of teens in
  * Android app. It basically contains the list of teens requested plus the
@@ -10,6 +12,7 @@ import java.util.List;
  * important to get, for example, which teens are still pending to confirm this
  * user's follow request.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TeenListRequest {
 
     private List<User> teenList;

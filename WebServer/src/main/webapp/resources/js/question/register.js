@@ -44,6 +44,8 @@ function() {
         });
     }
 
+    $("#question").addClass("active");
+
     $("#submit-question").click(function(e) {
         e.preventDefault();
 
