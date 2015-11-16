@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title><spring:message code="label.question.view.title"/></title>
 
     <link href="${resources}/css/bootstrap/bootstrap.min.css?ts=1" rel="stylesheet">
     <link href="${resources}/css/sticky-footer-navbar.css" rel="stylesheet">

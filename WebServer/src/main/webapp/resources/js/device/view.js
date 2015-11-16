@@ -23,8 +23,6 @@ function() {
     }
 
     function sendDataAjax(deviceMessageObject) {
-        alert(JSON.stringify(deviceMessageObject));
-
         $.ajax({
             url : getContextPath() + '/device/send',
             type : "POST",
@@ -38,10 +36,14 @@ function() {
                 } else {
                     toastr.error(data.message, "Opsss..");
                 }
-                $('#submit-device').button('reset');
+                $('#device-message').val("");
+                $('#send-message').button('reset');
+                $('#send').modal('hide');
             },
             error : function(data) {
-                $('#submit-device').button('reset');
+                $('#device-message').val("");
+                $('#send-message').button('reset');
+                $('#send').modal('hide');
             }
         });
     }
@@ -62,7 +64,7 @@ function() {
             var kids = $(this).closest('tr').children();
 
             var deviceObject = new Object();
-            deviceObject.token = kids.eq(0).text();
+            deviceObject.token = kids.eq(2).text();
 
             deviceArray.push(deviceObject);
         });
@@ -79,7 +81,6 @@ function() {
             $("#devices-table input[type=checkbox]").each(function () {
                 $(this).prop("checked", true);
             });
-
         } else {
             $("#devices-table input[type=checkbox]").each(function () {
                 $(this).prop("checked", false);

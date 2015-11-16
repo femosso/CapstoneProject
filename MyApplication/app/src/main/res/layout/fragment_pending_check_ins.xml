@@ -7,9 +7,7 @@
         android:id="@+id/listPendingCheckIns"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:divider="@color/list_divider"
-        android:dividerHeight="1dp"
-        android:listSelector="@drawable/row_teen_selector" />
+        android:dividerHeight="1dp" />
 
     <RelativeLayout
         android:id="@+id/emptyLayout"

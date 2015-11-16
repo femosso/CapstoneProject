@@ -11,32 +11,38 @@ import com.capstone.server.controller.RestUriConstants;
 import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants;
 
+/**
+ * This LoginInterceptor will block pages that only administrator can access.
+ * Everything different than that will be allowed to access without the
+ * necessity to have an user logged in.
+ */
 public class LoginInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request,
             HttpServletResponse response, Object handler) throws Exception {
 
-        return true;
-        /*String uri = request.getRequestURI();
+        String uri = request.getRequestURI();
         String contextPath = request.getContextPath();
 
         // remove the project name from the URI
         String controller = uri.substring(contextPath.length());
 
-        if (controller.startsWith(RestUriConstants.LOGIN_CONTROLLER) ||
-                uri.contains("resources")) {
-            return true;
-        }
-
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute(Constants.SESSION_USER);
-        if(user != null) {
-            return true;
+
+        if (user == null && isRestrictToLoggedUser(controller)) {
+            session.setAttribute(Constants.IS_REDIRECT, true);
+            response.sendRedirect(contextPath + "/");
+            return false;
         }
 
-        response.sendRedirect(contextPath + RestUriConstants.LOGIN_CONTROLLER
-                + "/" + RestUriConstants.REGISTER);
-        return false;*/
+        return true;
+    }
+
+    private boolean isRestrictToLoggedUser(String controller) {
+        return controller.startsWith(RestUriConstants.DEVICE_CONTROLLER + "/" + RestUriConstants.VIEW) ||
+               controller.startsWith(RestUriConstants.QUESTION_CONTROLLER + "/" + RestUriConstants.REGISTER) ||
+               controller.startsWith(RestUriConstants.QUESTION_CONTROLLER + "/" + RestUriConstants.VIEW);
     }
 }

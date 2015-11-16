@@ -32,7 +32,7 @@ function() {
             success : function(data) {
                 if(data.status == 'OK') {
                     toastr.success(data.message, "Success!");
-                    //$('#login-nav').submit();
+                    $("#question-form")[0].reset();
                 } else {
                     toastr.error(data.message, "Opsss..");
                 }

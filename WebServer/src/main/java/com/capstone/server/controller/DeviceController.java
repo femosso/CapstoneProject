@@ -104,7 +104,7 @@ public class DeviceController {
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
     public @ResponseBody JsonResponse sendMessage(@RequestBody final DeviceMessage deviceMessage) {
         asyncSend(deviceMessage, com.capstone.server.utils.Constants.GCM_ADMIN_TYPE);
-        return new JsonResponse(HttpStatus.OK, "success");
+        return new JsonResponse(HttpStatus.OK, "Message successfully sent!");
     }
 
     public void asyncSend(final DeviceMessage deviceMessage, final String... type) {
@@ -167,12 +167,5 @@ public class DeviceController {
                 }
             }
         });
-    }
-
-    private static boolean isValidString(String str) {
-        boolean ret = str != null && !str.trim().isEmpty();
-        if (DEBUG)
-            sLogger.debug("isValidString(" + str + ") " + ret);
-        return ret;
     }
 }

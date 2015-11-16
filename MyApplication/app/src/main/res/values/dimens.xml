@@ -10,9 +10,8 @@
 
     <!-- Teen row dimens -->
     <dimen name="title">17sp</dimen>
-    <dimen name="rating">15sp</dimen>
-    <dimen name="genre">13sp</dimen>
-    <dimen name="year">12sp</dimen>
+    <dimen name="info">13sp</dimen>
+    <dimen name="date">12sp</dimen>
 
     <!-- Follow Request button dimens -->
     <dimen name="follow_request_radius">14dp</dimen>

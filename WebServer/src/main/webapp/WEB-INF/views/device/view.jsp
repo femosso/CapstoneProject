@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title><spring:message code="label.device.view.title"/></title>
 
     <link href="${resources}/css/bootstrap/bootstrap.min.css?ts=1" rel="stylesheet">
     <link href="${resources}/css/sticky-footer-navbar.css" rel="stylesheet">
@@ -84,7 +84,7 @@
           </div>
           <div class="modal-footer ">
             <button class="btn btn-warning btn-lg" id="send-message" style="width: 100%;"
-                data-loading-text="<spring:message code="label.device.view.updating"/>" >
+                data-loading-text="<spring:message code="label.device.view.sending"/>" >
               <span class="glyphicon glyphicon-ok-sign"></span>
               <spring:message code="label.device.view.sendMessage"/>
             </button>

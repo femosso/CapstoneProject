@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.capstone.application.R;
-import com.capstone.application.database.PendingCheckInProvider;
 import com.capstone.application.gcm.RegistrationIntentService;
 import com.capstone.application.model.JsonResponse;
 import com.capstone.application.model.LoginResponse;
@@ -92,7 +91,7 @@ public class LoginActivity extends FragmentActivity {
         }
 
         // FIXME - remove this later
-        mContext.getContentResolver().delete(PendingCheckInProvider.CONTENT_URI, null, null);
+        // mContext.getContentResolver().delete(PendingCheckInProvider.CONTENT_URI, null, null);
     }
 
     @Override
@@ -263,8 +262,7 @@ public class LoginActivity extends FragmentActivity {
     }
 
     public static boolean validatePassword(String password) {
-        //return password.length() > 5;
-        return true;
+        return password.length() > 5;
     }
 
     public static boolean validateEmail(String email) {
@@ -289,15 +287,15 @@ public class LoginActivity extends FragmentActivity {
         @Override
         protected void onPreExecute() {
             dialog.setMessage(getString(R.string.progress_dialog_sending));
-            dialog.show();
-
             dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
-                    // TODO - log out from facebook if dialog is dismissed and user not authenticate yet
+                    // if dialog is dismissed, make sure we log out from facebook as well
                     PerformLoginTask.this.cancel(true);
+                    LoginManager.getInstance().logOut();
                 }
             });
+            dialog.show();
         }
 
         @Override
@@ -413,7 +411,6 @@ public class LoginActivity extends FragmentActivity {
     }
 
     private void handleLoginResult(JsonResponse result) {
-        // TODO - treat better the types of return (make it compliant with internationalization method)
         String outputMessage = getString(R.string.unexpected_result);
         if (result != null) {
             switch (result.getStatus()) {

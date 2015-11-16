@@ -57,8 +57,6 @@ public class LoginController implements MessageSourceAware {
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
     public @ResponseBody LoginResponse sendLogin(@RequestBody final User user,
             HttpSession session, Locale locale) {
-        // FIXME - add field validation
-
         User userDb = userDao.find(user.getEmail());
 
         if (userDb != null) {
@@ -152,12 +150,12 @@ public class LoginController implements MessageSourceAware {
 
             userDao.persist(user);
 
-            output = "success!!";
+            output = "Successfully registered!";
             sLogger.info(output);
 
             return new JsonResponse(HttpStatus.OK, output);
         } else {
-            output = "already exists!!";
+            output = "E-mail already registered!";
             sLogger.info(output);
 
             return new JsonResponse(HttpStatus.BAD_REQUEST, output);
@@ -193,7 +191,6 @@ public class LoginController implements MessageSourceAware {
             if (valid && user.getType() == UserType.TEEN.ordinal()) {
                 valid = isValidTeen(user.getTeen());
             }
-            // FIXME - maybe do Follower validation?
         }
 
         return valid;
@@ -205,5 +202,4 @@ public class LoginController implements MessageSourceAware {
         return teen != null && isValidDate(teen.getBirthday())
                 && isValidString(teen.getMedicalNumber());
     }
-
 }

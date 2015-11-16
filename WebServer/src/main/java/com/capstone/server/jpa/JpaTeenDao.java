@@ -47,11 +47,10 @@ public class JpaTeenDao implements TeenDao {
     @Transactional
     public Teen find(String email, boolean forceLoad) {
         Teen teen = em.find(Teen.class, email);
-        if(teen != null && forceLoad) {
+        if (teen != null && forceLoad) {
             Hibernate.initialize(teen.getUser());
             Hibernate.initialize(teen.getFollowerList());
             Hibernate.initialize(teen.getPendingFollowerList());
-            //Hibernate.initialize(teen.getCheckInList());
         }
         return teen;
     }
@@ -67,8 +66,8 @@ public class JpaTeenDao implements TeenDao {
         Query query = em.createQuery("SELECT e FROM Teen e");
 
         Collection<Teen> teens = (Collection<Teen>) query.getResultList();
-        if(teens != null && forceLoad) {
-            for(Teen teen : teens) {
+        if (teens != null && forceLoad) {
+            for (Teen teen : teens) {
                 Hibernate.initialize(teen.getFollowerList());
             }
         }

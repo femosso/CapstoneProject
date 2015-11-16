@@ -84,6 +84,7 @@ public class TeenListAdapter extends RecyclerView.Adapter<TeenListAdapter.ViewHo
                 ToggleButton toggleButton = (ToggleButton) v;
                 if (toggleButton.isChecked()) {
                     toggleButton.setTextOn(mActivity.getString(R.string.requested));
+                    toggleButton.setChecked(true);
                     v.setEnabled(false);
                 }
                 sendFollowRequest(mUserItems.get(position), toggleButton.isChecked());
@@ -123,8 +124,8 @@ public class TeenListAdapter extends RecyclerView.Adapter<TeenListAdapter.ViewHo
             for (Teen item : pendingTeenList) {
                 if (item.getEmail().equals(user.getEmail())) {
                     // if follow request if pending, mark button as checked but disable it
-                    holder.followRequest.setChecked(true);
                     holder.followRequest.setTextOn(mActivity.getString(R.string.requested));
+                    holder.followRequest.setChecked(true);
                     holder.followRequest.setEnabled(false);
                     break;
                 }
@@ -134,8 +135,8 @@ public class TeenListAdapter extends RecyclerView.Adapter<TeenListAdapter.ViewHo
             for (Teen item : teenList) {
                 if (item.getEmail().equals(user.getEmail())) {
                     // if follow request is approved, mark button as checked and enables it
-                    holder.followRequest.setChecked(true);
                     holder.followRequest.setTextOn(mActivity.getString(R.string.unfollow));
+                    holder.followRequest.setChecked(true);
                     holder.followRequest.setEnabled(true);
                     break;
                 }
@@ -170,7 +171,6 @@ public class TeenListAdapter extends RecyclerView.Adapter<TeenListAdapter.ViewHo
     }
 
     private class FollowTask extends AsyncTask<FollowDataRequest, Void, JsonResponse> {
-
         private ProgressDialog dialog;
 
         public FollowTask() {
@@ -202,7 +202,7 @@ public class TeenListAdapter extends RecyclerView.Adapter<TeenListAdapter.ViewHo
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                // Make the HTTP GET request, marshaling the response to User object
+                // Make the HTTP POST request, marshaling the response to JsonResponse object
                 result = restTemplate.postForObject(url, followData, JsonResponse.class);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -26,4 +26,6 @@ public class RestUriConstants {
     public static final String PARAM_EMAIL = "email";
     public static final String PARAM_TYPE = "type";
     public static final String PARAM_ID = "id";
+    public static final String PARAM_PHOTO = "photo";
+    public static final String PARAM_CHECK_IN = "checkIn";
 }

@@ -20,5 +20,5 @@
         android:summary="@string/server_url_summary"
         android:title="@string/server_url_title"
         android:key="serverUrl"
-        android:defaultValue="http://192.168.0.105:8080/WebServer"/>
+        android:defaultValue="http://192.168.0.106:8080/WebServer"/>
 </PreferenceScreen>

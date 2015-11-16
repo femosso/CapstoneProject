@@ -24,8 +24,11 @@ public class RestUriConstants {
     public static final String HISTORIC = "historic";
     public static final String SHARED_DATA = "sharedData";
     public static final String PHOTO = "photo";
+    public static final String CLEAR = "clear";
 
     public static final String PARAM_EMAIL= "email";
     public static final String PARAM_TYPE = "type";
     public static final String PARAM_ID = "id";
+    public static final String PARAM_PHOTO = "photo";
+    public static final String PARAM_CHECK_IN = "checkIn";
 }

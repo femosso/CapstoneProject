@@ -84,8 +84,8 @@ public class JpaCheckInDao implements CheckInDao {
         query.setParameter("arg1", email);
 
         Collection<CheckIn> checkIns = (Collection<CheckIn>) query.getResultList();
-        if(checkIns != null) {
-            for(CheckIn checkIn : checkIns) {
+        if (checkIns != null) {
+            for (CheckIn checkIn : checkIns) {
                 initializeCheckIn(checkIn);
             }
         }
@@ -100,7 +100,7 @@ public class JpaCheckInDao implements CheckInDao {
         Hibernate.initialize(answerList);
 
         // initialize list of such answers' questions
-        for(Answer answer : answerList) {
+        for (Answer answer : answerList) {
             Hibernate.initialize(answer.getQuestion());
         }
     }

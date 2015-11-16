@@ -1,7 +1,6 @@
 package com.capstone.application.activity;
 
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -106,27 +105,24 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         mChart.setPinchZoom(true);
 
         // set an alternative background color
-        // mChart.setBackgroundColor(Color.GRAY);
+        //mChart.setBackgroundColor(Color.GRAY);
+
         // add data
         setData(answerList);
 
         mChart.animateX(2500);
 
-        Typeface tf = Typeface.createFromAsset(getAssets(), "OpenSans-Regular.ttf");
-
         // get the legend (only possible after setting data)
         Legend l = mChart.getLegend();
 
-        // modify the legend ...
-        // l.setPosition(LegendPosition.LEFT_OF_CHART);
+        // modify the legend
+        //l.setPosition(LegendPosition.LEFT_OF_CHART);
         l.setForm(LegendForm.LINE);
-        l.setTypeface(tf);
         l.setTextSize(11f);
         l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
-//        l.setYOffset(11f);
+        //l.setYOffset(11f);
 
         XAxis xAxis = mChart.getXAxis();
-        xAxis.setTypeface(tf);
         xAxis.setTextSize(12f);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
@@ -134,7 +130,6 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
 
         YAxis leftAxis = mChart.getAxisLeft();
-        leftAxis.setTypeface(tf);
         leftAxis.setTextColor(ColorTemplate.getHoloBlue());
         leftAxis.setDrawGridLines(true);
 
@@ -158,17 +153,17 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
     }
 
     private void setData(List<Answer> answerList) {
-        ArrayList<String> xVals = new ArrayList<>();
-        ArrayList<Entry> yVals = new ArrayList<>();
+        ArrayList<String> xValues = new ArrayList<>();
+        ArrayList<Entry> yValues = new ArrayList<>();
 
-        String date;
-        int count = 0;
+        String date; int count = 0;
         for (Answer answer : answerList) {
             try {
-                date = new SimpleDateFormat("MM/dd HH:mm").format(answer.getCheckIn().getDate());
-                xVals.add(date);
+                date = new SimpleDateFormat(Constants.LINE_CHART_DATE_TIME_FORMAT)
+                        .format(answer.getCheckIn().getDate());
+                xValues.add(date);
 
-                yVals.add(new Entry(Float.valueOf(answer.getText()), count));
+                yValues.add(new Entry(Float.valueOf(answer.getText()), count));
                 count++;
             } catch (NumberFormatException e) {
                 Log.d(TAG, "Invalid entry " + answer.getText());
@@ -176,7 +171,7 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         }
 
         // create a dataset and give it a type
-        LineDataSet set1 = new LineDataSet(yVals, mInformationType);
+        LineDataSet set1 = new LineDataSet(yValues, mInformationType);
         set1.setAxisDependency(YAxis.AxisDependency.LEFT);
         set1.setColor(ColorTemplate.getHoloBlue());
         set1.setCircleColor(Color.BLACK);
@@ -187,15 +182,15 @@ public class LineChartActivity extends AppCompatActivity implements OnChartValue
         set1.setHighLightColor(Color.rgb(244, 117, 117));
         set1.setDrawCircleHole(false);
         //set1.setFillFormatter(new MyFillFormatter(0f));
-//        set1.setDrawHorizontalHighlightIndicator(false);
-//        set1.setVisible(false);
-//        set1.setCircleHoleColor(Color.WHITE);
+        //set1.setDrawHorizontalHighlightIndicator(false);
+        //set1.setVisible(false);
+        //set1.setCircleHoleColor(Color.WHITE);
 
-        ArrayList<LineDataSet> dataSets = new ArrayList<LineDataSet>();
+        ArrayList<LineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set1); // add the datasets
 
         // create a data object with the datasets
-        LineData data = new LineData(xVals, dataSets);
+        LineData data = new LineData(xValues, dataSets);
         data.setValueTextSize(9f);
 
         // set data

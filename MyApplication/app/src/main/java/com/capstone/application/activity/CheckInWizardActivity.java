@@ -7,11 +7,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -20,7 +22,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -68,26 +69,30 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
     private static final String TAG = RegisterActivity.class.getName();
 
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+
     private Context mContext;
 
     private ViewPager mPager;
-    private MyPagerAdapter mPagerAdapter;
 
-    private boolean mEditingAfterReview;
+    private MyPagerAdapter mPagerAdapter;
 
     private AbstractWizardModel mWizardModel;
 
+    private boolean mEditingAfterReview;
     private boolean mConsumePageSelectedEvent;
+
+    private long mPendingCheckInId;
 
     private Button mNextButton;
     private Button mPrevButton;
 
     private List<Page> mCurrentPageSequence;
-    private StepPagerStrip mStepPagerStrip;
-
     private List<Question> mQuestions;
 
-    private long mPendingCheckInId;
+    private StepPagerStrip mStepPagerStrip;
+
+    private String mImageName;
 
     /**
      * Stores the list of {@link Page} keys to be retrieved when reading results
@@ -167,7 +172,8 @@ public class CheckInWizardActivity extends FragmentActivity implements
             @Override
             public void onClick(View view) {
                 if (mPager.getCurrentItem() == mCurrentPageSequence.size()) {
-                    DialogFragment dg = new DialogFragment() {
+                    DialogFragment dialogFragment = new DialogFragment() {
+                        @NonNull
                         @Override
                         public Dialog onCreateDialog(Bundle savedInstanceState) {
                             return new AlertDialog.Builder(getActivity())
@@ -177,7 +183,7 @@ public class CheckInWizardActivity extends FragmentActivity implements
                                     .setNeutralButton(getString(R.string.check_in_confirm_alert_neutral), null).create();
                         }
                     };
-                    dg.show(getSupportFragmentManager(), "place_order_dialog");
+                    dialogFragment.show(getSupportFragmentManager(), "place_order_dialog");
                 } else {
                     if (mEditingAfterReview) {
                         mPager.setCurrentItem(mPagerAdapter.getCount() - 1);
@@ -199,16 +205,11 @@ public class CheckInWizardActivity extends FragmentActivity implements
         updateBottomBar();
     }
 
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-
-    private String mImageName;
-
     private DialogInterface.OnClickListener onNegativeButton = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-
                 String timeStamp = String.valueOf(System.currentTimeMillis());
 
                 File imagesFolder = new File(Constants.SAVE_IMAGES_PATH);
@@ -241,12 +242,9 @@ public class CheckInWizardActivity extends FragmentActivity implements
     };
 
     private void sendDataToServer() {
-        int i = 0;
-        boolean hasUnanswered = false;
+        int i = 0; boolean hasUnanswered = false;
 
-        Answer answer;
-        Question question;
-        String text;
+        Answer answer; Question question; String text;
         List<Answer> answers = new ArrayList<>();
 
         Page page;
@@ -316,9 +314,7 @@ public class CheckInWizardActivity extends FragmentActivity implements
     public void onPageTreeChanged() {
         mCurrentPageSequence = mWizardModel.getCurrentPageSequence();
         recalculateCutOffPage();
-        mStepPagerStrip.setPageCount(mCurrentPageSequence.size() + 1); // + 1 =
-        // review
-        // step
+        mStepPagerStrip.setPageCount(mCurrentPageSequence.size() + 1);
         mPagerAdapter.notifyDataSetChanged();
         updateBottomBar();
     }
@@ -327,16 +323,13 @@ public class CheckInWizardActivity extends FragmentActivity implements
         int position = mPager.getCurrentItem();
         if (position == mCurrentPageSequence.size()) {
             mNextButton.setText(getString(R.string.check_in_wizard_finish));
-            //mNextButton.setBackgroundResource(R.drawable.finish_background);
-            //mNextButton.setTextAppearance(this, R.style.TextAppearanceFinish);
+            mNextButton.setBackgroundResource(R.drawable.wizard_finish_background);
+            mNextButton.setTextColor(Color.WHITE);
         } else {
-            mNextButton.setText(mEditingAfterReview ? getString(R.string.check_in_wizard_review)
-                    : getString(R.string.check_in_wizard_next));
-            //mNextButton.setBackgroundResource(R.drawable.selectable_item_background);
-            TypedValue v = new TypedValue();
-            getTheme().resolveAttribute(android.R.attr.textAppearanceMedium, v, true);
-            mNextButton.setTextAppearance(this, v.resourceId);
+            mNextButton.setText(mEditingAfterReview ? getString(R.string.check_in_wizard_review) : getString(R.string.check_in_wizard_next));
+            mNextButton.setBackgroundResource(R.drawable.wizard_selectable_item_background);
             mNextButton.setEnabled(position != mPagerAdapter.getCutOffPage());
+            mNextButton.setTextColor(Color.BLACK);
         }
 
         mPrevButton.setVisibility(position <= 0 ? View.INVISIBLE : View.VISIBLE);
@@ -410,8 +403,8 @@ public class CheckInWizardActivity extends FragmentActivity implements
     }
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
-        private int mCutOffPage;
         private Fragment mPrimaryItem;
+        private int mCutOffPage;
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -428,7 +421,6 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
         @Override
         public int getItemPosition(Object object) {
-            // TODO: be smarter about this
             if (object == mPrimaryItem) {
                 // Re-use the current fragment (its position never changes)
                 return POSITION_UNCHANGED;
@@ -484,15 +476,14 @@ public class CheckInWizardActivity extends FragmentActivity implements
                     }
 
                     MultipleFixedChoicePage choicePage = new MultipleFixedChoicePage(this, question.getText());
-                    //SingleFixedChoicePage choicePage = new SingleFixedChoicePage(this, question.getText());
-                    //choicePage.setRequired(true);
+                    choicePage.setRequired(true);
                     choicePage.setChoices((alternatives));
 
                     wizardPages[i] = choicePage;
                 } else if (question.getFormat().equals(QuestionFormat.FORMAT2.getValue())) {
-                    wizardPages[i] = new NumberPage(this, question.getText())/*.setRequired(true)*/;
+                    wizardPages[i] = new NumberPage(this, question.getText()).setRequired(true);
                 } else {
-                    wizardPages[i] = new TextPage(this, question.getText())/*.setRequired(true)*/;
+                    wizardPages[i] = new TextPage(this, question.getText()).setRequired(true);
                 }
 
                 mKeyList.add(wizardPages[i].getKey());
@@ -504,7 +495,6 @@ public class CheckInWizardActivity extends FragmentActivity implements
     }
 
     private class SendCheckInTask extends AsyncTask<CheckIn, Void, JsonResponse> {
-
         private ProgressDialog dialog;
 
         public SendCheckInTask(CheckInWizardActivity activity) {
@@ -535,21 +525,24 @@ public class CheckInWizardActivity extends FragmentActivity implements
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                String json = ow.writeValueAsString(checkInData);
-
+                // all the data to be sent to server will be in this hash
                 MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 
                 if (checkInData.getPhotoPath() != null) {
-                    map.add("file", new FileSystemResource(checkInData.getPhotoPath()));
+                    map.add(RestUriConstants.PARAM_PHOTO, new FileSystemResource(checkInData.getPhotoPath()));
                 }
 
-                HttpHeaders xHeader = new HttpHeaders();
-                xHeader.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> xPart = new HttpEntity<>(json, xHeader);
-                map.add("checkIn", xPart);
+                // get the Check In data as Json String
+                ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                String checkInJson = objectWriter.writeValueAsString(checkInData);
 
-                // Make the HTTP GET request, marshaling the response to User object
+                HttpHeaders header = new HttpHeaders();
+                header.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<String> checkInParam = new HttpEntity<>(checkInJson, header);
+                map.add(RestUriConstants.PARAM_CHECK_IN, checkInParam);
+
+                // Make the HTTP POST request, marshaling the response to JsonResponse object
                 result = restTemplate.postForObject(url, map, JsonResponse.class);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -574,7 +567,8 @@ public class CheckInWizardActivity extends FragmentActivity implements
 
                     setResult(RESULT_OK, returnIntent);
                 } else {
-                    // TODO
+                    Toast.makeText(mContext, "Could not send check in data to server",
+                            Toast.LENGTH_LONG).show();
                 }
 
                 finish();

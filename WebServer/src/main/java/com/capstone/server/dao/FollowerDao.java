@@ -6,7 +6,6 @@ import java.util.Collection;
 import com.capstone.server.model.Follower;
 
 public interface FollowerDao {
-
     public void persist(Follower follower);
     public Follower update(Follower follower);
     public Follower remove(String email);

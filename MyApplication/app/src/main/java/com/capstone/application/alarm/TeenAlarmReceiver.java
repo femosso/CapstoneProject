@@ -43,10 +43,23 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
 
     private AlarmManager mAlarmMgr;
 
-    private PendingIntent mAlarmIntent;
+    private PendingIntent mAlarmPendingIntent;
+
+    private Intent mAlarmIntent;
+
+    private Context mContext;
 
     public TeenAlarmReceiver() {
         // Required empty public constructor
+    }
+
+    public TeenAlarmReceiver(Context context) {
+        mContext = context;
+
+        mAlarmIntent = new Intent(mContext, TeenAlarmReceiver.class);
+        mAlarmIntent.setAction(Constants.REQUEST_NEW_CHECK_IN_ACTION);
+
+        mAlarmPendingIntent = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent, 0);
     }
 
     @Override
@@ -92,7 +105,7 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notify)
                 .addAction(R.drawable.ic_check_in, context.getString(R.string.answer_now), answerNowPendingIntent)
                 .addAction(R.drawable.ic_later, context.getString(R.string.answer_later), laterPendingIntent)
                 .setContentTitle(context.getString(R.string.notification_new_check_in_title))
@@ -113,38 +126,45 @@ public class TeenAlarmReceiver extends BroadcastReceiver {
      * alarm fires, the app broadcasts a REQUEST_NEW_CHECK_IN_ACTION Intent to query
      * server for a new check in.
      */
-    public void setAlarm(Context context) {
-        mAlarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    public void setAlarm() {
+        if (isAlarmUp()) {
+            Log.d(TAG, "Alarm is already active, no need to create it again");
+            return;
+        }
 
-        Intent intent = new Intent(context, TeenAlarmReceiver.class);
-        intent.setAction(Constants.REQUEST_NEW_CHECK_IN_ACTION);
-
-        mAlarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        mAlarmMgr = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
         // reads the alarm frequency from shared preferences
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         String reminderFrequency = sharedPreferences.getString(Constants.REMINDER_FREQUENCY_KEY, null);
 
         if (reminderFrequency != null) {
             Log.d(TAG, "Setting alarm for " + reminderFrequency + " times/day");
 
             mAlarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                    AlarmManager.INTERVAL_DAY / Integer.valueOf(reminderFrequency), mAlarmIntent);
+                    AlarmManager.INTERVAL_DAY / Integer.valueOf(reminderFrequency), mAlarmPendingIntent);
         }
 
         // Enable {@code BootReceiver} to automatically restart the alarm when the
         // device is rebooted.
-        ComponentName receiver = new ComponentName(context, BootReceiver.class);
-        PackageManager pm = context.getPackageManager();
+        ComponentName receiver = new ComponentName(mContext, BootReceiver.class);
+        PackageManager pm = mContext.getPackageManager();
 
         pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
     }
 
+    private boolean isAlarmUp() {
+        // FIXME - For presentation purposes, I have commented this line to trigger alarm every time MainActivity is created
+        /*return PendingIntent.getBroadcast(mContext, 0,
+                mAlarmIntent, PendingIntent.FLAG_NO_CREATE) != null;*/
+        return false;
+    }
+
     public void cancelAlarm(Context context) {
         // If the alarm has been set, cancel it.
         if (mAlarmMgr != null) {
-            mAlarmMgr.cancel(mAlarmIntent);
+            mAlarmMgr.cancel(mAlarmPendingIntent);
         }
 
         // Disable {@code BootReceiver} so that it doesn't automatically restart the

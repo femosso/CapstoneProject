@@ -53,7 +53,7 @@ public class MyGcmListenerService extends GcmListenerService {
         String title = "";
 
         if (Constants.GCM_FOLLOW_REQUEST_TYPE.equals(type)) {
-            title = "Follow Request";
+            title = getString(R.string.notification_follow_request_title);
 
             Intent intent = new Intent(this, FollowRequestActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -64,7 +64,7 @@ public class MyGcmListenerService extends GcmListenerService {
             // update notification counter as new follow request message has arrived
             updateFollowRequestCounter();
         } else if (Constants.GCM_NEW_CHECK_IN_TYPE.equals(type)) {
-            title = "New Check-In from a Teen";
+            title = getString(R.string.notification_new_check_in_from_teen_title);
 
             CheckIn checkIn = HomeFragment.retrieveCheckInFromServer(getApplicationContext(), checkInId);
 
@@ -75,7 +75,7 @@ public class MyGcmListenerService extends GcmListenerService {
             pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         } else if (Constants.GCM_ADMIN_TYPE.equals(type)) {
-            title = "Got It";
+            title = getString(R.string.notification_admin_message_title);
 
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -88,7 +88,7 @@ public class MyGcmListenerService extends GcmListenerService {
         if (!title.isEmpty()) {
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setSmallIcon(R.drawable.ic_logo)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setAutoCancel(true)

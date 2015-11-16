@@ -47,7 +47,7 @@ public class JpaQuestionDao implements QuestionDao {
     @Transactional
     public Question find(long id, boolean forceLoad) {
         Question question = em.find(Question.class, id);
-        if(question != null && forceLoad) {
+        if (question != null && forceLoad) {
             Hibernate.initialize(question.getAlternativeList());
             Hibernate.initialize(question.getAnswerList());
         }
@@ -65,8 +65,8 @@ public class JpaQuestionDao implements QuestionDao {
         Query query = em.createQuery("SELECT e FROM Question e");
 
         Collection<Question> questions = (Collection<Question>) query.getResultList();
-        if(questions != null && forceLoad) {
-            for(Question question : questions) {
+        if (questions != null && forceLoad) {
+            for (Question question : questions) {
                 Hibernate.initialize(question.getAlternativeList());
                 Hibernate.initialize(question.getAnswerList());
             }

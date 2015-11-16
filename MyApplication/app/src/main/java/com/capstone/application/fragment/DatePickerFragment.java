@@ -40,9 +40,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT);
-        simpleDateFormat.setCalendar(c);
 
         // sets the selected date to the birthDateWrapper in RegisterActivity
-        birthDateWrapper.getEditText().setText(simpleDateFormat.toString());
+        birthDateWrapper.getEditText().setText(simpleDateFormat.format(c.getTime()));
     }
 }

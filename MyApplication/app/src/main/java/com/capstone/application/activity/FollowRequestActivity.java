@@ -117,7 +117,7 @@ public class FollowRequestActivity extends AppCompatActivity {
                 // Add the String message converter
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                // Make the HTTP GET request, marshaling the response to Teen object
+                // Make the HTTP GET request, marshaling the response to User[] object
                 User[] result = restTemplate.getForObject(url, User[].class);
 
                 if (result != null) {

@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerC
         // only set up alarm and make follow request activity available if logged user is a teen
         if (mUserType == Constants.UserType.TEEN.ordinal()) {
             // set up alarm for the logged teen
-            mAlarm = new TeenAlarmReceiver();
-            mAlarm.setAlarm(getApplicationContext());
+            mAlarm = new TeenAlarmReceiver(getApplicationContext());
+            mAlarm.setAlarm();
 
             // set up receiver to update follow request counter in action bar
             mUpdateFollowRequestReceiver = new BroadcastReceiver() {

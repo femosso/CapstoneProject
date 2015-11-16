@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Got It Diabetes Management</string>
 
     <string name="facebook_app_id">1569471569983376</string>
 
@@ -38,6 +38,7 @@
     <string name="teen_birthday">Birthday:&#160;</string>
     <string name="teen_medical_number">Medical Number:&#160;</string>
     <string name="check_in_history_not_loaded">Could not load the history of this question</string>
+    <string name="question_history">* Question\'s history</string>
 
     <!-- CheckInWizardActivity -->
     <string name="check_in_wizard_not_initialized">Not able to initialize wizard - no questions</string>
@@ -49,6 +50,7 @@
     <string name="check_in_confirm_alert_negative">Add Photo</string>
     <string name="check_in_confirm_alert_positive">Send</string>
     <string name="check_in_confirm_alert_neutral">Cancel</string>
+    <string name="send_check_in_fail">Could not send check in data to server</string>
 
     <!-- LineChartActivity -->
     <string name="chart_no_data">You need to provide data for the chart.</string>
@@ -71,7 +73,8 @@
     <string name="user_type_follower">Follower</string>
 
     <!-- PendingCheckInListAdapter -->
-    <string name="last_pending_check_in_time">"%1$s min, %2$s sec ago"</string>
+    <string name="pending_check_in_from">Pending Check In from:&#160;</string>
+    <string name="last_pending_check_in_time">%1$s min, %2$s sec ago</string>
     <string name="do_check_in_now">Do a Check In now!</string>
 
     <!-- TeenAlarmReceiver -->
@@ -79,6 +82,11 @@
     <string name="notification_new_check_in_content">It\'s time for a new check in!</string>
     <string name="answer_now">Answer Now</string>
     <string name="answer_later">Later</string>
+
+    <!-- MyGcmListenerService -->
+    <string name="notification_follow_request_title">Follow Request</string>
+    <string name="notification_new_check_in_from_teen_title">New Check In from a Teen</string>
+    <string name="notification_admin_message_title">Got It Diabetes Management</string>
 
     <!-- Texts displayed in empty views -->
     <string name="no_check_in_retrieve">No check in retrieved.</string>
@@ -107,6 +115,13 @@
     <string name="about_graph_views_link">https://github.com/PhilJay/MPAndroidChart/</string>
     <string name="about_check_in_wizard">Check In Wizard</string>
     <string name="about_check_in_link">https://github.com/TechFreak/WizardPager/</string>
+    <string name="about_icons">The icons used in this application have been found in the following websites:</string>
+    <string name="about_icons_4_android">Icons 4 Android</string>
+    <string name="about_icons_4_android_link">http://www.icons4android.com/</string>
+    <string name="about_google_design_icons">Google Design Icons</string>
+    <string name="about_google_design_icons_link">https://www.google.com/design/icons/</string>
+    <string name="about_icons_8">Icons8</string>
+    <string name="about_icons_8_link">https://icons8.com/</string>
 
     <!-- activity_check_in_details.xml -->
     <string name="check_in_information_divider">Check-in Information</string>
@@ -125,11 +140,11 @@
     <string name="sign_up">Don\'t have an account yet? Sign up here!</string>
 
     <!-- activity_question_wizard.xml -->
-    <string name="next_question">next</string>
-    <string name="prev_question">prev</string>
+    <string name="next_question">Next</string>
+    <string name="prev_question">Previous</string>
 
     <!-- activity_register.xml -->
-    <string name="img_register_description">Registering image</string>
+    <string name="img_project_logo">Got it Logo</string>
     <string name="i_am_a_teen">I am a Teen!</string>
     <string name="hint_name">Name</string>
     <string name="hint_medical_number">Medical Number</string>

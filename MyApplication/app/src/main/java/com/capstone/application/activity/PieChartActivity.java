@@ -1,13 +1,11 @@
 package com.capstone.application.activity;
 
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -40,8 +38,6 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
     private static final String TAG = PieChartActivity.class.getName();
 
     private PieChart mChart;
-
-    private Typeface tf;
 
     private String mInformationType;
 
@@ -100,10 +96,7 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
 
         mChart.setDragDecelerationFrictionCoef(0.95f);
 
-        tf = Typeface.createFromAsset(getAssets(), "OpenSans-Regular.ttf");
-
-        mChart.setCenterTextTypeface(Typeface.createFromAsset(getAssets(), "OpenSans-Light.ttf"));
-        mChart.setCenterText("text");
+        mChart.setCenterText(mInformationType);
 
         mChart.setDrawHoleEnabled(true);
         mChart.setHoleColorTransparent(true);
@@ -117,11 +110,12 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
         mChart.setDrawCenterText(true);
 
         mChart.setRotationAngle(0);
+
         // enable rotation of the chart by touch
         mChart.setRotationEnabled(true);
 
-        // mChart.setUnit(" €");
-        // mChart.setDrawUnitsInChart(true);
+        //mChart.setUnit(" €");
+        //mChart.setDrawUnitsInChart(true);
 
         // add a selection listener
         mChart.setOnChartValueSelectedListener(this);
@@ -129,7 +123,7 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
         setData(answerList);
 
         mChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-        // mChart.spin(2000, 0, 360);
+        //mChart.spin(2000, 0, 360);
 
         Legend l = mChart.getLegend();
         l.setPosition(LegendPosition.RIGHT_OF_CHART);
@@ -158,10 +152,10 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
     }
 
     private void setData(List<Answer> answerList) {
+        // hash map containing the alternative and how many time this alternative has been used
         HashMap<String, Integer> optionsCounter = new HashMap<>();
 
-        Set<String> optionsChecked;
-        int counter;
+        Set<String> optionsChecked; int counter;
         for (Answer answer : answerList) {
             optionsChecked = convertStringToSet(answer.getText());
 
@@ -177,49 +171,26 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
             }
         }
 
-        ArrayList<String> xVals = new ArrayList<>();
-        ArrayList<Entry> yVals = new ArrayList<>();
+        ArrayList<String> xValues = new ArrayList<>();
+        ArrayList<Entry> yValues = new ArrayList<>();
 
         int i = 0;
         for (Map.Entry<String, Integer> entry : optionsCounter.entrySet()) {
-            yVals.add(new Entry((float) entry.getValue(), i));
-            xVals.add(entry.getKey());
+            yValues.add(new Entry((float) entry.getValue(), i));
+            xValues.add(entry.getKey());
             i++;
         }
 
-        PieDataSet dataSet = new PieDataSet(yVals, "Election Results");
+        PieDataSet dataSet = new PieDataSet(yValues, "");
         dataSet.setSliceSpace(2f);
         dataSet.setSelectionShift(5f);
-
-        // add a lot of colors
-
-        ArrayList<Integer> colors = new ArrayList<>();
-
-/*        for (int c : ColorTemplate.VORDIPLOM_COLORS)
-            colors.add(c);
-
-        for (int c : ColorTemplate.JOYFUL_COLORS)
-            colors.add(c);*/
-
-        for (int c : ColorTemplate.COLORFUL_COLORS)
-            colors.add(c);
-
-/*        for (int c : ColorTemplate.LIBERTY_COLORS)
-            colors.add(c);
-
-        for (int c : ColorTemplate.PASTEL_COLORS)
-            colors.add(c);*/
-
-        colors.add(ColorTemplate.getHoloBlue());
-
-        dataSet.setColors(colors);
+        dataSet.setColors(ColorTemplate.PASTEL_COLORS);
         //dataSet.setSelectionShift(0f);
 
-        PieData data = new PieData(xVals, dataSet);
+        PieData data = new PieData(xValues, dataSet);
         data.setValueFormatter(new PercentFormatter());
         data.setValueTextSize(11f);
         data.setValueTextColor(Color.WHITE);
-        data.setValueTypeface(tf);
         mChart.setData(data);
 
         // undo all highlights
@@ -230,15 +201,9 @@ public class PieChartActivity extends AppCompatActivity implements OnChartValueS
 
     @Override
     public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
-        if (e == null)
-            return;
-        Log.i("VAL SELECTED",
-                "Value: " + e.getVal() + ", xIndex: " + e.getXIndex()
-                        + ", DataSet index: " + dataSetIndex);
     }
 
     @Override
     public void onNothingSelected() {
-        Log.i("PieChart", "nothing selected");
     }
 }

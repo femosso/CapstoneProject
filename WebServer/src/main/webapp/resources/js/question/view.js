@@ -40,9 +40,11 @@ function() {
                     toastr.error(data.message, "Opsss..");
                 }
                 $('#submit-question').button('reset');
+                $('#edit').modal('hide');
             },
             error : function(data) {
                 $('#submit-question').button('reset');
+                $('#edit').modal('hide');
             }
         });
     }
@@ -177,7 +179,6 @@ function() {
         // set question-id to a hidden input inside modal-body
         var id = tr.attr("id");
 
-        alert("id " + id);
         $.ajax({
             url : getContextPath() + '/question/delete/' + id,
             type : "DELETE",

@@ -33,8 +33,8 @@
 
     <!-- types of data the teen desires to share with its followers -->
     <string-array name="shared_data">
-        <item>Type 1</item>
-        <item>Type 2</item>
-        <item>Type 3</item>
+        <item>Blood Sugar Level</item>
+        <item>State of Teen</item>
+        <item>General Question</item>
     </string-array>
 </resources>

@@ -2,6 +2,7 @@ package com.capstone.application.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -343,6 +344,14 @@ public class RegisterActivity extends FragmentActivity {
         @Override
         protected void onPreExecute() {
             dialog.setMessage(getString(R.string.progress_dialog_sending));
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    // if dialog is dismissed, make sure we log out from facebook as well
+                    RegisterAccountTask.this.cancel(true);
+                    LoginManager.getInstance().logOut();
+                }
+            });
             dialog.show();
         }
 
@@ -407,7 +416,6 @@ public class RegisterActivity extends FragmentActivity {
     }
 
     private void handleRegisteringResult(JsonResponse result) {
-        // TODO - treat better the types of return (make it compliant with internationalization method)
         String outputMessage = getString(R.string.unexpected_result);
         if (result != null) {
             switch (result.getStatus()) {

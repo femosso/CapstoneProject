@@ -35,31 +35,17 @@
                 android:layout_alignTop="@+id/imgThumbnail"
                 android:layout_toEndOf="@+id/imgThumbnail"
                 android:layout_toRightOf="@+id/imgThumbnail"
-                android:text="title"
                 android:textSize="@dimen/title"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/txtMedicalNumber"
+                android:id="@+id/txtUserType"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/txtFullName"
-                android:layout_marginTop="1dip"
-                android:layout_toEndOf="@+id/imgThumbnail"
+                android:textSize="@dimen/info"
+                android:layout_below="@+id/txtFullName"
                 android:layout_toRightOf="@+id/imgThumbnail"
-                android:text="rating"
-                android:textSize="@dimen/rating" />
-
-            <TextView
-                android:id="@+id/txtBirthday"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/txtMedicalNumber"
-                android:layout_marginTop="5dp"
-                android:layout_toEndOf="@+id/imgThumbnail"
-                android:layout_toRightOf="@+id/imgThumbnail"
-                android:text="genre"
-                android:textSize="@dimen/genre" />
+                android:layout_toEndOf="@+id/imgThumbnail" />
 
             <Button
                 android:id="@+id/btnDeny"

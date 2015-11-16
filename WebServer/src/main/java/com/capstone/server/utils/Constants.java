@@ -8,6 +8,7 @@ public class Constants {
 
     /** Session constants */
     public static final String SESSION_USER = "loggedUser";
+    public static final String IS_REDIRECT = "isRedirect";
 
     /**
      * Type of messages that could be sent via GCM
@@ -59,9 +60,9 @@ public class Constants {
 
     /** Types of question that could be created by the admin */
     public enum QuestionType {
-        TYPE1("Type 1"),
-        TYPE2("Type 2"),
-        TYPE3("Type 3");
+        TYPE1("Blood Sugar Level"),
+        TYPE2("State of Teen"),
+        TYPE3("General Question");
 
         private final String value;
 

@@ -52,7 +52,7 @@ public class ApiKeyInitializer implements ServletContextListener {
         }
     }
 
+    @Override
     public void contextDestroyed(ServletContextEvent event) {
     }
-
 }

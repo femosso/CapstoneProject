@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title><spring:message code="label.home.projectFullName"/></title>
 
     <link href="${resources}/css/bootstrap/bootstrap.min.css?ts=1" rel="stylesheet">
     <link href="${resources}/css/sticky-footer-navbar.css" rel="stylesheet">
@@ -31,6 +31,7 @@
           </c:otherwise>
         </c:choose>
       </div>
+      <input type="hidden" id="isRedirect" value="${sessionScope.isRedirect}" />
     </div>
 
     <jsp:include page="footer.jsp" />
@@ -40,8 +41,6 @@
     <script src="${resources}/js/cryptojs/md5.js"></script>
     <script src="${resources}/js/toastr/toastr.min.js"></script>
     <script src="${resources}/js/login/box.js"></script>
-    <script>
-      $("#home").addClass("active");
-    </script>
+    <script src="${resources}/js/home.js"></script>
   </body>
 </html>

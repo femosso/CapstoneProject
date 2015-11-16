@@ -181,15 +181,6 @@ public class TeenController {
                 DeviceController deviceController = new DeviceController();
                 deviceController.asyncSend(deviceMessage, Constants.GCM_FOLLOW_REQUEST_TYPE);
 
-/*                // if a teen wants to start following someone
-                if (userDb.getType() == UserType.TEEN.ordinal() && userDb.getFollower() == null) {
-                    Follower follower = new Follower();
-                    follower.setEmail(userDb.getEmail());
-                    follower.setUser(userDb);
-
-                    userDb.setFollower(follower);
-                }*/
-
                 // add userEmail to list of pending followers for this teen
                 teenPendingFollowersDb = getUpdatedList(userDb, teenPendingFollowersDb, true);
 
@@ -205,8 +196,7 @@ public class TeenController {
             teenDao.update(teenDb);
         }
 
-        // FIXME - Add appropriate return message
-        return new JsonResponse(HttpStatus.OK, "good");
+        return new JsonResponse(HttpStatus.OK, "Ok");
     }
 
     @RequestMapping(value = RestUriConstants.PENDING + "/" + RestUriConstants.LIST, method = RequestMethod.GET)
@@ -216,7 +206,7 @@ public class TeenController {
             sLogger.info("Invalid parameters");
             return null;
         }
-       
+
         // get user that has requested the list of teens
         User requestorDb = userDao.find(email, true);
         if (requestorDb == null) {
@@ -233,19 +223,19 @@ public class TeenController {
         sLogger.info("User " + email + " requested list pending follow request");
 
         List<Follower> pendingFollowerListDb = requestorDb.getTeen().getPendingFollowerList();
-        
+
         List<User> usersList = new ArrayList<>(); User user;
-        for(Follower follower : pendingFollowerListDb) {
+        for (Follower follower : pendingFollowerListDb) {
             // set only fields that matter
             user = new User();
             user.setEmail(follower.getUser().getEmail());
             user.setFirstName(follower.getUser().getFirstName());
             user.setLastName(follower.getUser().getLastName());
             user.setType(follower.getUser().getType());
-            
+
             usersList.add(user);
         }
-        
+
         return usersList;
     }
 
@@ -278,20 +268,18 @@ public class TeenController {
         teenDb.setPendingFollowerList(teenPendingFollowersDb);
         teenDao.update(teenDb);
 
-        
-        List<User> updatedUsersList = new ArrayList<>();
-        User user;
-        for(Follower follower : teenPendingFollowersDb) {
+        List<User> updatedUsersList = new ArrayList<>(); User user;
+        for (Follower follower : teenPendingFollowersDb) {
             // set only fields that matter
             user = new User();
             user.setEmail(follower.getUser().getEmail());
             user.setFirstName(follower.getUser().getFirstName());
             user.setLastName(follower.getUser().getLastName());
             user.setType(follower.getUser().getType());
-            
+
             updatedUsersList.add(user);
         }
-        
+
         return new FollowDataResponse(new JsonResponse(HttpStatus.OK, "good"), updatedUsersList);
     }
 
@@ -327,7 +315,7 @@ public class TeenController {
                 if (SignInProvider.FACEBOOK.ordinal() == userDb.getProvider()) {
                     in = downloadFacebookProfilePicture(userDb.getFacebookId());
                 } else if (SignInProvider.APPLICATION.ordinal() == userDb.getProvider()) {
-                    in = new FileInputStream("C:\\Users\\User\\Desktop\\images\\download.jpg");
+                    in = new FileInputStream("C:\\Users\\User\\Desktop\\images\\icon-profile.png");
                 }
 
                 if (in != null) {
@@ -359,7 +347,7 @@ public class TeenController {
      * remove
      */
     private List<Follower> getUpdatedList(User user, List<Follower> currentList, boolean add) {
-        if(add) {
+        if (add) {
             currentList.add(user.getFollower());
         } else {
             // safe remove the user from this teen followers list

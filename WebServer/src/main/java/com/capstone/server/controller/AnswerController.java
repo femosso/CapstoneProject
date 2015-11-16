@@ -34,6 +34,8 @@ public class AnswerController {
     @RequestMapping(value = RestUriConstants.HISTORIC, method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody Feedback requestHistoric(@RequestParam(RestUriConstants.PARAM_EMAIL) String email,
             @RequestParam(RestUriConstants.PARAM_TYPE) String type) {
+        sLogger.debug("Historic request for " + email + " and question type " + type);
+
         User userDb = userDao.find(email, true);
         List<Answer> answersDb = (List<Answer>) answerDao.findByTeenAndType(email, type);
 
@@ -58,5 +60,4 @@ public class AnswerController {
 
         return new Feedback(user, answers);
     }
-
 }

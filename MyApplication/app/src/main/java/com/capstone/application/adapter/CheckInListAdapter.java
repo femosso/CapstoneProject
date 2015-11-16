@@ -73,7 +73,7 @@ public class CheckInListAdapter extends RecyclerView.Adapter<CheckInListAdapter.
             for (Answer answer : answerList) {
                 feedback = feedback + answer.getQuestion().getType() + ": " + answer.getText() + "\n";
             }
-            holder.mainQuestion.setText(feedback);
+            holder.mainQuestion.setText("" + feedback);
 
             long date = checkIn.getDate();
             holder.checkInDate.setText(new SimpleDateFormat(Constants.DATE_TIME_FORMAT).format(date));

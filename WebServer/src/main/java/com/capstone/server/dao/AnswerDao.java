@@ -6,7 +6,6 @@ import java.util.Collection;
 import com.capstone.server.model.Answer;
 
 public interface AnswerDao {
-
     public void persist(Answer answer);
     public Answer update(Answer answer);
     public Answer remove(long id);

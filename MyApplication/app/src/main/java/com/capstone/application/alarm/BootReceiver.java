@@ -11,12 +11,11 @@ import android.content.Intent;
 public class BootReceiver extends BroadcastReceiver {
     public static final String BOOT_COMPLETED_ACTION = "android.intent.action.BOOT_COMPLETED";
 
-    private TeenAlarmReceiver mAlarm = new TeenAlarmReceiver();
-
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(BOOT_COMPLETED_ACTION)) {
-            mAlarm.setAlarm(context);
+            TeenAlarmReceiver alarm = new TeenAlarmReceiver(context);
+            alarm.setAlarm();
         }
     }
 }

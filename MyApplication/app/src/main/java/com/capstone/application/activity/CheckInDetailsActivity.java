@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -86,18 +87,24 @@ public class CheckInDetailsActivity extends AppCompatActivity {
 
                 // add the answer text for this question
                 TextView answerTextView = new TextView(this);
-                answerTextView.setText(answerText);
+                answerTextView.setText(answerText + "\n");
 
                 feedbackLayout.addView(answerTextView);
 
-                // if the question is from this TYPE1, provide the possibility
-                // to view the history of it in a line chart
+                // if the question is from these specific types, provide the possibility
+                // to view the history of it in a chart
                 if (Constants.QuestionType.fromString(answer.getQuestion().getType())
-                        .equals(Constants.QuestionType.TYPE1)) {
-                    Button button = new Button(this);
-                    button.setText("see history");
+                        .equals(Constants.QuestionType.TYPE1) ||
+                        Constants.QuestionType.fromString(answer.getQuestion().getType())
+                                .equals(Constants.QuestionType.TYPE2)) {
 
-                    button.setOnClickListener(new View.OnClickListener() {
+                    // add heads up informing it is possible to retrieve history of this question
+                    String originalText = questionTextView.getText().toString();
+                    originalText += " *";
+                    questionTextView.setText(originalText);
+
+                    // add listener for this question to show history
+                    questionTextView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             String type = answer.getQuestion().getType();
@@ -106,36 +113,14 @@ public class CheckInDetailsActivity extends AppCompatActivity {
                             new RetrieveHistoricTask(CheckInDetailsActivity.this, type).execute(email);
                         }
                     });
-
-                    feedbackLayout.addView(button);
-                } else if (Constants.QuestionType.fromString(answer.getQuestion().getType())
-                        .equals(Constants.QuestionType.TYPE2)) {
-                    Button button = new Button(this);
-                    button.setText("see history 1");
-
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            String type = answer.getQuestion().getType();
-                            String email = mCheckIn.getUser().getEmail();
-
-                            new RetrieveHistoricTask(CheckInDetailsActivity.this, type).execute(email);
-                        }
-                    });
-
-                    feedbackLayout.addView(button);
                 }
-
-/*                // add line separator
-                View separator = new View(this);
-                LinearLayout.LayoutParams layoutParams =
-                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
-
-                separator.setLayoutParams(layoutParams);
-                separator.setBackgroundColor(Color.BLACK);
-
-                feedbackLayout.addView(separator);*/
             }
+
+            // add the question history text to describe when the question has *
+            TextView asteriskTextView = new TextView(this);
+            asteriskTextView.setText(getString(R.string.question_history));
+            asteriskTextView.setGravity(Gravity.END);
+            feedbackLayout.addView(asteriskTextView);
         }
     }
 

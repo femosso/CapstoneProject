@@ -33,6 +33,7 @@ import com.capstone.server.model.Question;
 import com.capstone.server.model.Teen;
 import com.capstone.server.model.User;
 import com.capstone.server.utils.Constants;
+import com.capstone.server.utils.Constants.QuestionType;
 
 @Controller
 @RequestMapping(RestUriConstants.CHECK_IN_CONTROLLER)
@@ -47,7 +48,7 @@ public class CheckInController {
     private UserDao userDao;
 
     @RequestMapping(value = RestUriConstants.LIST, method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody List<CheckIn> requestCheckInList(@RequestParam("email") String email) {
+    public @ResponseBody List<CheckIn> requestCheckInList(@RequestParam(RestUriConstants.PARAM_EMAIL) String email) {
         if (!isValidEmail(email)) {
             sLogger.info("Invalid parameters");
             return null;
@@ -84,7 +85,8 @@ public class CheckInController {
                 checkIn.setId(checkInDb.getId());
                 checkIn.setDate(checkInDb.getDate());
 
-                checkIn.setAnswerList(buildAnswerList(checkInDb, teenDb));
+                // set answer list without general questions
+                checkIn.setAnswerList(buildAnswerList(checkInDb, teenDb, false));
                 checkIns.add(checkIn);
             }
         }
@@ -97,6 +99,7 @@ public class CheckInController {
         CheckIn checkInDb = checkInDao.find(id, true);
 
         if (checkInDb == null) {
+            sLogger.debug("No such check in with id " + id);
             return null;
         }
 
@@ -120,14 +123,15 @@ public class CheckInController {
         checkIn.setId(checkInDb.getId());
         checkIn.setDate(checkInDb.getDate());
 
-        checkIn.setAnswerList(buildAnswerList(checkInDb, teenDb));
+        // set answer list including general questions
+        checkIn.setAnswerList(buildAnswerList(checkInDb, teenDb, true));
 
         return checkIn;
     }
 
     @RequestMapping(value = RestUriConstants.SEND, method = RequestMethod.POST)
-    public @ResponseBody JsonResponse sendCheckIn(@RequestPart("checkIn") CheckIn checkIn,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+    public @ResponseBody JsonResponse sendCheckIn(@RequestPart(RestUriConstants.PARAM_CHECK_IN) CheckIn checkIn,
+            @RequestPart(value = RestUriConstants.PARAM_PHOTO, required = false) MultipartFile file) {
         if (!isValidCheckIn(checkIn)) {
             sLogger.info("Invalid parameters");
             return new JsonResponse(HttpStatus.BAD_REQUEST, "Invalid parameters");
@@ -193,28 +197,50 @@ public class CheckInController {
         return null;
     }
 
-    private List<Answer> buildAnswerList(CheckIn checkInDb, Teen teenDb) {
+    private List<Answer> buildAnswerList(CheckIn checkInDb, Teen teenDb, boolean includeGeneralQuestions) {
         Question question; Answer answer;
         List<Answer> answers = new ArrayList<>();
 
         for (Answer answerDb : checkInDb.getAnswerList()) {
             String questionType = answerDb.getQuestion().getType();
 
-            // only add answer information if teen desires to shared this kind of data
-            if (teenDb.getSharedDataAsList().contains(questionType)) {
+            // only add answer information if teen desires to shared this kind of data.
+            // when includeGeneralQuestions parameter is false, we do not add
+            // QuestionType.TYPE3 questions/answers
+            if (questionType != null && teenDb.getSharedDataAsList().contains(questionType)
+                    && (includeGeneralQuestions || !questionType.equals(QuestionType.TYPE3.getValue()))) {
                 question = new Question();
                 question.setType(questionType);
                 question.setText(answerDb.getQuestion().getText());
 
+                String questionFormat = answerDb.getQuestion().getFormat();
+
                 answer = new Answer();
-                answer.setText(answerDb.getText());
                 answer.setQuestion(question);
+
+                // format answer if question is in multiple choice format
+                String answerText = questionFormat != null
+                        && questionFormat.equals(Constants.QuestionFormat.FORMAT1.getValue())
+                                ? formatAnswersList(answerDb.getText()) : answerDb.getText();
+                answer.setText(answerText);
 
                 answers.add(answer);
             }
         }
 
         return answers;
+    }
+
+    /**
+     * Auxiliary method to format answers of list type (comma separated) in a
+     * good way to be shown in Android app
+     */
+    private String formatAnswersList(String value) {
+        if(value != null && value.endsWith(",")) {
+            value = value.substring(0, value.length() - 1);
+        }
+
+        return value;
     }
 
     private boolean isValidCheckIn(CheckIn checkIn) {

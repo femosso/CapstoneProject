@@ -44,9 +44,8 @@ public class FollowRequestListAdapter extends RecyclerView.Adapter<FollowRequest
     public class ViewHolderItem extends RecyclerView.ViewHolder {
         NetworkImageView thumbNail;
 
-        TextView title;
-        TextView rating;
-        TextView genre;
+        TextView fullName;
+        TextView userType;
 
         Button confirm;
         Button deny;
@@ -55,9 +54,8 @@ public class FollowRequestListAdapter extends RecyclerView.Adapter<FollowRequest
             super(itemView);
             thumbNail = (NetworkImageView) itemView.findViewById(R.id.imgThumbnail);
 
-            title = (TextView) itemView.findViewById(R.id.txtFullName);
-            rating = (TextView) itemView.findViewById(R.id.txtMedicalNumber);
-            genre = (TextView) itemView.findViewById(R.id.txtBirthday);
+            fullName = (TextView) itemView.findViewById(R.id.txtFullName);
+            userType = (TextView) itemView.findViewById(R.id.txtUserType);
 
             confirm = (Button) itemView.findViewById(R.id.btnConfirm);
             deny = (Button) itemView.findViewById(R.id.btnDeny);
@@ -107,10 +105,10 @@ public class FollowRequestListAdapter extends RecyclerView.Adapter<FollowRequest
             holder.thumbNail.setImageUrl(url, mImageLoader);
 
             if (user.getFirstName() != null) {
-                holder.title.setText(user.getFirstName() + " " + user.getLastName());
+                holder.fullName.setText(user.getFirstName() + " " + user.getLastName());
             }
 
-            holder.rating.setText(mActivity.getString(R.string.user_type) +
+            holder.userType.setText(mActivity.getString(R.string.user_type) +
                     (user.getType() == Constants.UserType.TEEN.ordinal() ?
                             mActivity.getString(R.string.user_type_teen) :
                             mActivity.getString(R.string.user_type_follower)));

@@ -2,11 +2,12 @@ package com.capstone.application.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 
 public class Constants {
 
-    private static final String DEFAULT_SERVER_URL = "http://192.168.0.105:8080/WebServer";
+    private static final String DEFAULT_SERVER_URL = "http://192.168.0.106:8080/WebServer";
 
     public static String getServerUrl(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -116,9 +117,9 @@ public class Constants {
      * Types of question that could be created by the admin
      */
     public enum QuestionType {
-        TYPE1("Type 1"),
-        TYPE2("Type 2"),
-        TYPE3("Type 3");
+        TYPE1("Blood Sugar Level"),
+        TYPE2("State of Teen"),
+        TYPE3("General Question");
 
         private final String value;
 
@@ -155,14 +156,20 @@ public class Constants {
     }
 
     /**
-     * Constants related to date/time format that will be displayed
+     * Constants related to date/time format that will be displayed in lists
      */
     public static final String DATE_FORMAT = "MM/dd/yyyy";
     public static final String TIME_FORMAT = "HH:mm:ss";
     public static final String DATE_TIME_FORMAT = DATE_FORMAT + " " + TIME_FORMAT;
 
     /**
+     * Constant related to date/time format that will be displayed in line chart
+     */
+    public static final String LINE_CHART_DATE_TIME_FORMAT = "MM/dd HH:mm";
+
+    /**
      * Temporary path where the check in photo will be saved while it has not been sent to server
      */
-    public static final String SAVE_IMAGES_PATH = "/mnt/sdcard/Capstone/Images/";
+    public static final String SAVE_IMAGES_PATH = Environment.getExternalStorageDirectory().getPath() +
+            "/Capstone/Images/";
 }

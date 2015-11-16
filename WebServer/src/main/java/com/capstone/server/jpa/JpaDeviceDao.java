@@ -59,10 +59,10 @@ public class JpaDeviceDao implements DeviceDao {
     @Transactional
     public Device findByToken(String token) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
-        
+
         CriteriaQuery<Device> criteriaQuery = builder.createQuery(Device.class);
         Root<Device> deviceRoot = criteriaQuery.from(Device.class);
-        
+
         criteriaQuery.select(deviceRoot);
         criteriaQuery.where(builder.equal(deviceRoot.get("token"), token));
 

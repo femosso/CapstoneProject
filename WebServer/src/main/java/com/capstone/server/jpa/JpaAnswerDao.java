@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.capstone.server.dao.AnswerDao;
 import com.capstone.server.model.Answer;
-import com.capstone.server.model.Teen;
 
 @Repository
 public class JpaAnswerDao implements AnswerDao {
@@ -60,8 +59,8 @@ public class JpaAnswerDao implements AnswerDao {
         query.setParameter("arg2", type);
 
         Collection<Answer> answers = (Collection<Answer>) query.getResultList();
-        if(answers != null) {
-            for(Answer answer : answers) {
+        if (answers != null) {
+            for (Answer answer : answers) {
                 Hibernate.initialize(answer.getCheckIn());
             }
         }

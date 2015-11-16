@@ -23,6 +23,7 @@
                 android:id="@+id/txtTeenName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
                 android:textSize="@dimen/title"
                 android:textStyle="bold" />
 
@@ -33,7 +34,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/txtTeenName"
-                android:textSize="@dimen/rating" />
+                android:textSize="@dimen/info" />
 
             <TextView
                 android:id="@+id/txtCheckInDate"
@@ -42,7 +43,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:textSize="@dimen/year" />
+                android:textSize="@dimen/date" />
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

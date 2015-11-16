@@ -29,8 +29,6 @@ public class QuestionController {
 
     private final static Logger sLogger = Logger.getLogger(QuestionController.class);
 
-    private final static boolean DEBUG = sLogger.isDebugEnabled();
-
     @Autowired
     private QuestionDao questionDao;
 
@@ -84,7 +82,7 @@ public class QuestionController {
             questionDao.update(question);
         }
 
-        return new JsonResponse(HttpStatus.OK, "ok");
+        return new JsonResponse(HttpStatus.OK, "Question successfully created/updated!");
     }
 
     @RequestMapping(value = RestUriConstants.LIST, method = RequestMethod.GET)
@@ -112,16 +110,12 @@ public class QuestionController {
     }
 
     @RequestMapping(value = RestUriConstants.DELETE, method = RequestMethod.DELETE)
-    public @ResponseBody JsonResponse delete(@PathVariable("id") long id) {
+    public @ResponseBody JsonResponse delete(@PathVariable(RestUriConstants.PARAM_ID) long id) {
         questionDao.remove(id);
-        return new JsonResponse(HttpStatus.OK, "ok");
+        return new JsonResponse(HttpStatus.OK, "Question successfully removed!");
     }
 
     private boolean isValidQuestion(Question question) {
         return true;
     }
-
-/*    private boolean isValidCheckIn(CheckIn checkIn) {
-        return true;
-    }*/
 }

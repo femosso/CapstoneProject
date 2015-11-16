@@ -38,6 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/wizard_selectable_item_background"
             android:text="@string/prev_question" />
 
         <View
@@ -50,6 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/wizard_selectable_item_background"
             android:text="@string/next_question" />
     </LinearLayout>
 

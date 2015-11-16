@@ -6,7 +6,6 @@ import java.util.Collection;
 import com.capstone.server.model.CheckIn;
 
 public interface CheckInDao {
-
     public void persist(CheckIn checkIn);
     public CheckIn update(CheckIn checkIn);
     public CheckIn remove(long id);

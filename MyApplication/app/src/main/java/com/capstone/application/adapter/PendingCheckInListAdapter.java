@@ -29,8 +29,11 @@ public class PendingCheckInListAdapter extends BaseAdapter {
     private static final String TAG = PendingCheckInListAdapter.class.getName();
 
     private Activity mActivity;
+
     private PendingCheckInsFragment mFragment;
+
     private LayoutInflater inflater;
+
     private List<PendingCheckIn> mPendingCheckInItems;
 
     public PendingCheckInListAdapter(PendingCheckInsFragment fragment, List<PendingCheckIn> pendingCheckIns) {
@@ -89,7 +92,8 @@ public class PendingCheckInListAdapter extends BaseAdapter {
             viewHolder = (ViewHolderItem) convertView.getTag();
         }
 
-        viewHolder.date.setText(new SimpleDateFormat(Constants.DATE_TIME_FORMAT).format(pendingCheckIn.getDate()));
+        viewHolder.date.setText(mActivity.getString(R.string.pending_check_in_from) +
+                new SimpleDateFormat(Constants.DATE_FORMAT).format(pendingCheckIn.getDate()));
 
         long delay = System.currentTimeMillis() - pendingCheckIn.getDate();
 
@@ -111,9 +115,9 @@ public class PendingCheckInListAdapter extends BaseAdapter {
     }
 
     private class RetrieveNewCheckIn extends AsyncTask<Void, Void, List<Question>> {
+        private ProgressDialog mDialog;
 
         private long mPendingCheckInId;
-        private ProgressDialog mDialog;
 
         public RetrieveNewCheckIn(long pendingCheckInId) {
             mDialog = new ProgressDialog(mActivity);

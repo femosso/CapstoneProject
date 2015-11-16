@@ -58,14 +58,14 @@ public class JpaUserDao implements UserDao {
                 // initialize list of pending follower request and its internal fields
                 List<Follower> pendingFollowerList = user.getTeen().getPendingFollowerList();
                 Hibernate.initialize(pendingFollowerList);
-                for(Follower follower : pendingFollowerList) {
+                for (Follower follower : pendingFollowerList) {
                     Hibernate.initialize(follower.getUser());
                 }
 
                 // initialize list of followers and its internal fields
                 List<Follower> followerList = user.getTeen().getFollowerList();
                 Hibernate.initialize(followerList);
-                for(Follower follower : followerList) {
+                for (Follower follower : followerList) {
                     Hibernate.initialize(follower.getUser());
                 }
 
@@ -84,14 +84,14 @@ public class JpaUserDao implements UserDao {
         // initialize list of pending teens request and its internal fields
         List<Teen> pendingTeenList = user.getFollower().getPendingTeenList();
         Hibernate.initialize(pendingTeenList);
-        for(Teen teen : pendingTeenList) {
+        for (Teen teen : pendingTeenList) {
             Hibernate.initialize(teen.getUser());
         }
 
         // initialize list of teens and its internal fields
         List<Teen> teenList = user.getFollower().getTeenList();
         Hibernate.initialize(teenList);
-        for(Teen teen : teenList) {
+        for (Teen teen : teenList) {
             Hibernate.initialize(teen.getUser());
         }
         Hibernate.initialize(user.getFollower().getPendingTeenList());

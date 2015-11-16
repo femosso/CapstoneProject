@@ -2,14 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/row_teen_selector"
     android:padding="8dp">
 
     <TextView
         android:id="@+id/txtDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="title"
         android:textSize="@dimen/title"
         android:textStyle="bold" />
 
@@ -20,7 +18,6 @@
         android:layout_alignBottom="@+id/btnAnswerNow"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:text="Small Text"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <Button
